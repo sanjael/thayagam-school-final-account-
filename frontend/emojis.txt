@@ -1,0 +1,141 @@
+src\AppContext.jsx:26:invalidCredentials: "Invalid username or password ❌",
+src\AppContext.jsx:27:accountDisabled: "This account has been disabled 🚫",
+src\AppContext.jsx:28:tamilError: "கடவுச்சொல் அல்லது பயனர்பெயர் தவறு ❌",
+src\AppContext.jsx:58:paidInFull: "Paid in Full! 🎉",
+src\AppContext.jsx:60:successToast: "Fee collected successfully! ✅",
+src\AppContext.jsx:99:pendingDuesTab: "📋 Pending Dues",
+src\AppContext.jsx:100:classCollectionsTab: "🏫 Class Collections",
+src\AppContext.jsx:103:whatsappSent: "WhatsApp reminder template generated for parent! 📱",
+src\AppContext.jsx:134:invalidCredentials: "தவறான பயனர் பெயர் அல்லது கடவுச்சொல் ❌",
+src\AppContext.jsx:135:accountDisabled: "இந்த கணக்கு முடக்கப்பட்டுள்ளது 🚫",
+src\AppContext.jsx:136:tamilError: "கடவுச்சொல் அல்லது பயனர்பெயர் தவறு ❌",
+src\AppContext.jsx:166:paidInFull: "முழுமையாக செலுத்தப்பட்டது! 🎉",
+src\AppContext.jsx:168:successToast: "கட்டணம் வெற்றிகரமாகப் பெறப்பட்டது! ✅",
+src\AppContext.jsx:207:pendingDuesTab: "📋 நிலுவைக் கட்டணங்கள்",
+src\AppContext.jsx:208:classCollectionsTab: "🏫 வகுப்புவாரியான வசூல்",
+src\AppContext.jsx:211:whatsappSent: "பெற்றோருக்கு நினைவூட்டல் செய்தி அனுப்பப்பட்டது! 📱",
+src\components\Layout.jsx:158:admin: '🔑 Administrator',
+src\components\Layout.jsx:159:principal: '🎓 Principal',
+src\components\Layout.jsx:160:accountant: '💼 Accountant',
+src\components\Layout.jsx:203:🏫
+src\components\Layout.jsx:232:🔍
+src\components\Layout.jsx:281:{darkMode ? '☀️' : '🌙'}
+src\components\Layout.jsx:316:<span className="text-2xl">🎉</span>
+src\components\Layout.jsx:434:<span className="text-4xl">⏳</span>
+src\components\Layout.jsx:458:✕
+src\components\Layout.jsx:464:⚠️ {pwError}
+src\components\Layout.jsx:469:✓ {pwSuccess}
+src\components\Sidebar.jsx:112:<span className="text-[#efc000] font-bold text-2xl">🏫</span>
+src\pages\AuditLogsPage.jsx:56:📥 Export CSV
+src\pages\ClassDetailsPage.jsx:112:📥 Download Detailed Excel
+src\pages\ClassesPage.jsx:141:<span className="text-lg">➕</span> Add New Class
+src\pages\ClassesPage.jsx:149:<div className="w-12 h-12 bg-amber-50 dark:bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center text-2xl">📚</div>
+src\pages\ClassesPage.jsx:156:<div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center text-2xl">👨‍🎓</div>
+src\pages\ClassesPage.jsx:163:<div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center text-2xl">🏫</div>
+src\pages\ClassesPage.jsx:170:<div className="w-12 h-12 bg-purple-50 dark:bg-purple-500/10 text-purple-500 rounded-2xl flex items-center justify-center text-2xl">🟢</div>
+src\pages\ClassesPage.jsx:181:<span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+src\pages\ClassesPage.jsx:239:✏️ Edit
+src\pages\ClassesPage.jsx:242:📦 Archive
+src\pages\ClassesPage.jsx:246:🗑 Delete
+src\pages\ClassesPage.jsx:257:<p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1.5">👨‍🎓 Students</p>
+src\pages\ClassesPage.jsx:261:<p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1.5">💰 Pending Fees</p>
+src\pages\ClassesPage.jsx:266:👨‍🏫
+src\pages\ClassesPage.jsx:281:<span className="text-base">👁</span> View Students
+src\pages\ClassesPage.jsx:287:<span className="text-base">📊</span> Fee Report
+src\pages\ClassesPage.jsx:296:<span className="text-5xl mb-4">🏫</span>
+src\pages\ClassesPage.jsx:309:<span className="bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 p-2.5 rounded-2xl shadow-sm border border-amber-200 dark:border-amber-800">📚</span>
+src\pages\ClassesPage.jsx:316:✕
+src\pages\ClassesPage.jsx:322:<span className="text-base">⚠️</span> {error}
+src\pages\ClassesPage.jsx:373:<span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">👨‍🏫</span>
+src\pages\ClassesPage.jsx:391:<span className="text-lg">➕</span> Add Class
+src\pages\DashboardPage.jsx:65:if (!mode) return '💳';
+src\pages\DashboardPage.jsx:67:if (m === 'cash') return '💵';
+src\pages\DashboardPage.jsx:68:if (m === 'online') return '📱';
+src\pages\DashboardPage.jsx:69:if (m === 'cheque' || m === 'dd') return '🏢';
+src\pages\DashboardPage.jsx:70:return '💳';
+src\pages\DashboardPage.jsx:189:icon: '💰',
+src\pages\DashboardPage.jsx:198:icon: '🎓',
+src\pages\DashboardPage.jsx:207:icon: '📊',
+src\pages\DashboardPage.jsx:216:icon: '🔍',
+src\pages\DashboardPage.jsx:263:🕒 Busiest Hours for Fee Collection
+src\pages\DashboardPage.jsx:292:📈 Collection Trend
+src\pages\DashboardPage.jsx:378:<span className="text-3xl">💸</span>
+src\pages\DashboardPage.jsx:449:<span className="text-3xl">📂</span>
+src\pages\FeesPage.jsx:144:📈 Bulk Increase 5%
+src\pages\FeesPage.jsx:147:📋 Copy Previous Year
+src\pages\FeesPage.jsx:156:<p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">💰 Total Fee Types</p>
+src\pages\FeesPage.jsx:160:<p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">📚 Configured Classes</p>
+src\pages\FeesPage.jsx:168:<p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">📅 Academic Year</p>
+src\pages\FeesPage.jsx:178:{editId ? '✏️' : '➕'}
+src\pages\FeesPage.jsx:221:✕
+src\pages\FeesPage.jsx:232:⚠️ {error}
+src\pages\FeesPage.jsx:241:<span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+src\pages\FeesPage.jsx:313:<span className="text-base">📋</span> Fee Structure Preview
+src\pages\FeesPage.jsx:345:<span>💰</span> {item.fee_type}
+src\pages\FeesPage.jsx:353:✏️ Edit
+src\pages\FeesPage.jsx:356:🗑 Delete
+src\pages\FeesPage.jsx:372:<span className="text-5xl mb-4">📑</span>
+src\pages\LoginPage.jsx:100:🏫
+src\pages\PaymentsPage.jsx:9:{ val: 'cash', label: '💵 Cash' },
+src\pages\PaymentsPage.jsx:10:{ val: 'online', label: '🔵 Online' },
+src\pages\PaymentsPage.jsx:11:{ val: 'upi', label: '🟣 UPI' },
+src\pages\PaymentsPage.jsx:12:{ val: 'card', label: '💳 Card' },
+src\pages\PaymentsPage.jsx:13:{ val: 'cheque', label: '🏢 Cheque' }
+src\pages\PaymentsPage.jsx:193:case 'cash': return <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 text-[10px] font-bold">🟢 Cash</span>;
+src\pages\PaymentsPage.jsx:194:case 'online': return <span className="text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 text-[10px] font-bold">🔵 Online</span>;
+src\pages\PaymentsPage.jsx:195:case 'upi': return <span className="text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 text-[10px] font-bold">🟣 UPI</span>;
+src\pages\PaymentsPage.jsx:196:case 'card': return <span className="text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200 text-[10px] font-bold">💳 Card</span>;
+src\pages\PaymentsPage.jsx:197:default: return <span className="text-slate-700 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200 text-[10px] font-bold capitalize">⚪ {mode}</span>;
+src\pages\PaymentsPage.jsx:221:<span className="text-xl">🎉</span>
+src\pages\PaymentsPage.jsx:234:🖨 Print All
+src\pages\PaymentsPage.jsx:237:📊 Export Excel
+src\pages\PaymentsPage.jsx:242:💰 Record Payment
+src\pages\PaymentsPage.jsx:251:<div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center text-2xl">💰</div>
+src\pages\PaymentsPage.jsx:258:<div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center text-2xl">📄</div>
+src\pages\PaymentsPage.jsx:265:<div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center text-2xl">⚠️</div>
+src\pages\PaymentsPage.jsx:272:<div className="w-12 h-12 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center text-2xl">🧾</div>
+src\pages\PaymentsPage.jsx:283:<span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+src\pages\PaymentsPage.jsx:387:<span>⚡</span> Click to Collect
+src\pages\PaymentsPage.jsx:417:<span className="text-base">👁</span> View Receipt
+src\pages\PaymentsPage.jsx:420:<span className="text-base">✏️</span> Edit Payment
+src\pages\PaymentsPage.jsx:423:<span className="text-base">💸</span> Issue Refund
+src\pages\PaymentsPage.jsx:438:<span className="text-base">📱</span> WhatsApp Receipt
+src\pages\PaymentsPage.jsx:441:<span className="text-base">✉️</span> Email Receipt
+src\pages\PaymentsPage.jsx:446:<span className="text-base">❌</span> Cancel Payment
+src\pages\PaymentsPage.jsx:482:<div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-3">⚡</div>
+src\pages\PaymentsPage.jsx:505:<span>💰</span> Collect Remaining
+src\pages\PaymentsPage.jsx:520:<button onClick={() => setPreviewReceipt(null)} className="text-slate-400 hover:text-white px-2">✕</button>
+src\pages\PaymentsPage.jsx:555:<span className="bg-blue-100 text-blue-600 p-1.5 rounded-lg text-sm">🕒</span>
+src\pages\PaymentsPage.jsx:560:<button onClick={() => setHistoryStudent(null)} className="bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition">✕</button>
+src\pages\ReportsPage.jsx:107:setToastMessage('✅ Report Generated Successfully (PDF Ready)');
+src\pages\ReportsPage.jsx:456:{isGenerating ? <span className="animate-pulse">⚙</span> : <Download size={18} />}
+src\pages\SettingsPage.jsx:107:setError('❌ Only JPG / PNG formats are allowed.');
+src\pages\SettingsPage.jsx:111:setError('❌ Logo size must be less than 2 MB.');
+src\pages\SettingsPage.jsx:134:setError('❌ Invalid Email address.');
+src\pages\SettingsPage.jsx:138:setError('❌ Phone number must be exactly 10 digits.');
+src\pages\SettingsPage.jsx:178:showToast('✅ Settings Updated Successfully');
+src\pages\SettingsPage.jsx:202:showToast('✅ Backup Completed Successfully');
+src\pages\SettingsPage.jsx:379:<button type="button" onClick={() => showToast('✅ Password changed successfully!')} className="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-800 transition">Change Password</button>
+src\pages\SettingsPage.jsx:461:{isBackingUp ? <span className="animate-spin text-lg">⚙</span> : <Download size={18} />}
+src\pages\SettingsPage.jsx:490:<button onClick={() => setShowReceiptPreview(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+src\pages\SignupPage.jsx:81:🏫
+src\pages\StudentsPage.jsx:214:{qf === 'Active' && '🟢 '}
+src\pages\StudentsPage.jsx:215:{qf === 'Inactive' && '🔴 '}
+src\pages\StudentsPage.jsx:216:{qf === 'New Admissions' && '🆕 '}
+src\pages\StudentsPage.jsx:217:{qf === 'Fee Pending' && '💰 '}
+src\pages\StudentsPage.jsx:251:📄 Export PDF
+src\pages\StudentsPage.jsx:254:📊 Export Excel
+src\pages\StudentsPage.jsx:261:➕ {t('addStudent')}
+src\pages\StudentsPage.jsx:309:🖨 Print ID Cards
+src\pages\StudentsPage.jsx:312:📊 Export Selected
+src\pages\StudentsPage.jsx:380:📞 {s.phone}
+src\pages\StudentsPage.jsx:401:👁
+src\pages\StudentsPage.jsx:405:✏️
+src\pages\StudentsPage.jsx:409:🧾
+src\pages\StudentsPage.jsx:418:🗑 Delete
+src\pages\StudentsPage.jsx:431:<span className="text-4xl mb-3">🔍</span>
+src\pages\StudentsPage.jsx:485:<button onClick={() => setViewStudent(null)} className="absolute top-4 right-4 text-white hover:text-slate-900 bg-black/10 hover:bg-white/50 p-2 rounded-full backdrop-blur-md transition">✕</button>
+src\pages\StudentsPage.jsx:525:<span className="text-lg">🧾</span> View Fee History
+src\pages\StudentsPage.jsx:540:{editId ? '✏️' : '➕'}
+src\pages\StudentsPage.jsx:548:✕
+src\pages\StudentsPage.jsx:554:<span className="text-base">⚠️</span> {error}
