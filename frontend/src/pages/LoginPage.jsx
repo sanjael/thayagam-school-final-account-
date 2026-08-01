@@ -93,16 +93,16 @@ export default function LoginPage() {
           
           <div className="text-center mb-8">
             {/* School Logo */}
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-md border-4 border-amber-500/20 overflow-hidden mb-4">
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-white shadow-xl border-4 border-amber-500/30 overflow-hidden mb-4 p-2 transition-transform duration-300 hover:scale-105">
               <img 
                 src="/logo.jpg" 
                 alt="School Logo" 
-                className="h-full w-full object-contain p-2"
+                className="h-full w-full object-contain"
                 onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
               />
               {/* Fallback icon if logo not found */}
-              <div className="hidden h-full w-full items-center justify-center text-4xl text-blue-900 bg-slate-50">
-                
+              <div className="hidden h-full w-full items-center justify-center text-4xl font-black text-blue-900 bg-white">
+                TA
               </div>
             </div>
             

@@ -69,7 +69,7 @@ const THEME = {
 export default function Sidebar({ onClose }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [logoUrl, setLogoUrl] = useState('');
+  const [logoUrl, setLogoUrl] = useState('/logo.jpg');
 
   const role = user?.role || 'accountant';
   const theme = THEME[role] || THEME.accountant;
@@ -108,12 +108,17 @@ export default function Sidebar({ onClose }) {
           <X size={18} />
         </button>
 
-        <div className={`w-16 h-16 bg-white/5 border-2 ${theme.badge.split(' ')[2]} rounded-2xl flex items-center justify-center shadow-lg overflow-hidden p-1`}>
-          {logoUrl ? (
-            <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
-          ) : (
-            <span className={`font-black text-lg ${theme.accent}`}>TA</span>
-          )}
+        <div className="w-16 h-16 bg-white rounded-2xl border-2 border-amber-500/40 flex items-center justify-center shadow-xl overflow-hidden p-1.5 transition-transform duration-300 hover:scale-105">
+          <img 
+            src={logoUrl} 
+            alt="Thayagam Academy Logo" 
+            className="w-full h-full object-contain" 
+            onError={(e) => {
+              if (e.target.src !== `${window.location.origin}/logo.jpg`) {
+                e.target.src = '/logo.jpg';
+              }
+            }}
+          />
         </div>
         <div className="mt-2">
           <p className="text-[17px] font-black uppercase tracking-[0.15em] text-white">THAYAGAM</p>

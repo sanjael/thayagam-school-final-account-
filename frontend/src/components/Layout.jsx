@@ -241,11 +241,11 @@ export default function Layout({ children }) {
               <img
                 src={`${BASE_URL}/${settings.logo_path}`}
                 alt="Logo"
-                className="h-8 w-8 md:h-9 md:w-9 rounded-xl object-contain border border-slate-100 dark:border-slate-800 p-0.5 bg-slate-50 flex-shrink-0"
+                className="h-8 w-8 md:h-9 md:w-9 rounded-xl object-contain border border-amber-500/30 p-0.5 bg-white flex-shrink-0 shadow-sm"
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
             ) : (
-              <img src="/logo.jpg" alt="Default Logo" className="h-8 w-8 md:h-9 md:w-9 rounded-xl object-contain border border-slate-100 dark:border-slate-800 p-0.5 bg-slate-50 flex-shrink-0" />
+              <img src="/logo.jpg" alt="Default Logo" className="h-8 w-8 md:h-9 md:w-9 rounded-xl object-contain border border-amber-500/30 p-0.5 bg-white flex-shrink-0 shadow-sm" />
             )}
             <div className="hidden md:block">
               <span className={`text-[10px] font-bold uppercase tracking-wider ${
