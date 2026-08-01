@@ -627,10 +627,6 @@ export default function StudentsPage() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Phone</p>
                     <p className="font-bold text-slate-800 dark:text-slate-200">{viewStudent.phone || '—'}</p>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">DOB</p>
-                    <p className="font-bold text-slate-800 dark:text-slate-200">{viewStudent.dob || '—'}</p>
-                  </div>
                   <div className="col-span-2 bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
                     <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Address</p>
                     <p className="font-bold text-slate-800 dark:text-slate-200">{viewStudent.address || '—'}</p>
@@ -677,7 +673,6 @@ export default function StudentsPage() {
                   ['Full Name',    'name',         'text', true],
                   [t('parentName'),'parent_name',  'text', false],
                   [t('phone'),     'phone',        'tel',  false],
-                  [t('dob'),       'dob',          'date', false],
                 ].map(([label, key, type, req]) => (
                   <div key={key} className={key === 'name' ? 'col-span-2' : ''}>
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">
