@@ -98,7 +98,7 @@ export default function StudentsPage() {
     total: students.length,
     active: students.filter(s => s.status === 'Active').length,
     inactive: students.filter(s => s.status === 'Inactive').length,
-    newAdmissions: Math.floor(students.length * 0.1) // Mock value for visual presentation
+    newAdmissions: 0
   };
 
   async function handleSubmit(e) {
