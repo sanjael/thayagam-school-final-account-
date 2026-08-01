@@ -14,7 +14,7 @@ const MODES = [
 ];
 
 const EMPTY = {
-  student_id: '', term: 'Term 1', academic_year: '2024-2025',
+  student_id: '', term: 'Term 1', academic_year: '2026-2027',
   amount_paid: '', payment_date: new Date().toISOString().slice(0, 10),
   payment_mode: 'cash', notes: '', fine: 0, discount: 0, reference_no: ''
 };
@@ -807,6 +807,8 @@ export default function PaymentsPage() {
                       <option value="2023-2024">2023-2024</option>
                       <option value="2024-2025">2024-2025</option>
                       <option value="2025-2026">2025-2026</option>
+                      <option value="2026-2027">2026-2027</option>
+                      <option value="2027-2028">2027-2028</option>
                     </select>
                   </div>
                 </div>
