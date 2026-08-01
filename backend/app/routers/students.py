@@ -49,10 +49,10 @@ def _enrich(s: models.Student, db: Session = None, ay: str = None, active_terms:
 
 @router.get("/", response_model=List[schemas.StudentOut])
 def get_students(
-    search: Optional[str] = Query(None),
-    class_id: Optional[int] = Query(None),
-    gender: Optional[str] = Query(None),
-    status: Optional[str] = Query("active"),  # active | inactive | all
+    search: Optional[str] = None,
+    class_id: Optional[int] = None,
+    gender: Optional[str] = None,
+    status: Optional[str] = "active",  # active | inactive | all
     db: Session = Depends(get_db),
 ):
     settings = db.query(models.SchoolSettings).first()
@@ -64,15 +64,15 @@ def get_students(
         q = q.filter(models.Student.is_active == True)
     elif status == "inactive":
         q = q.filter(models.Student.is_active == False)
-    if search:
+    if search and isinstance(search, str) and search.strip():
         q = q.filter(
             (models.Student.name.ilike(f"%{search}%")) |
             (models.Student.admission_no.ilike(f"%{search}%")) |
             (models.Student.phone.ilike(f"%{search}%"))
         )
-    if class_id:
+    if class_id and isinstance(class_id, int):
         q = q.filter(models.Student.class_id == class_id)
-    if gender:
+    if gender and isinstance(gender, str) and gender in ("male", "female", "other"):
         q = q.filter(models.Student.gender == gender)
     return [_enrich(s, db, ay, active_terms) for s in q.order_by(models.Student.name).all()]
 
