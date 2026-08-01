@@ -8,13 +8,13 @@ import { useAuth } from '../AuthContext';
 
 function StatCard({ title, value, color, icon, sub }) {
   return (
-    <article className="rounded-2xl p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 flex items-center justify-between group hover:-translate-y-1">
-      <div className="space-y-1">
-        <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{title}</h2>
-        <p className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight group-hover:text-amber-500 transition-colors">{value}</p>
-        {sub && <p className="text-[9px] text-slate-400 font-medium">{sub}</p>}
+    <article className="rounded-2xl p-3.5 sm:p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 flex items-center justify-between group hover:-translate-y-1">
+      <div className="space-y-0.5">
+        <h2 className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{title}</h2>
+        <p className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white tracking-tight group-hover:text-amber-500 transition-colors">{value}</p>
+        {sub && <p className="text-[9px] text-slate-400 font-medium hidden sm:block">{sub}</p>}
       </div>
-      <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${color} text-white shadow-inner transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
+      <div className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl ${color} text-white shadow-inner transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 flex-shrink-0`}>
         {icon}
       </div>
     </article>
@@ -91,7 +91,7 @@ export default function DashboardPage() {
       <div className="space-y-5">
         
         {/* Welcome Header */}
-        <header className="flex flex-col gap-3 rounded-2xl bg-gradient-to-r from-amber-500/10 to-transparent dark:from-amber-900/20 border border-amber-100 dark:border-amber-900/30 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <header className="flex flex-col gap-3 rounded-2xl bg-gradient-to-r from-amber-500/10 to-transparent dark:from-amber-900/20 border border-amber-100 dark:border-amber-900/30 p-4 sm:p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <h1 className="text-xl font-bold text-slate-900 dark:text-white">👋 {t('welcomeTitle')}</h1>
             <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
@@ -121,7 +121,7 @@ export default function DashboardPage() {
         </header>
 
         {/* 5 Stats Cards Row */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <section className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-5">
           <StatCard 
             title={t('todayCollected')}  
             value={fmt(summary?.today_collected)}   
@@ -160,7 +160,7 @@ export default function DashboardPage() {
         </section>
 
         {/* Quick Actions Panel */}
-        <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <section className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           {[
             {
               id: 'qa-new-payment',
@@ -234,7 +234,7 @@ export default function DashboardPage() {
         </section>
 
         {/* Charts Row */}
-        <section className="grid gap-6 md:grid-cols-2">
+        <section className="grid gap-4 sm:gap-6 md:grid-cols-2">
           
           {/* Peak Hours Chart */}
           <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -243,7 +243,7 @@ export default function DashboardPage() {
                Busiest Hours for Fee Collection
             </h3>
             
-            <div className="h-56 w-full">
+            <div className="h-44 sm:h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={timeData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
@@ -290,7 +290,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="h-56 w-full">
+            <div className="h-44 sm:h-56 w-full">
               {loadingTrend ? (
                 <div className="h-full flex items-center justify-center text-xs text-slate-400 animate-pulse">
                   Loading chart data...
@@ -338,7 +338,7 @@ export default function DashboardPage() {
         </section>
 
         {/* Bottom Row: Recent Payments + Classes Grid */}
-        <section className="grid gap-6 lg:grid-cols-3">
+        <section className="grid gap-4 sm:gap-6 lg:grid-cols-3">
 
           {/* Recent Payments Widget */}
           <div className="lg:col-span-1 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -391,7 +391,7 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+            <div className="mt-4 grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 sm:gap-3">
               {Array.from(new Set(classes.map(c => c.name)))
                 .sort((a, b) => {
                   const order = { "LKG": -2, "UKG": -1 };

@@ -136,41 +136,41 @@ export default function ReportsPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-500 uppercase">Total Collection</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-1">{fmt(summary?.total_collected)}</h3>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-[9px] sm:text-xs font-bold text-slate-500 uppercase truncate">Total Collection</p>
+              <h3 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white mt-1 truncate">{fmt(summary?.total_collected)}</h3>
             </div>
-            <div className="h-12 w-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
-              <IndianRupee size={24} />
-            </div>
-          </div>
-          <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-500 uppercase">Pending Amount</p>
-              <h3 className="text-2xl font-black text-rose-600 mt-1">{fmt(summary?.total_balance)}</h3>
-            </div>
-            <div className="h-12 w-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center">
-              <AlertCircle size={24} />
+            <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
+              <IndianRupee size={20} />
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-500 uppercase">Students Paid</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-1">{paidStudentsCount}</h3>
+          <div className="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-[9px] sm:text-xs font-bold text-slate-500 uppercase truncate">Pending Amount</p>
+              <h3 className="text-lg sm:text-2xl font-black text-rose-600 mt-1 truncate">{fmt(summary?.total_balance)}</h3>
             </div>
-            <div className="h-12 w-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
-              <CheckCircle size={24} />
+            <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center flex-shrink-0">
+              <AlertCircle size={20} />
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-500 uppercase">Pending Students</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-1">{pendingStudentsCount}</h3>
+          <div className="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-[9px] sm:text-xs font-bold text-slate-500 uppercase truncate">Students Paid</p>
+              <h3 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white mt-1 truncate">{paidStudentsCount}</h3>
             </div>
-            <div className="h-12 w-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
-              <Users size={24} />
+            <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
+              <CheckCircle size={20} />
+            </div>
+          </div>
+          <div className="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-[9px] sm:text-xs font-bold text-slate-500 uppercase truncate">Pending Students</p>
+              <h3 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white mt-1 truncate">{pendingStudentsCount}</h3>
+            </div>
+            <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0">
+              <Users size={20} />
             </div>
           </div>
         </div>

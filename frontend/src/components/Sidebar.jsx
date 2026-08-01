@@ -5,36 +5,34 @@ import { useAuth } from '../AuthContext';
 import { api, BASE_URL } from '../api';
 import {
   LayoutDashboard, Users, BookOpen, CreditCard, Receipt,
-  FileBarChart, Settings, ShieldAlert, LogOut, UserCog, KeyRound
+  FileBarChart, Settings, ShieldAlert, LogOut, UserCog, KeyRound, X
 } from 'lucide-react';
 
-// Navigation items per role
 const NAV_BY_ROLE = {
   admin: [
-    { to: '/dashboard',   label: 'Dashboard',     icon: <LayoutDashboard size={20} strokeWidth={2.5} /> },
-    { to: '/students',    label: 'Students',       icon: <Users size={20} strokeWidth={2.5} /> },
-    { to: '/classes',     label: 'Classes',        icon: <BookOpen size={20} strokeWidth={2.5} /> },
-    { to: '/fees',        label: 'Fee Structure',  icon: <CreditCard size={20} strokeWidth={2.5} /> },
-    { to: '/payments',    label: 'Payments',       icon: <Receipt size={20} strokeWidth={2.5} /> },
-    { to: '/reports',     label: 'Reports',        icon: <FileBarChart size={20} strokeWidth={2.5} /> },
-    { to: '/admin/users', label: 'User Management',icon: <UserCog size={20} strokeWidth={2.5} /> },
-    { to: '/audit-logs',  label: 'Audit Logs',     icon: <ShieldAlert size={20} strokeWidth={2.5} /> },
-    { to: '/settings',    label: 'Settings',       icon: <Settings size={20} strokeWidth={2.5} /> },
+    { to: '/dashboard',   label: 'Dashboard',      icon: <LayoutDashboard size={20} strokeWidth={2.5} /> },
+    { to: '/students',    label: 'Students',        icon: <Users size={20} strokeWidth={2.5} /> },
+    { to: '/classes',     label: 'Classes',         icon: <BookOpen size={20} strokeWidth={2.5} /> },
+    { to: '/fees',        label: 'Fee Structure',   icon: <CreditCard size={20} strokeWidth={2.5} /> },
+    { to: '/payments',    label: 'Payments',        icon: <Receipt size={20} strokeWidth={2.5} /> },
+    { to: '/reports',     label: 'Reports',         icon: <FileBarChart size={20} strokeWidth={2.5} /> },
+    { to: '/admin/users', label: 'User Management', icon: <UserCog size={20} strokeWidth={2.5} /> },
+    { to: '/audit-logs',  label: 'Audit Logs',      icon: <ShieldAlert size={20} strokeWidth={2.5} /> },
+    { to: '/settings',    label: 'Settings',        icon: <Settings size={20} strokeWidth={2.5} /> },
   ],
   accountant: [
-    { to: '/payments',    label: 'Payments',       icon: <Receipt size={20} strokeWidth={2.5} /> },
-    { to: '/students',    label: 'Students',       icon: <Users size={20} strokeWidth={2.5} /> },
-    { to: '/reports',     label: 'Reports',        icon: <FileBarChart size={20} strokeWidth={2.5} /> },
+    { to: '/payments',    label: 'Payments',        icon: <Receipt size={20} strokeWidth={2.5} /> },
+    { to: '/students',    label: 'Students',        icon: <Users size={20} strokeWidth={2.5} /> },
+    { to: '/reports',     label: 'Reports',         icon: <FileBarChart size={20} strokeWidth={2.5} /> },
   ],
   principal: [
-    { to: '/reports',     label: 'Reports',        icon: <FileBarChart size={20} strokeWidth={2.5} /> },
-    { to: '/students',    label: 'Students',       icon: <Users size={20} strokeWidth={2.5} /> },
-    { to: '/classes',     label: 'Classes',        icon: <BookOpen size={20} strokeWidth={2.5} /> },
-    { to: '/dashboard',   label: 'Overview',       icon: <LayoutDashboard size={20} strokeWidth={2.5} /> },
+    { to: '/reports',     label: 'Reports',         icon: <FileBarChart size={20} strokeWidth={2.5} /> },
+    { to: '/students',    label: 'Students',        icon: <Users size={20} strokeWidth={2.5} /> },
+    { to: '/classes',     label: 'Classes',         icon: <BookOpen size={20} strokeWidth={2.5} /> },
+    { to: '/dashboard',   label: 'Overview',        icon: <LayoutDashboard size={20} strokeWidth={2.5} /> },
   ],
 };
 
-// Role-based theme config
 const THEME = {
   admin: {
     sidebar:  'bg-[#0a0f1e] border-[#1a2340]',
@@ -44,6 +42,7 @@ const THEME = {
     badge:    'bg-amber-500/20 text-amber-400 border border-amber-500/30',
     avatar:   'bg-[#0a0f1e] border-amber-500/40 text-amber-400',
     label:    'ADMINISTRATOR',
+    close:    'hover:bg-amber-500/10 text-amber-400',
   },
   accountant: {
     sidebar:  'bg-slate-900 border-slate-800',
@@ -53,6 +52,7 @@ const THEME = {
     badge:    'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
     avatar:   'bg-slate-950 border-emerald-500/40 text-emerald-400',
     label:    'ACCOUNTANT',
+    close:    'hover:bg-emerald-500/10 text-emerald-400',
   },
   principal: {
     sidebar:  'bg-[#0d0d1f] border-[#1a1a3a]',
@@ -62,6 +62,7 @@ const THEME = {
     badge:    'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30',
     avatar:   'bg-[#0d0d1f] border-indigo-500/40 text-indigo-400',
     label:    'PRINCIPAL',
+    close:    'hover:bg-indigo-500/10 text-indigo-400',
   },
 };
 
@@ -95,8 +96,18 @@ export default function Sidebar({ onClose }) {
 
   return (
     <aside className={`flex h-screen w-72 flex-col ${theme.sidebar} border-r text-slate-100 shadow-2xl z-20 font-sans transition-colors duration-300`}>
+
       {/* Brand Header */}
-      <div className="px-6 py-7 flex flex-col items-center text-center gap-2">
+      <div className="px-6 pt-6 pb-4 flex flex-col items-center text-center gap-2 relative">
+        {/* Close button — mobile only */}
+        <button
+          onClick={onClose}
+          className={`md:hidden absolute top-4 right-4 p-2 rounded-xl transition ${theme.close}`}
+          aria-label="Close sidebar"
+        >
+          <X size={18} />
+        </button>
+
         <div className={`w-16 h-16 bg-white/5 border-2 ${theme.badge.split(' ')[2]} rounded-2xl flex items-center justify-center shadow-lg overflow-hidden p-1`}>
           {logoUrl ? (
             <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
@@ -117,7 +128,7 @@ export default function Sidebar({ onClose }) {
 
       <div className="mx-4 h-px bg-white/5 mb-2" />
 
-      {/* Navigation */}
+      {/* Navigation — scrollable */}
       <nav className="flex-1 space-y-1 px-3 py-2 overflow-y-auto">
         {navItems.map((item) => (
           <NavLink
@@ -130,8 +141,8 @@ export default function Sidebar({ onClose }) {
             }
             onClick={() => onClose && onClose()}
           >
-            <span className="transition-transform duration-200 group-hover:scale-110">{item.icon}</span>
-            {item.label}
+            <span className="transition-transform duration-200 group-hover:scale-110 flex-shrink-0">{item.icon}</span>
+            <span className="truncate">{item.label}</span>
           </NavLink>
         ))}
       </nav>
@@ -142,7 +153,7 @@ export default function Sidebar({ onClose }) {
       {user && (
         <div className="px-3 mb-2">
           <div className="bg-white/5 rounded-2xl p-3 flex items-center gap-3 border border-white/5">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base border ${theme.avatar}`}>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base border flex-shrink-0 ${theme.avatar}`}>
               {roleInitial}
             </div>
             <div className="flex-1 overflow-hidden">
@@ -160,7 +171,7 @@ export default function Sidebar({ onClose }) {
           className={`flex items-center gap-3.5 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 group ${theme.inactive} w-full`}
           onClick={() => onClose && onClose()}
         >
-          <KeyRound size={18} className="transition-transform duration-200 group-hover:scale-110" strokeWidth={2.5} />
+          <KeyRound size={18} className="transition-transform duration-200 group-hover:scale-110 flex-shrink-0" strokeWidth={2.5} />
           Change Password
         </NavLink>
       </div>
@@ -171,7 +182,7 @@ export default function Sidebar({ onClose }) {
           onClick={handleLogout}
           className="flex items-center gap-3.5 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 group text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 w-full"
         >
-          <LogOut size={18} className="transition-transform duration-200 group-hover:-translate-x-1" strokeWidth={2.5} />
+          <LogOut size={18} className="transition-transform duration-200 group-hover:-translate-x-1 flex-shrink-0" strokeWidth={2.5} />
           Sign Out
         </button>
       </div>

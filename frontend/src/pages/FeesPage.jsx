@@ -133,17 +133,17 @@ export default function FeesPage() {
       <div className="max-w-7xl mx-auto space-y-6 pb-10">
         
         {/* Header Section with Actions */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Fee Structure</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Configure and manage school fee requirements</p>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Fee Structure</h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Configure and manage school fee requirements</p>
           </div>
           {user?.role === 'admin' && (
-            <div className="flex flex-wrap gap-3">
-              <button onClick={() => alert("Bulk fee increased by 5% successfully!")} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2.5 rounded-2xl text-xs font-bold transition shadow-sm flex items-center gap-2">
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => alert("Bulk fee increased by 5% successfully!")} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 sm:px-4 py-2 rounded-xl sm:rounded-2xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
                  Bulk Increase 5%
               </button>
-              <button onClick={() => alert("Fee structures copied to next year!")} className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-5 py-2.5 rounded-2xl text-xs font-bold transition shadow-lg shadow-amber-500/20 flex items-center gap-2">
+              <button onClick={() => alert("Fee structures copied to next year!")} className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 sm:px-5 py-2 rounded-xl sm:rounded-2xl text-xs font-bold transition shadow-lg shadow-amber-500/20 flex items-center gap-1.5">
                  Copy Previous Year
               </button>
             </div>
@@ -151,22 +151,22 @@ export default function FeesPage() {
         </div>
 
         {/* Top Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center hover:border-amber-200 transition-colors">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1"> Total Fee Types</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">{uniqueFeeTypes}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center hover:border-amber-200 transition-colors">
+            <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1"> Total Fee Types</p>
+            <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">{uniqueFeeTypes}</p>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center hover:border-blue-200 transition-colors">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1"> Configured Classes</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">{configuredClasses}</p>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center hover:border-blue-200 transition-colors">
+            <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1"> Configured Classes</p>
+            <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">{configuredClasses}</p>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center hover:border-emerald-200 transition-colors">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">₹ Average Fee (Per Term)</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">₹{avgFee.toLocaleString('en-IN')}</p>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center hover:border-emerald-200 transition-colors">
+            <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">₹ Avg Fee / Term</p>
+            <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">₹{avgFee.toLocaleString('en-IN')}</p>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center hover:border-purple-200 transition-colors">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1"> Academic Year</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">{activeYear}</p>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center hover:border-purple-200 transition-colors">
+            <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1"> Academic Year</p>
+            <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">{activeYear}</p>
           </div>
         </div>
 

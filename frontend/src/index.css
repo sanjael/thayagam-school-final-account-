@@ -6,6 +6,10 @@
 
 :root {
   color-scheme: light dark;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 }
 
 .dark {
@@ -19,6 +23,8 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* prevent iOS bounce scroll on main body */
+  overscroll-behavior: none;
 }
 
 ::selection {
@@ -39,4 +45,66 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Faster tap response on mobile */
+button, a, [role="button"], input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Bottom nav safe area on iOS */
+.bottom-nav {
+  padding-bottom: max(12px, var(--safe-bottom));
+}
+
+/* Bottom padding for page content on mobile (accounts for bottom nav) */
+.mobile-page-padding {
+  padding-bottom: calc(80px + var(--safe-bottom));
+}
+
+/* Smooth slide-in transitions */
+.sidebar-enter {
+  transform: translateX(-100%);
+}
+.sidebar-enter-active {
+  transform: translateX(0);
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sidebar-exit {
+  transform: translateX(0);
+}
+.sidebar-exit-active {
+  transform: translateX(-100%);
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mobile card hover effects */
+@media (hover: none) {
+  .hover\:shadow-xl:hover {
+    box-shadow: none;
+  }
+}
+
+/* Make tables horizontally scrollable on mobile */
+.table-mobile-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure modals are fullscreen on very small screens */
+@media (max-width: 640px) {
+  .modal-mobile-full {
+    position: fixed !important;
+    inset: 0 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    overflow-y: auto;
+  }
+}
+
+/* Min touch target size for accessibility */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
 }

@@ -538,8 +538,8 @@ export default function SettingsPage() {
                 </div>
               )}
 
-              {/* Floating Action Buttons */}
-              <div className="fixed sm:sticky bottom-6 sm:bottom-0 left-0 w-full p-4 sm:p-0 bg-white sm:bg-transparent dark:bg-slate-800 sm:dark:bg-transparent border-t sm:border-t-0 border-slate-100 dark:border-slate-700 flex justify-end gap-3 mt-8 z-40">
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 dark:border-slate-700 mt-8">
                 <button type="button" onClick={handleReset} disabled={!isDirty} className="px-6 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl text-sm font-bold transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                   <RotateCcw size={18} /> Reset
                 </button>

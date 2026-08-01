@@ -58,7 +58,7 @@ export default function AuditLogsPage() {
           </div>
           
           {logs.length > 0 && (
-            <div className="grid grid-cols-3 gap-4 mt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-6">
               <div className="rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 p-4 border border-indigo-100 dark:border-indigo-800/50">
                 <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wide">Total Logged Actions</p>
                 <p className="text-2xl font-black text-indigo-950 dark:text-indigo-100 mt-1">{logs.length}</p>

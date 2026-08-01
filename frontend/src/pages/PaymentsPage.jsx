@@ -287,21 +287,21 @@ export default function PaymentsPage() {
         )}
 
         {/* Header & Quick Actions */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Fee Payments</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage all fee collections and receipts</p>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Fee Payments</h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Manage all fee collections and receipts</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button onClick={() => window.print()} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2.5 rounded-2xl text-xs font-bold shadow-sm hover:bg-slate-50 transition flex items-center gap-2">
+            <button onClick={() => window.print()} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 px-3 sm:px-4 py-2 text-xs font-bold rounded-xl sm:rounded-2xl shadow-sm hover:bg-slate-50 transition flex items-center gap-1.5">
                Print All
             </button>
-                <button onClick={exportToCSV} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2.5 rounded-2xl text-xs font-bold shadow-sm hover:bg-slate-50 transition flex items-center gap-2">
-                  <span className="text-base"></span> Export CSV
-                </button>
+            <button onClick={exportToCSV} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 px-3 sm:px-4 py-2 text-xs font-bold rounded-xl sm:rounded-2xl shadow-sm hover:bg-slate-50 transition flex items-center gap-1.5">
+               Export CSV
+            </button>
             {user?.role !== 'principal' && (
               <button onClick={() => { setShowForm(true); setForm(EMPTY); setSelectedStudent(null); }}
-                className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2.5 rounded-2xl text-sm font-black transition shadow-lg shadow-emerald-500/20 flex items-center gap-2 ml-2">
+                className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 sm:px-6 py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition shadow-lg shadow-emerald-500/20 flex items-center gap-1.5">
                  Record Payment
               </button>
             )}
@@ -309,48 +309,48 @@ export default function PaymentsPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4 hover:border-emerald-200 transition-colors">
-            <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-3 sm:gap-4 hover:border-emerald-200 transition-colors">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-50 text-emerald-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl shadow-inner flex-shrink-0">
               💰
             </div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Total Collection</p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white">₹{totalCollectedMock.toLocaleString('en-IN')}</p>
+            <div className="min-w-0">
+              <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5 truncate">Total Collection</p>
+              <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white truncate">₹{totalCollectedMock.toLocaleString('en-IN')}</p>
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4 hover:border-amber-200 transition-colors">
-            <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-3 sm:gap-4 hover:border-amber-200 transition-colors">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-50 text-amber-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl shadow-inner flex-shrink-0">
               ⚠️
             </div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Pending Amount</p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white">₹{totalPendingMock.toLocaleString('en-IN')}</p>
+            <div className="min-w-0">
+              <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5 truncate">Pending Amount</p>
+              <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white truncate">₹{totalPendingMock.toLocaleString('en-IN')}</p>
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4 hover:border-purple-200 transition-colors">
-            <div className="w-12 h-12 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+          <div className="col-span-2 md:col-span-1 bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-3 sm:gap-4 hover:border-purple-200 transition-colors">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-50 text-purple-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl shadow-inner flex-shrink-0">
               🧾
             </div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Receipts Generated</p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white">{payments.length}</p>
+            <div className="min-w-0">
+              <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5 truncate">Receipts Generated</p>
+              <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white truncate">{payments.length}</p>
             </div>
           </div>
         </div>
 
         {/* Advanced Search & Filters */}
-        <section className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-3">
-          <div className="flex-1 relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+        <section className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+          <div className="col-span-2 md:col-span-1 relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
             <input 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search Name, Receipt No, Phone, Admission No..." 
-              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl pl-11 pr-4 py-3 text-sm font-bold outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 text-slate-900 dark:text-slate-100 placeholder-slate-500 transition shadow-inner"
+              placeholder="Search Name, Receipt No..." 
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl pl-9 pr-3 py-2 text-xs font-bold outline-none focus:border-emerald-500 text-slate-900 dark:text-slate-100 placeholder-slate-500 transition"
             />
           </div>
-          <select value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="w-full md:w-36 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none">
+          <select value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none">
             <option value="All">📅 All Dates</option>
             <option value="Today">Today</option>
             <option value="Yesterday">Yesterday</option>
@@ -358,11 +358,11 @@ export default function PaymentsPage() {
             <option value="This Month">This Month</option>
             <option value="Academic Year">Academic Year</option>
           </select>
-          <select value={filterMode} onChange={(e) => setFilterMode(e.target.value)} className="w-full md:w-36 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none">
+          <select value={filterMode} onChange={(e) => setFilterMode(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none">
             <option value="">🏷️ All Modes</option>
             {MODES.map(m => <option key={m.val} value={m.val}>{m.label}</option>)}
           </select>
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-full md:w-36 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none">
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none col-span-2 md:col-span-1">
             <option value="">🚥 All Status</option>
             <option value="Paid">Paid</option>
             <option value="Pending">Pending</option>
@@ -370,8 +370,54 @@ export default function PaymentsPage() {
           </select>
         </section>
 
-        {/* Payments Table */}
-        <section className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden" ref={tableRef}>
+        {/* ── Mobile Card List (hidden on md+) ── */}
+        <div className="md:hidden space-y-3">
+          {filteredPayments.length === 0 && (
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 text-center text-slate-400 text-xs font-medium border border-slate-200 dark:border-slate-800">
+              No payments found matching criteria.
+            </div>
+          )}
+          {filteredPayments.map((p) => {
+            const percent = Math.round((p.amount_paid / p.total_fee) * 100);
+            return (
+              <div key={p.id} className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    {p.receipt_no}
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400">{p.payment_date}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-black text-slate-600 dark:text-slate-300 text-xs">
+                    {p.student_name ? p.student_name.charAt(0) : '?'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-slate-900 dark:text-white text-sm truncate">{p.student_name}</p>
+                    <p className="text-[10px] font-bold text-slate-400">{p.class_name} • {p.term}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-black text-emerald-600 dark:text-emerald-400 text-sm">{fmt(p.amount_paid)}</p>
+                    <p className="text-[9px] text-slate-400">Total: {fmt(p.total_fee)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+                  {getModeBadge(p.payment_mode)}
+                  <div className="flex gap-2">
+                    <button onClick={() => setPreviewReceipt(p)} className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-lg text-xs">
+                      Receipt
+                    </button>
+                    <button onClick={() => setQuickCollect(p)} className="px-3 py-1 bg-amber-500 text-slate-950 font-black rounded-lg text-xs">
+                      Collect
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Payments Table (hidden on mobile) */}
+        <section className="hidden md:block bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden" ref={tableRef}>
           <div className="overflow-x-auto min-h-[400px] pb-24">
             <table className="w-full min-w-max text-left text-sm text-slate-700 dark:text-slate-300">
               <thead className="bg-slate-50 dark:bg-slate-950 text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
@@ -700,8 +746,8 @@ export default function PaymentsPage() {
 
         {/* --- WOW FEATURE: Record Payment Modal --- */}
         {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fade-in" onClick={() => setShowForm(false)}>
-            <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800" onClick={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/60 sm:p-4 backdrop-blur-sm animate-fade-in" onClick={() => setShowForm(false)}>
+            <div className="w-full sm:max-w-2xl bg-white dark:bg-slate-900 rounded-t-[2rem] sm:rounded-[2rem] p-5 sm:p-8 shadow-2xl border border-slate-100 dark:border-slate-800 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-black text-slate-900 dark:text-white">Record New Payment</h2>
                 <button onClick={() => setShowForm(false)} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">X</button>

@@ -133,49 +133,49 @@ export default function ClassesPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Classes & Sections</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage school grades, capacity, and assignments</p>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Classes & Sections</h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Manage school grades, capacity, and assignments</p>
           </div>
           {user?.role === 'admin' && (
             <button 
               onClick={() => setShowAddForm(true)}
-              className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-6 py-3 rounded-2xl text-sm font-black transition shadow-lg shadow-amber-500/20 flex items-center gap-2"
+              className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
             >
-              <span className="text-lg">➕</span> Add New Class
+              <span className="text-base sm:text-lg">➕</span> Add New Class
             </button>
           )}
         </div>
 
         {/* Top Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4 hover:border-amber-200 dark:hover:border-amber-800 transition-colors">
-            <div className="w-12 h-12 bg-amber-50 dark:bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center text-2xl shadow-inner">🏫</div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Total Classes</p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white">{uniqueClassesCount}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-3 sm:gap-4 hover:border-amber-200 dark:hover:border-amber-800 transition-colors">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-50 dark:bg-amber-500/10 text-amber-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl shadow-inner flex-shrink-0">🏫</div>
+            <div className="min-w-0">
+              <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5 truncate">Total Classes</p>
+              <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white truncate">{uniqueClassesCount}</p>
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4 hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
-            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center text-2xl shadow-inner">🧑‍🎓</div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Total Students</p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white">{totalStudents}</p>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-3 sm:gap-4 hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl shadow-inner flex-shrink-0">🧑‍🎓</div>
+            <div className="min-w-0">
+              <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5 truncate">Total Students</p>
+              <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white truncate">{totalStudents}</p>
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4 hover:border-emerald-200 dark:hover:border-emerald-800 transition-colors">
-            <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center text-2xl"></div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Active Sections</p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white">{classes.length}</p>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-3 sm:gap-4 hover:border-emerald-200 dark:hover:border-emerald-800 transition-colors">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">✨</div>
+            <div className="min-w-0">
+              <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5 truncate">Active Sections</p>
+              <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white truncate">{classes.length}</p>
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4 hover:border-purple-200 dark:hover:border-purple-800 transition-colors">
-            <div className="w-12 h-12 bg-purple-50 dark:bg-purple-500/10 text-purple-500 rounded-2xl flex items-center justify-center text-2xl"></div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Occupied</p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white">{classes.length}</p>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-3 sm:gap-4 hover:border-purple-200 dark:hover:border-purple-800 transition-colors">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-50 dark:bg-purple-500/10 text-purple-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">📊</div>
+            <div className="min-w-0">
+              <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5 truncate">Occupied</p>
+              <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white truncate">{classes.length}</p>
             </div>
           </div>
         </div>
@@ -296,8 +296,8 @@ export default function ClassesPage() {
 
         {/* Add Class Form Modal */}
         {showAddForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-lg rounded-[2.5rem] bg-white dark:bg-slate-900 p-8 shadow-2xl border border-slate-100 dark:border-slate-800 relative">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/60 sm:p-4 backdrop-blur-sm animate-fade-in">
+            <div className="w-full sm:max-w-lg rounded-t-[2rem] sm:rounded-[2.5rem] bg-white dark:bg-slate-900 p-5 sm:p-8 shadow-2xl border border-slate-100 dark:border-slate-800 relative max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
                   <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 p-2.5 rounded-2xl shadow-sm border border-amber-200 dark:border-amber-800"></span> 

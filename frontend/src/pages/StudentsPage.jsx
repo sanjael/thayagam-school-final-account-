@@ -269,68 +269,68 @@ export default function StudentsPage() {
         </div>
 
         {/* Top Statistics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 print:hidden">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Total Students</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">{stats.total}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 print:hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center">
+            <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Total Students</p>
+            <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{stats.total}</p>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center">
-            <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider mb-1">Active Students</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">{stats.active}</p>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center">
+            <p className="text-[9px] sm:text-[10px] font-bold text-emerald-500 uppercase tracking-wider mb-1">Active Students</p>
+            <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{stats.active}</p>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center">
-            <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-1">New Admissions</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">{stats.newAdmissions}</p>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center">
+            <p className="text-[9px] sm:text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-1">New Admissions</p>
+            <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{stats.newAdmissions}</p>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center">
-            <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wider mb-1">Inactive Students</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white">{stats.inactive}</p>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center">
+            <p className="text-[9px] sm:text-[10px] font-bold text-rose-500 uppercase tracking-wider mb-1">Inactive Students</p>
+            <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{stats.inactive}</p>
           </div>
         </div>
 
         <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 shadow-sm relative z-10 overflow-hidden">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-6 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-4 sm:pb-6 border-b border-slate-100 dark:border-slate-800">
             <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">{t('students')}</h1>
-              <p className="text-xs text-slate-500 mt-1 print:hidden">Manage and view student information</p>
+              <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">{t('students')}</h1>
+              <p className="text-xs text-slate-500 mt-0.5 print:hidden">Manage and view student information</p>
             </div>
-            <div className="flex flex-wrap gap-3 print:hidden">
-              <button onClick={() => window.print()} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 transition flex items-center gap-1.5 shadow-sm">
-                 <FileText size={16} /> Export PDF
+            <div className="flex flex-wrap gap-2 sm:gap-3 print:hidden">
+              <button onClick={() => window.print()} className="rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 transition flex items-center gap-1.5 shadow-sm">
+                 <FileText size={14} /> <span className="hidden sm:inline">Export</span> PDF
               </button>
-              <button onClick={exportToCSV} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 transition flex items-center gap-1.5 shadow-sm">
-                 <FileSpreadsheet size={16} /> Export CSV
+              <button onClick={exportToCSV} className="rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 transition flex items-center gap-1.5 shadow-sm">
+                 <FileSpreadsheet size={14} /> <span className="hidden sm:inline">Export</span> CSV
               </button>
               {user?.role === 'admin' && (
                 <button
                   onClick={() => { setShowForm(true); setEditId(null); setForm(EMPTY); }}
-                  className="rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2 text-xs font-bold transition shadow-md shadow-amber-500/20 flex items-center gap-1.5"
+                  className="rounded-xl sm:rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 px-3 py-2 text-xs font-bold transition shadow-md shadow-amber-500/20 flex items-center gap-1.5"
                 >
-                   <Plus size={16} /> {t('addStudent')}
+                   <Plus size={14} /> {t('addStudent')}
                 </button>
               )}
             </div>
           </div>
 
           {/* Search & Filters */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3 print:hidden">
-            <div className="md:col-span-1">
+          <div className="mt-4 sm:mt-6 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 print:hidden">
+            <div className="col-span-2 sm:col-span-2 md:col-span-1">
               <input
                 value={search} onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by Name, Adm No, Phone..."
-                className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-xs outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 text-slate-900 dark:text-slate-100 font-medium"
+                className="w-full rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3 sm:px-4 py-2.5 text-xs outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 text-slate-900 dark:text-slate-100 font-medium"
               />
             </div>
             <select
               value={filterClass} onChange={(e) => setFilterClass(e.target.value)}
-              className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-400 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30"
+              className="rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 sm:px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-400 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30"
             >
               <option value="">All Classes</option>
               {classes.map((c) => <option key={c.id} value={c.id}>{c.section ? `${c.name} - ${c.section}` : c.name}</option>)}
             </select>
             <select
               value={filterGender} onChange={(e) => setFilterGender(e.target.value)}
-              className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-400 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30"
+              className="rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 sm:px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-400 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30"
             >
               <option value="">All Genders</option>
               <option value="male">Male</option>
@@ -338,7 +338,7 @@ export default function StudentsPage() {
             </select>
             <select
               value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-              className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-400 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30"
+              className="rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 sm:px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-400 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30"
             >
               <option value="">All Statuses</option>
               <option value="Active">Active</option>
@@ -368,8 +368,60 @@ export default function StudentsPage() {
             </div>
           )}
 
-          {/* Table Container with scroll */}
-          <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-800 max-h-[500px] overflow-y-auto custom-scrollbar relative pb-24">
+          {/* ── Mobile Card List (visible only on small screens) ── */}
+          <div className="md:hidden mt-4 space-y-3 print:hidden">
+            {paginatedStudents.length === 0 && (
+              <div className="py-12 text-center text-slate-400">
+                <span className="text-3xl">🔍</span>
+                <p className="mt-2 text-sm font-medium">No students found.</p>
+              </div>
+            )}
+            {paginatedStudents.map((s) => (
+              <div key={s.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-4 shadow-sm flex flex-col gap-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600 dark:text-amber-400 font-black text-base flex-shrink-0">
+                      {s.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">{s.name}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5 font-mono">{s.admission_no}</p>
+                    </div>
+                  </div>
+                  <span className={`flex-shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold ${s.status === 'Active' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/30' : 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-800/30'}`}>
+                    <span className={`w-1 h-1 rounded-full ${s.status === 'Active' ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                    {s.status}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-[10px] text-slate-500 flex-wrap">
+                  <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg font-bold text-slate-700 dark:text-slate-300">{s.class_name || 'N/A'}</span>
+                  {s.phone && <span className="flex items-center gap-1"><Phone size={10} />{s.phone}</span>}
+                  {s.parent_name && <span>{s.parent_name}</span>}
+                </div>
+                {s.pending_fees > 0 && (
+                  <div className="text-[10px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-500/10 px-2 py-1 rounded-lg w-fit">
+                    ₹{s.pending_fees.toLocaleString('en-IN')} pending
+                  </div>
+                )}
+                <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <button onClick={() => setViewStudent(s)} className="flex-1 py-2 text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center gap-1.5 transition hover:bg-blue-100">
+                    <Eye size={13} /> View
+                  </button>
+                  {user?.role === 'admin' && (
+                    <button onClick={() => openEdit(s)} className="flex-1 py-2 text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/20 rounded-xl flex items-center justify-center gap-1.5 transition hover:bg-amber-100">
+                      <Edit size={13} /> Edit
+                    </button>
+                  )}
+                  <button onClick={() => { setSelectedStudentForPayment(s); navigate('/payments'); }} className="flex-1 py-2 text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl flex items-center justify-center gap-1.5 transition hover:bg-emerald-100">
+                    <History size={13} /> Fees
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Desktop Table (hidden on mobile) ── */}
+          <div className="hidden md:block mt-6 overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-800 max-h-[500px] overflow-y-auto custom-scrollbar relative pb-24">
             <table className="w-full min-w-max text-left text-sm text-slate-700 dark:text-slate-300">
               <thead className="bg-slate-50 dark:bg-slate-950 text-[10px] text-slate-400 font-bold uppercase tracking-wider sticky top-0 z-20 shadow-sm border-b border-slate-100 dark:border-slate-800 after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-slate-200 dark:after:bg-slate-800">
                 <tr>
@@ -500,7 +552,7 @@ export default function StudentsPage() {
                 )}
               </tbody>
             </table>
-          </div>
+          </div> {/* end desktop table wrapper */}
 
           {/* Pagination */}
           {totalPages > 1 && (
@@ -540,8 +592,8 @@ export default function StudentsPage() {
 
         {/* View Profile Modal */}
         {viewStudent && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fade-in print:hidden">
-            <div className="w-full max-w-md rounded-[2rem] bg-white dark:bg-slate-900 shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden relative">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/60 sm:p-4 backdrop-blur-sm animate-fade-in print:hidden">
+            <div className="w-full sm:max-w-md sm:rounded-[2rem] rounded-t-[2rem] bg-white dark:bg-slate-900 shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden relative max-h-[90vh] overflow-y-auto">
               <div className="bg-amber-500 h-28 relative flex items-center p-6">
                 <div className="absolute -bottom-10 left-6 w-20 h-20 bg-white dark:bg-slate-900 rounded-full border-[5px] border-white dark:border-slate-900 flex items-center justify-center shadow-lg">
                    <span className="text-3xl font-black text-amber-500">{viewStudent.name.charAt(0).toUpperCase()}</span>
@@ -596,8 +648,8 @@ export default function StudentsPage() {
 
         {/* Add/Edit Form Modal */}
         {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fade-in print:hidden">
-            <div className="w-full max-w-lg rounded-[2rem] bg-white dark:bg-slate-900 p-7 shadow-2xl border border-slate-100 dark:border-slate-800 relative max-h-[95vh] overflow-y-auto custom-scrollbar">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/60 sm:p-4 backdrop-blur-sm animate-fade-in print:hidden">
+            <div className="w-full sm:max-w-lg sm:rounded-[2rem] rounded-t-[2rem] bg-white dark:bg-slate-900 p-5 sm:p-7 shadow-2xl border border-slate-100 dark:border-slate-800 relative max-h-[95vh] overflow-y-auto custom-scrollbar">
               <div className="flex justify-between items-center pb-5 border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
                 <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-3">
                   <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 p-2 rounded-xl shadow-sm">
@@ -619,7 +671,7 @@ export default function StudentsPage() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="mt-6 grid grid-cols-2 gap-5">
+              <form onSubmit={handleSubmit} className="mt-4 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
                 {[
                   ['Admission No', 'admission_no', 'text', !editId],
                   ['Full Name',    'name',         'text', true],
