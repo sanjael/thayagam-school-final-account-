@@ -6,7 +6,7 @@ import { useAuth } from '../AuthContext';
 
 const TERMS = ['Term 1', 'Term 2', 'Term 3'];
 const FEE_TYPES = ['Tuition Fee', 'Admission Fee', 'Exam Fee', 'Transport Fee', 'Books Fee', 'Uniform Fee', 'Hostel Fee', 'Other'];
-const EMPTY = { class_id: '', term: 'Term 1', fee_type: 'Tuition Fee', custom_fee: '', amount: '', academic_year: '2024-2025' };
+const EMPTY = { class_id: '', term: 'Term 1', fee_type: 'Tuition Fee', custom_fee: '', amount: '', academic_year: '2026-2027' };
 
 export default function FeesPage() {
   const { t } = useApp();
@@ -35,6 +35,11 @@ export default function FeesPage() {
 
   useEffect(() => { 
     api.getClasses().then(setClasses).catch(() => {}); 
+    api.getSettings().then(s => {
+      if (s.current_academic_year) {
+        setForm(p => ({ ...p, academic_year: s.current_academic_year }));
+      }
+    }).catch(() => {});
     load();
   }, []);
 
@@ -71,7 +76,6 @@ export default function FeesPage() {
   const configuredClasses = new Set(structures.map(s => s.class_id)).size;
   const totalAmount = structures.reduce((sum, s) => sum + Number(s.amount), 0);
   const avgFee = structures.length ? Math.round(totalAmount / structures.length) : 0;
-  const activeYear = form.academic_year;
 
   async function handleAdd(e) {
     e.preventDefault();
@@ -100,7 +104,7 @@ export default function FeesPage() {
       setForm({ ...EMPTY, academic_year: form.academic_year }); // Keep year
       load();
     } catch (err) { setError(err.message); }
-    setLoading(false);
+    finally { setLoading(false); }
   }
 
   async function handleDelete(id) {
@@ -166,7 +170,20 @@ export default function FeesPage() {
           </div>
           <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center hover:border-purple-200 transition-colors">
             <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1"> Academic Year</p>
-            <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">{activeYear}</p>
+            <input 
+              type="text"
+              list="ay-summary-list"
+              value={form.academic_year}
+              onChange={f('academic_year')}
+              className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white bg-transparent outline-none border-b border-dashed border-amber-500/50 hover:border-amber-500 cursor-pointer"
+            />
+            <datalist id="ay-summary-list">
+              <option value="2023-2024" />
+              <option value="2024-2025" />
+              <option value="2025-2026" />
+              <option value="2026-2027" />
+              <option value="2027-2028" />
+            </datalist>
           </div>
         </div>
 
@@ -180,7 +197,7 @@ export default function FeesPage() {
               {editId ? 'Edit Fee Structure' : 'Add Fee Structure'}
             </h2>
             
-            <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-6 gap-5 items-end">
+            <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-7 gap-4 items-end">
               <div className="md:col-span-1">
                 <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Class</label>
                 <select required value={form.class_id} onChange={f('class_id')}
@@ -195,6 +212,25 @@ export default function FeesPage() {
                   className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition shadow-sm">
                   {TERMS.map((t) => <option key={t}>{t}</option>)}
                 </select>
+              </div>
+              <div className="md:col-span-1">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Academic Year</label>
+                <input
+                  type="text"
+                  list="ay-form-list"
+                  value={form.academic_year}
+                  onChange={f('academic_year')}
+                  required
+                  placeholder="2026-2027"
+                  className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition shadow-sm"
+                />
+                <datalist id="ay-form-list">
+                  <option value="2023-2024" />
+                  <option value="2024-2025" />
+                  <option value="2025-2026" />
+                  <option value="2026-2027" />
+                  <option value="2027-2028" />
+                </datalist>
               </div>
               <div className="md:col-span-2">
                 <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Fee Type</label>
