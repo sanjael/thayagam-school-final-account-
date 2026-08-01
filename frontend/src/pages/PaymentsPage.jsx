@@ -803,13 +803,24 @@ export default function PaymentsPage() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-500 mb-1">Academic Year *</label>
-                    <select value={form.academic_year} onChange={f('academic_year')} required className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-emerald-500">
-                      <option value="2023-2024">2023-2024</option>
-                      <option value="2024-2025">2024-2025</option>
-                      <option value="2025-2026">2025-2026</option>
-                      <option value="2026-2027">2026-2027</option>
-                      <option value="2027-2028">2027-2028</option>
-                    </select>
+                    <input 
+                      type="text"
+                      list="academic-years-payment-list"
+                      value={form.academic_year} 
+                      onChange={f('academic_year')} 
+                      required 
+                      placeholder="e.g. 2026-2027"
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-emerald-500" 
+                    />
+                    <datalist id="academic-years-payment-list">
+                      <option value="2023-2024" />
+                      <option value="2024-2025" />
+                      <option value="2025-2026" />
+                      <option value="2026-2027" />
+                      <option value="2027-2028" />
+                      <option value="2028-2029" />
+                      <option value="2029-2030" />
+                    </datalist>
                   </div>
                 </div>
 
