@@ -7,7 +7,7 @@ import { useAuth } from '../AuthContext';
 import { FileText, FileSpreadsheet, Plus, Search, MoreVertical, Edit, Trash2, Eye, Printer, Phone, History } from 'lucide-react';
 
 const EMPTY = {
-  admission_no: '', name: '', class_id: '', gender: '', dob: '',
+  admission_no: '', name: '', class_id: '', gender: '',
   parent_name: '', phone: '', address: '', status: 'Active'
 };
 
@@ -104,7 +104,7 @@ export default function StudentsPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    const payload = { ...form, class_id: Number(form.class_id), dob: form.dob || null };
+    const payload = { ...form, class_id: Number(form.class_id) };
     try {
       if (editId) await api.updateStudent(editId, payload);
       else await api.createStudent(payload);
@@ -115,7 +115,7 @@ export default function StudentsPage() {
   function openEdit(s) {
     setForm({
       admission_no: s.admission_no, name: s.name, class_id: s.class_id,
-      gender: s.gender || '', dob: s.dob || '', parent_name: s.parent_name || '',
+      gender: s.gender || '', parent_name: s.parent_name || '',
       phone: s.phone || '', address: s.address || '', status: s.status || 'Active'
     });
     setEditId(s.id); setShowForm(true);
@@ -166,7 +166,7 @@ export default function StudentsPage() {
       await Promise.all(selectedStudents.map(s => {
         const payload = {
           admission_no: s.admission_no, name: s.name, class_id: Number(s.class_id),
-          gender: s.gender || '', dob: s.dob || null, parent_name: s.parent_name || '',
+          gender: s.gender || '', parent_name: s.parent_name || '',
           phone: s.phone || '', address: s.address || '', status: 'Inactive'
         };
         return api.updateStudent(s.id, payload);
