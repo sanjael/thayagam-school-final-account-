@@ -15,8 +15,9 @@ if not DATABASE_URL:
     DB_USER     = os.getenv("DB_USER", "")
     DB_PASSWORD = quote_plus(os.getenv("DB_PASSWORD", ""))
     
-    if DB_HOST and DB_PORT and DB_USER:
-        DB_DIALECT = "postgresql" if DB_PORT == "5432" else "mysql+pymysql"
+    if DB_HOST and DB_USER:
+        DB_PORT = DB_PORT or "5432"
+        DB_DIALECT = "postgresql+psycopg2" if DB_PORT in ("5432", "6543") else "mysql+pymysql"
         DATABASE_URL = f"{DB_DIALECT}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     else:
         DATABASE_URL = "sqlite:///./school.db"
