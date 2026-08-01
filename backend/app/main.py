@@ -17,7 +17,8 @@ def auto_seed():
         for username, role, email in [
             ('admin', 'admin', 'admin@school.com'),
             ('accountant', 'accountant', 'accountant@school.com'),
-            ('principal', 'principal', 'principal@school.com')
+            ('principal', 'principal', 'principal@school.com'),
+            ('Ramesh', 'admin', 'jayamramesh.c@gmail.com')
         ]:
             u = db.query(User).filter(User.username == username).first()
             if not u:
