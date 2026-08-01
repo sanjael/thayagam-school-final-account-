@@ -55,13 +55,22 @@ export default function FeesPage() {
   }, [structures, filterClass, filterYear, filterTerm, search]);
 
   const groupedByClass = useMemo(() => {
-    return filteredStructures.reduce((acc, s) => {
-      const key = s.class_name || s.class_id;
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(s);
-      return acc;
-    }, {});
-  }, [filteredStructures]);
+    const acc = {};
+    // Ensure all classes are initialized so every class displays in the list
+    classes.forEach(c => {
+      acc[c.name] = { classId: c.id, items: [] };
+    });
+
+    filteredStructures.forEach(s => {
+      const key = s.class_name || (classes.find(c => c.id === s.class_id)?.name) || String(s.class_id);
+      if (!acc[key]) {
+        acc[key] = { classId: s.class_id, items: [] };
+      }
+      acc[key].items.push(s);
+    });
+
+    return acc;
+  }, [filteredStructures, classes]);
 
   // Expand first class by default if none expanded
   useEffect(() => {
@@ -123,6 +132,11 @@ export default function FeesPage() {
       academic_year: item.academic_year
     });
     setEditId(item.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function quickAddFeeForClass(classId) {
+    setForm(p => ({ ...p, class_id: classId }));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -291,15 +305,15 @@ export default function FeesPage() {
           <select value={filterTerm} onChange={(e) => setFilterTerm(e.target.value)}
             className="w-full md:w-40 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition shadow-inner">
             <option value="">All Terms</option>
-            {TERMS.map((t) => <option key={t} value={t}>{t}</option>)}
+            {TERMS.map((t) => <option key={t}>{t}</option>)}
           </select>
-          <input value={filterYear} onChange={(e) => setFilterYear(e.target.value)} placeholder="AY e.g. 2024-2025"
+          <input value={filterYear} onChange={(e) => setFilterYear(e.target.value)} placeholder="AY e.g. 2026-2027"
             className="w-full md:w-40 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition shadow-inner text-center" />
         </section>
 
         {/* Classes Accordion List */}
         <section className="space-y-4">
-          {Object.entries(groupedByClass).map(([cls, items]) => {
+          {Object.entries(groupedByClass).map(([cls, { classId, items }]) => {
             const isExpanded = expandedClasses[cls];
             const classTotal = items.reduce((sum, item) => sum + Number(item.amount), 0);
             const feeTypesCount = new Set(items.map(i => i.fee_type)).size;
@@ -323,7 +337,7 @@ export default function FeesPage() {
                       {cls.match(/\d+/) ? cls.match(/\d+/)[0] : cls.charAt(0)}
                     </div>
                     <div>
-                      <h3 className="text-xl font-black text-slate-900 dark:text-white">Class {cls}</h3>
+                      <h3 className="text-xl font-black text-slate-900 dark:text-white">{cls.toLowerCase().startsWith('class') ? cls : `Class ${cls}`}</h3>
                       <p className="text-xs font-bold text-slate-500 mt-0.5">{feeTypesCount} Fee Types Configured</p>
                     </div>
                   </div>
@@ -342,74 +356,83 @@ export default function FeesPage() {
                 {isExpanded && (
                   <div className="p-5 md:p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30">
                     
-                    {/* Wow Feature: Fee Preview Summary Box */}
-                    <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl p-5 border border-amber-200 dark:border-amber-800/50 mb-6 flex flex-col md:flex-row justify-between items-center gap-5 shadow-sm">
-                      <div className="flex-1 w-full">
-                        <h4 className="text-[10px] font-black text-amber-800 dark:text-amber-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                          <span className="text-base"></span> Fee Structure Preview
-                        </h4>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-y-3 gap-x-4">
-                          {Object.entries(totalsByType).map(([type, amount]) => (
-                            <div key={type}>
-                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">{type}</p>
-                              <p className="text-sm font-black text-slate-900 dark:text-white">₹{amount.toLocaleString('en-IN')}</p>
+                    {items.length === 0 ? (
+                      <div className="p-6 text-center bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                        <p className="text-xs font-bold text-slate-500 mb-3">No fees configured for {cls} in Academic Year {form.academic_year || '2026-2027'}</p>
+                        {user?.role === 'admin' && classId && (
+                          <button 
+                            type="button" 
+                            onClick={() => quickAddFeeForClass(classId)}
+                            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-bold transition shadow-sm"
+                          >
+                            + Add Fee Structure for {cls}
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <>
+                        {/* Wow Feature: Fee Preview Summary Box */}
+                        <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl p-5 border border-amber-200 dark:border-amber-800/50 mb-6 flex flex-col md:flex-row justify-between items-center gap-5 shadow-sm">
+                          <div className="flex-1 w-full">
+                            <h4 className="text-[10px] font-black text-amber-800 dark:text-amber-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                              Fee Structure Preview
+                            </h4>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-y-3 gap-x-4">
+                              {Object.entries(totalsByType).map(([type, amount]) => (
+                                <div key={type}>
+                                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">{type}</p>
+                                  <p className="text-sm font-black text-slate-900 dark:text-white">₹{amount.toLocaleString('en-IN')}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="bg-white dark:bg-slate-900 px-6 py-4 rounded-[1.5rem] border border-amber-200 dark:border-amber-800 shadow-md text-center min-w-[180px] w-full md:w-auto">
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Annual Fee</p>
+                            <p className="text-3xl font-black text-emerald-600 dark:text-emerald-500">₹{classTotal.toLocaleString('en-IN')}</p>
+                          </div>
+                        </div>
+
+                        {/* Fee Cards Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                          {items.map((item) => (
+                            <div key={item.id} className="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 p-5 shadow-sm hover:shadow-md transition-all group relative">
+                              <div className="flex justify-between items-start mb-3">
+                                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
+                                  {item.term}
+                                </span>
+                                <span className="text-[9px] text-slate-400 font-medium bg-white dark:bg-slate-900 px-1">
+                                  {item.created_at ? new Date(item.created_at).toLocaleDateString('en-GB') : 'Just now'}
+                                </span>
+                              </div>
+                              
+                              <div className="mb-5">
+                                <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
+                                  <span></span> {item.fee_type}
+                                </p>
+                                <p className="text-2xl font-black text-emerald-600 dark:text-emerald-500">₹{Number(item.amount).toLocaleString('en-IN')}</p>
+                              </div>
+                              
+                              {user?.role === 'admin' && (
+                                <div className="flex gap-2 border-t border-slate-100 dark:border-slate-800 pt-3">
+                                  <button onClick={() => openEdit(item)} className="flex-1 text-slate-500 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-blue-900/30 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                    ️ Edit
+                                  </button>
+                                  <button onClick={() => handleDelete(item.id)} className="flex-1 text-slate-500 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 dark:bg-slate-800 dark:hover:bg-rose-900/30 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                     Delete
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
-                      </div>
-                      <div className="bg-white dark:bg-slate-900 px-6 py-4 rounded-[1.5rem] border border-amber-200 dark:border-amber-800 shadow-md text-center min-w-[180px] w-full md:w-auto">
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Annual Fee</p>
-                        <p className="text-3xl font-black text-emerald-600 dark:text-emerald-500">₹{classTotal.toLocaleString('en-IN')}</p>
-                      </div>
-                    </div>
-
-                    {/* Fee Cards Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                      {items.map((item) => (
-                        <div key={item.id} className="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 p-5 shadow-sm hover:shadow-md transition-all group relative">
-                          <div className="flex justify-between items-start mb-3">
-                            <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
-                              {item.term}
-                            </span>
-                            <span className="text-[9px] text-slate-400 font-medium bg-white dark:bg-slate-900 px-1">
-                              {item.created_at ? new Date(item.created_at).toLocaleDateString('en-GB') : 'Just now'}
-                            </span>
-                          </div>
-                          
-                          <div className="mb-5">
-                            <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
-                              <span></span> {item.fee_type}
-                            </p>
-                            <p className="text-2xl font-black text-emerald-600 dark:text-emerald-500">₹{Number(item.amount).toLocaleString('en-IN')}</p>
-                          </div>
-                          
-                          {user?.role === 'admin' && (
-                            <div className="flex gap-2 border-t border-slate-100 dark:border-slate-800 pt-3">
-                              <button onClick={() => openEdit(item)} className="flex-1 text-slate-500 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-blue-900/30 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
-                                ️ Edit
-                              </button>
-                              <button onClick={() => handleDelete(item.id)} className="flex-1 text-slate-500 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 dark:bg-slate-800 dark:hover:bg-rose-900/30 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
-                                 Delete
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                      </>
+                    )}
 
                   </div>
                 )}
               </div>
             );
           })}
-
-          {structures.length === 0 && (
-            <div className="py-20 flex flex-col items-center justify-center bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 border-dashed">
-              <span className="text-5xl mb-4"></span>
-              <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300">No fee structures found</h3>
-              <p className="text-sm text-slate-500 mt-1">Try adjusting filters or add a new fee entry above.</p>
-            </div>
-          )}
         </section>
 
       </div>
