@@ -91,8 +91,9 @@ def create_payment(payload: schemas.FeePaymentCreate, db: Session = Depends(get_
         models.FeeStructure.academic_year == payload.academic_year
     ).scalar() or Decimal("0")
 
+    # Fallback to amount_paid if total fee structure is not pre-configured
     if total == 0:
-        raise HTTPException(400, "No fee structure defined for this class/term/year")
+        total = Decimal(str(payload.amount_paid))
 
     # Sum of previous payments for this student, term, and academic year
     previous_paid = db.query(func.sum(models.FeePayment.amount_paid)).filter(
