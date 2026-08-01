@@ -52,7 +52,7 @@ def get_students(
     search: Optional[str] = None,
     class_id: Optional[int] = None,
     gender: Optional[str] = None,
-    status: Optional[str] = "active",  # active | inactive | all
+    status: Optional[str] = None,  # active | inactive | all
     db: Session = Depends(get_db),
 ):
     settings = db.query(models.SchoolSettings).first()
@@ -60,10 +60,11 @@ def get_students(
     active_terms = _terms_up_to(settings.current_term if settings else "Term 1")
 
     q = db.query(models.Student)
-    if status == "active":
+    if status == "active" or status is None:
         q = q.filter(models.Student.is_active == True)
     elif status == "inactive":
         q = q.filter(models.Student.is_active == False)
+
     if search and isinstance(search, str) and search.strip():
         q = q.filter(
             (models.Student.name.ilike(f"%{search}%")) |
@@ -74,7 +75,43 @@ def get_students(
         q = q.filter(models.Student.class_id == class_id)
     if gender and isinstance(gender, str) and gender in ("male", "female", "other"):
         q = q.filter(models.Student.gender == gender)
-    return [_enrich(s, db, ay, active_terms) for s in q.order_by(models.Student.name).all()]
+
+    students = q.order_by(models.Student.name).all()
+    if not students:
+        return []
+
+    # Batch query fee structures per class (1 query)
+    fee_rows = db.query(models.FeeStructure.class_id, func.sum(models.FeeStructure.amount)).filter(
+        models.FeeStructure.term.in_(active_terms),
+        models.FeeStructure.academic_year == ay
+    ).group_by(models.FeeStructure.class_id).all()
+    fee_map = {cid: float(amt or 0) for cid, amt in fee_rows}
+
+    # Batch query payments per student (1 query)
+    student_ids = [s.id for s in students]
+    payment_rows = db.query(models.FeePayment.student_id, func.sum(models.FeePayment.amount_paid)).filter(
+        models.FeePayment.student_id.in_(student_ids),
+        models.FeePayment.term.in_(active_terms),
+        models.FeePayment.academic_year == ay,
+        models.FeePayment.is_cancelled == False
+    ).group_by(models.FeePayment.student_id).all()
+    paid_map = {sid: float(amt or 0) for sid, amt in payment_rows}
+
+    results = []
+    for s in students:
+        out = schemas.StudentOut.from_orm(s)
+        if s.class_:
+            out.class_name = f"{s.class_.name} - {s.class_.section}" if s.class_.section else s.class_.name
+        else:
+            out.class_name = None
+
+        total_fee = fee_map.get(s.class_id, 0.0)
+        total_paid = paid_map.get(s.id, 0.0)
+        bal = total_fee - total_paid
+        out.pending_fees = bal if bal > 0 else 0.0
+        results.append(out)
+
+    return results
 
 
 @router.get("/{student_id}", response_model=schemas.StudentOut)
