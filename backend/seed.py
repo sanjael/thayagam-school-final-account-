@@ -1,10 +1,11 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
 
-from app.database import SessionLocal
-from app.models import User, SchoolSettings, Class
+from app.database import SessionLocal, engine
+from app.models import User, SchoolSettings, Class, Base
 from app.auth import hash_password
 
+Base.metadata.create_all(bind=engine)
 db = SessionLocal()
 
 # Seed Users

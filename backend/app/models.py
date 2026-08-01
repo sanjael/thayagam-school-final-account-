@@ -111,7 +111,7 @@ class FeePayment(Base):
     balance       = Column(DECIMAL(10, 2), nullable=False)
     payment_date  = Column(Date, nullable=False)
     payment_mode  = Column(Enum(PaymentMode), default=PaymentMode.cash)
-    collected_by  = Column(Integer, ForeignKey("users.id"), nullable=True)
+    collected_by  = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     fine          = Column(DECIMAL(10, 2), default=0)
     discount      = Column(DECIMAL(10, 2), default=0)
     reference_no  = Column(String(100), nullable=True)
@@ -152,7 +152,7 @@ class SchoolSettings(Base):
 class AuditLog(Base):
     __tablename__ = "audit_logs"
     id          = Column(Integer, primary_key=True, index=True)
-    user_id     = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id     = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     action      = Column(String(200), nullable=False)
     details     = Column(Text)
     created_at  = Column(DateTime, server_default=func.now())
