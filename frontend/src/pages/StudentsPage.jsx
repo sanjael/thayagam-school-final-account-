@@ -199,7 +199,7 @@ export default function StudentsPage() {
           ${selectedStudents.map(s => `
             <div class="id-card">
               <div class="header-bg"></div>
-              <div class="school-name">THAYAGAM ACADEMY</div>
+              <div class="school-name">THAAYAGAM SCHOOL</div>
               <div class="student-name">${s.name}</div>
               <div class="detail">Adm No: &nbsp;&nbsp;<b>${s.admission_no}</b></div>
               <div class="detail">Class: &nbsp;&nbsp;&nbsp;&nbsp;<b>${s.class_name}</b></div>

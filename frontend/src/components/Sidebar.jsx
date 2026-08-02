@@ -121,8 +121,8 @@ export default function Sidebar({ onClose }) {
           />
         </div>
         <div className="mt-2">
-          <p className="text-[17px] font-black uppercase tracking-[0.15em] text-white">THAYAGAM</p>
-          <p className={`text-[10px] font-bold uppercase tracking-[0.25em] ${theme.accent} mt-1`}>ACADEMY</p>
+          <p className="text-[17px] font-black uppercase tracking-[0.15em] text-white">THAAYAGAM</p>
+          <p className={`text-[10px] font-bold uppercase tracking-[0.25em] ${theme.accent} mt-1`}>SCHOOL</p>
         </div>
 
         {/* Role badge */}
@@ -195,7 +195,7 @@ export default function Sidebar({ onClose }) {
       {/* Footer */}
       <div className="px-4 pb-5 text-center">
         <p className="text-[9px] text-slate-600 font-medium tracking-[0.1em] uppercase leading-relaxed">
-          THAYAGAM ACADEMY<br />SYSTEM v2.0.0
+          THAAYAGAM SCHOOL<br />SYSTEM v2.0.0
         </p>
       </div>
     </aside>

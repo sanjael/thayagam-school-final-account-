@@ -682,7 +682,7 @@ export default function PaymentsPage() {
               
               <div className="p-8 bg-receipt-pattern">
                 <div className="text-center border-b-2 border-dashed border-slate-200 pb-6 mb-6">
-                  <h2 className="text-2xl font-black text-slate-900 mb-1">THAYAGAM ACADEMY</h2>
+                  <h2 className="text-2xl font-black text-slate-900 mb-1">THAAYAGAM SCHOOL</h2>
                   <p className="text-xs font-bold text-slate-500">FEE RECEIPT</p>
                 </div>
                 
