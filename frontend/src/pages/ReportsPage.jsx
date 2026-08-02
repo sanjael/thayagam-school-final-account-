@@ -166,8 +166,140 @@ export default function ReportsPage() {
     }
   }
 
+  const handlePrintReportsPDF = () => {
+    const printWindow = window.open('', '_blank');
+    let title = "Financial Report";
+    let contentHtml = "";
+
+    if (tab === 'pending') {
+      title = "Pending Fees Report";
+      contentHtml = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center;">#</th>
+              <th>Adm No</th>
+              <th>Student Name</th>
+              <th>Class</th>
+              <th>Term</th>
+              <th>Total Fee</th>
+              <th>Paid</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredPending.map((p, i) => `
+              <tr>
+                <td style="text-align: center;">${i + 1}</td>
+                <td><b>${p.admission_no || ''}</b></td>
+                <td><b>${p.student_name}</b></td>
+                <td>${p.class || ''}</td>
+                <td>${p.term || ''}</td>
+                <td>₹${Number(p.total_fee || 0).toLocaleString('en-IN')}</td>
+                <td style="color: #16a34a;">₹${Number(p.amount_paid || 0).toLocaleString('en-IN')}</td>
+                <td style="color: #dc2626; font-weight: bold;">₹${Number(p.balance || 0).toLocaleString('en-IN')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } else if (tab === 'class') {
+      title = "Class-wise Collection Report";
+      contentHtml = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center;">#</th>
+              <th>Class Name</th>
+              <th>Collected Amount</th>
+              <th>Remaining Dues</th>
+              <th>Transactions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${classWise.map((c, i) => `
+              <tr>
+                <td style="text-align: center;">${i + 1}</td>
+                <td><b>${c.class_name}</b></td>
+                <td style="color: #16a34a; font-weight: bold;">₹${Number(c.collected_amount || 0).toLocaleString('en-IN')}</td>
+                <td style="color: #dc2626; font-weight: bold;">₹${Number(c.remaining_dues || 0).toLocaleString('en-IN')}</td>
+                <td>${c.transactions || 0}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } else if (tab === 'daybook') {
+      title = `Daily Collection Report (${daybook?.date || new Date().toISOString().slice(0, 10)})`;
+      const payments = daybook?.payments || [];
+      contentHtml = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center;">#</th>
+              <th>Receipt No</th>
+              <th>Student Name</th>
+              <th>Class</th>
+              <th>Term</th>
+              <th>Payment Mode</th>
+              <th>Amount Paid</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${payments.map((p, i) => `
+              <tr>
+                <td style="text-align: center;">${i + 1}</td>
+                <td><b>${p.receipt_no}</b></td>
+                <td><b>${p.student_name}</b></td>
+                <td>${p.class_name}</td>
+                <td>${p.term}</td>
+                <td style="text-transform: capitalize;">${p.payment_mode}</td>
+                <td style="color: #16a34a; font-weight: bold;">₹${Number(p.amount_paid || 0).toLocaleString('en-IN')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${title} - Thaayagam School</title>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #1e293b; }
+            .header { text-align: center; border-bottom: 2px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px; }
+            .header h1 { margin: 0; font-size: 24px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px; }
+            .header p { margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: bold; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th, td { border: 1px solid #cbd5e1; padding: 9px 12px; text-align: left; font-size: 12px; }
+            th { background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+            tr:nth-child(even) { background-color: #f8fafc; }
+            .footer { margin-top: 25px; text-align: right; font-size: 11px; color: #94a3b8; font-weight: bold; }
+            @page { size: A4; margin: 12mm; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>THAAYAGAM SCHOOL</h1>
+            <p>${title.toUpperCase()}</p>
+          </div>
+          ${contentHtml}
+          <div class="footer">
+            Generated on ${new Date().toLocaleDateString('en-IN')} | Thaayagam School Financial Reports
+          </div>
+          <script>
+            window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 500); }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   function handlePrint() {
-    window.print();
+    handlePrintReportsPDF();
   }
   
   function handleGenerateReport(e) {
@@ -285,6 +417,9 @@ export default function ReportsPage() {
                 <option>Custom Range</option>
               </select>
               
+              <button onClick={handlePrintReportsPDF} title="Export PDF Report" className="px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 transition flex items-center gap-1.5 font-bold text-xs shadow-sm">
+                <FileText size={16} /> Export PDF
+              </button>
               <button onClick={handleExportReports} title="Export CSV Report" className="px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-white hover:bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition flex items-center gap-1.5 font-bold text-xs shadow-sm">
                 <Download size={16} /> Export CSV
               </button>
