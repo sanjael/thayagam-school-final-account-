@@ -152,9 +152,27 @@ export default function FeesPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function quickAddFeeForClass(classId) {
-    setForm(p => ({ ...p, class_id: classId }));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  function quickAddFeeForClass(cId, cName) {
+    let targetId = cId;
+    if (!targetId && cName) {
+      const cleanName = cName.replace(/^Class\s+/i, '').trim().toLowerCase();
+      const found = classes.find(c => 
+        c.id === cId || 
+        c.name.toLowerCase() === cName.toLowerCase() || 
+        c.name.toLowerCase() === cleanName ||
+        `class ${c.name.toLowerCase()}` === cName.toLowerCase()
+      );
+      if (found) targetId = found.id;
+    }
+    if (targetId) {
+      setForm(p => ({ ...p, class_id: targetId }));
+    }
+    const el = document.getElementById('fee-form-section');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   const toggleClass = (cls) => {

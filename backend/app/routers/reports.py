@@ -13,75 +13,102 @@ router = APIRouter(prefix="/reports", tags=["Reports"])
 TERM_ORDER = ["Term 1", "Term 2", "Term 3"]
 
 def terms_up_to(current_term: str) -> list:
-    """Return all terms that are active (up to and including current_term)."""
-    try:
-        idx = TERM_ORDER.index(current_term)
-    except ValueError:
-        idx = 0
-    return TERM_ORDER[:idx + 1]
+    """Return all active terms."""
+    return TERM_ORDER
 
 
 @router.get("/summary")
 def get_summary(academic_year: Optional[str] = Query(None), db: Session = Depends(get_db)):
     settings = db.query(models.SchoolSettings).first()
-    ay = academic_year or (settings.current_academic_year if settings else "2024-2025")
-    active_terms = terms_up_to(settings.current_term if settings else "Term 1")
+    if academic_year:
+        ay = academic_year
+    else:
+        latest_fs = db.query(models.FeeStructure.academic_year).order_by(models.FeeStructure.id.desc()).first()
+        ay = latest_fs[0] if latest_fs else (settings.current_academic_year if settings else "2026-2027")
+        
+    active_terms = ["Term 1", "Term 2", "Term 3"]
 
     total_students  = db.query(func.count(models.Student.id)).filter(models.Student.is_active == True).scalar()
     total_collected = db.query(func.sum(models.FeePayment.amount_paid)).filter(
         models.FeePayment.academic_year == ay,
-        models.FeePayment.term.in_(active_terms),
         models.FeePayment.is_cancelled == False
     ).scalar() or 0
 
     today = datetime.date.today()
     today_collected = db.query(func.sum(models.FeePayment.amount_paid)).filter(
-        models.FeePayment.academic_year == ay,
         models.FeePayment.payment_date == today,
         models.FeePayment.is_cancelled == False
     ).scalar() or 0
 
     first_of_month = today.replace(day=1)
     month_collected = db.query(func.sum(models.FeePayment.amount_paid)).filter(
-        models.FeePayment.academic_year == ay,
         models.FeePayment.payment_date >= first_of_month,
         models.FeePayment.payment_date <= today,
         models.FeePayment.is_cancelled == False
     ).scalar() or 0
 
-    # Expected only for active terms (calculated in 1 single aggregate SQL query)
-    total_expected = db.query(func.sum(models.FeeStructure.amount))\
-        .select_from(models.Student)\
-        .join(models.FeeStructure, models.FeeStructure.class_id == models.Student.class_id)\
-        .filter(
-            models.Student.is_active == True,
-            models.FeeStructure.term.in_(active_terms),
-            models.FeeStructure.academic_year == ay
-        ).scalar() or Decimal("0")
-
-    total_balance = max(Decimal("0"), total_expected - Decimal(str(total_collected)))
-    total_receipts = db.query(func.count(models.Receipt.id)).join(models.FeePayment).filter(
+    total_receipts = db.query(func.count(models.FeePayment.id)).filter(
         models.FeePayment.academic_year == ay,
         models.FeePayment.is_cancelled == False
-    ).scalar()
+    ).scalar() or 0
+
+    # Calculate Total Balance (Pending Amount across all students for this academic year)
+    students = db.query(models.Student).filter(models.Student.is_active == True).all()
+    class_ids = list({s.class_id for s in students if s.class_id})
+
+    fee_rows = db.query(
+        models.FeeStructure.class_id,
+        models.FeeStructure.term,
+        func.sum(models.FeeStructure.amount)
+    ).filter(
+        models.FeeStructure.class_id.in_(class_ids),
+        models.FeeStructure.academic_year == ay
+    ).group_by(models.FeeStructure.class_id, models.FeeStructure.term).all()
+    fee_map = {(cid, term): Decimal(str(amt or 0)) for cid, term, amt in fee_rows}
+
+    student_ids = [s.id for s in students]
+    payment_rows = db.query(
+        models.FeePayment.student_id,
+        models.FeePayment.term,
+        func.sum(models.FeePayment.amount_paid)
+    ).filter(
+        models.FeePayment.student_id.in_(student_ids),
+        models.FeePayment.academic_year == ay,
+        models.FeePayment.is_cancelled == False
+    ).group_by(models.FeePayment.student_id, models.FeePayment.term).all()
+    paid_map = {(sid, term): Decimal(str(amt or 0)) for sid, term, amt in payment_rows}
+
+    total_balance = Decimal("0")
+    for s in students:
+        for term in active_terms:
+            total_fee = fee_map.get((s.class_id, term), Decimal("0"))
+            if total_fee > 0:
+                paid = paid_map.get((s.id, term), Decimal("0"))
+                bal = total_fee - paid
+                if bal > 0:
+                    total_balance += bal
 
     return {
-        "academic_year": ay,
-        "current_term": settings.current_term if settings else "Term 1",
-        "total_students": total_students,
-        "total_collected": float(total_collected),
-        "total_balance": float(total_balance),
-        "total_receipts": total_receipts,
-        "today_collected": float(today_collected),
-        "month_collected": float(month_collected)
+        "total_students":   total_students,
+        "total_collected":  float(total_collected),
+        "today_collected":  float(today_collected),
+        "month_collected":  float(month_collected),
+        "total_balance":    float(total_balance),
+        "total_receipts":   total_receipts,
+        "academic_year":    ay,
     }
 
 
 @router.get("/pending")
 def get_pending(academic_year: Optional[str] = Query(None), class_id: Optional[int] = Query(None), db: Session = Depends(get_db)):
     settings = db.query(models.SchoolSettings).first()
-    ay = academic_year or (settings.current_academic_year if settings else "2024-2025")
-    active_terms = terms_up_to(settings.current_term if settings else "Term 1")
+    if academic_year:
+        ay = academic_year
+    else:
+        latest_fs = db.query(models.FeeStructure.academic_year).order_by(models.FeeStructure.id.desc()).first()
+        ay = latest_fs[0] if latest_fs else (settings.current_academic_year if settings else "2026-2027")
+
+    active_terms = ["Term 1", "Term 2", "Term 3"]
 
     students_q = db.query(models.Student).filter(models.Student.is_active == True)
     if class_id:
@@ -92,14 +119,13 @@ def get_pending(academic_year: Optional[str] = Query(None), class_id: Optional[i
         return []
 
     # Batch query fee structures: (class_id, term) -> sum(amount)
-    class_ids = list({s.class_id for s in students})
+    class_ids = list({s.class_id for s in students if s.class_id})
     fee_rows = db.query(
         models.FeeStructure.class_id,
         models.FeeStructure.term,
         func.sum(models.FeeStructure.amount)
     ).filter(
         models.FeeStructure.class_id.in_(class_ids),
-        models.FeeStructure.term.in_(active_terms),
         models.FeeStructure.academic_year == ay
     ).group_by(models.FeeStructure.class_id, models.FeeStructure.term).all()
     fee_map = {(cid, term): Decimal(str(amt or 0)) for cid, term, amt in fee_rows}
@@ -112,7 +138,6 @@ def get_pending(academic_year: Optional[str] = Query(None), class_id: Optional[i
         func.sum(models.FeePayment.amount_paid)
     ).filter(
         models.FeePayment.student_id.in_(student_ids),
-        models.FeePayment.term.in_(active_terms),
         models.FeePayment.academic_year == ay,
         models.FeePayment.is_cancelled == False
     ).group_by(models.FeePayment.student_id, models.FeePayment.term).all()
