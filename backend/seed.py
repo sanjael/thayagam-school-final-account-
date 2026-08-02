@@ -31,7 +31,7 @@ for username, role, email in [
 s = db.query(SchoolSettings).first()
 if not s:
     db.add(SchoolSettings(
-        school_name='Sri Thayagam Matriculation School',
+        school_name='Thayagam',
         address='Tamil Nadu', phone='9876543210',
         correspondent_name='Correspondent Name',
         principal_name='Principal Name',

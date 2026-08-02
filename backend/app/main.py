@@ -33,12 +33,14 @@ def auto_seed():
         s = db.query(SchoolSettings).first()
         if not s:
             db.add(SchoolSettings(
-                school_name='Sri Thayagam Matriculation School',
+                school_name='Thayagam',
                 address='Tamil Nadu', phone='9876543210',
                 correspondent_name='Correspondent Name',
                 principal_name='Principal Name',
                 current_academic_year='2024-2025'
             ))
+        else:
+            s.school_name = 'Thayagam'
 
         default_classes = ["LKG", "UKG"] + [f"Class {i}" for i in range(1, 13)]
         for c_name in default_classes:

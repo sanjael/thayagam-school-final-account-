@@ -99,7 +99,7 @@ export default function Layout({ children }) {
       .then(setSettings)
       .catch(() => {
         setSettings({
-          school_name: 'Sri Thayagam Matriculation School',
+          school_name: 'Thayagam',
           current_academic_year: '2024-2025'
         });
       });
@@ -256,7 +256,7 @@ export default function Layout({ children }) {
                 {roleLabels[user?.role] || 'Portal'}
               </span>
               <h2 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight truncate max-w-[180px]">
-                {settings?.school_name || 'Sri Thayagam School'}
+                {settings?.school_name || 'Thayagam'}
               </h2>
             </div>
           </div>

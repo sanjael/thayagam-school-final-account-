@@ -15,7 +15,7 @@ const translations = {
     logout: "Log Out",
     
     // Login
-    portalTitle: "Sri Thayagam Matriculation School",
+    portalTitle: "Thayagam",
     portalSubtitle: "Administrative Fee Management Portal",
     username: "Username",
     password: "Password",
