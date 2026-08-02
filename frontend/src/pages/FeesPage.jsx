@@ -158,9 +158,6 @@ export default function FeesPage() {
           </div>
           {user?.role === 'admin' && (
             <div className="flex flex-wrap gap-2">
-              <button onClick={() => alert("Bulk fee increased by 5% successfully!")} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 sm:px-4 py-2 rounded-xl sm:rounded-2xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
-                 Bulk Increase 5%
-              </button>
               <button onClick={() => alert("Fee structures copied to next year!")} className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 sm:px-5 py-2 rounded-xl sm:rounded-2xl text-xs font-bold transition shadow-lg shadow-amber-500/20 flex items-center gap-1.5">
                  Copy Previous Year
               </button>
