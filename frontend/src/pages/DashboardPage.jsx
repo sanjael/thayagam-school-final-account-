@@ -384,7 +384,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
               <div>
                 <h2 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">🏫 School Classes</h2>
-                <p className="text-xs text-slate-400 mt-0.5">Select a class to view its sections and details.</p>
+                <p className="text-xs text-slate-400 mt-0.5">Select a class to view details.</p>
               </div>
               <Link to="/classes" className="text-[10px] text-amber-500 font-bold hover:underline bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded-lg">
                 Manage Classes →
@@ -417,9 +417,7 @@ export default function DashboardPage() {
                   <span className="text-xs font-bold text-slate-800 dark:text-slate-200 text-center">
                     {className}
                   </span>
-                  <span className="text-[9px] text-slate-400 mt-0.5 uppercase font-semibold">
-                    {classes.filter(c => c.name === className).length} Sec.
-                  </span>
+
                 </Link>
               ))}
             </div>

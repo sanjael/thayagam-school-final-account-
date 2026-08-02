@@ -135,7 +135,7 @@ export default function ClassesPage() {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Classes & Sections</h1>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Classes</h1>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Manage school grades, capacity, and assignments</p>
           </div>
           {user?.role === 'admin' && (
@@ -167,7 +167,7 @@ export default function ClassesPage() {
           <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-3 sm:gap-4 hover:border-emerald-200 dark:hover:border-emerald-800 transition-colors">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">✨</div>
             <div className="min-w-0">
-              <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5 truncate">Active Sections</p>
+              <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5 truncate">Active Classes</p>
               <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white truncate">{classes.length}</p>
             </div>
           </div>
@@ -186,7 +186,7 @@ export default function ClassesPage() {
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></span>
             <input 
               type="text" 
-              placeholder="Search Class or Section..." 
+              placeholder="Search Class..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl pl-11 pr-4 py-3 text-sm font-medium outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 text-slate-900 dark:text-slate-100 transition"
@@ -220,9 +220,11 @@ export default function ClassesPage() {
                     <div>
                       <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
                         {c.name}
-                        <span className="text-xs font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 px-2 py-0.5 rounded-lg border border-amber-200/50 dark:border-amber-500/30">
-                          {c.section || 'No Section'}
-                        </span>
+                        {c.section && (
+                          <span className="text-xs font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 px-2 py-0.5 rounded-lg border border-amber-200/50 dark:border-amber-500/30">
+                            {c.section}
+                          </span>
+                        )}
                       </h3>
                     </div>
                   </div>
