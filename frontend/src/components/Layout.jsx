@@ -308,21 +308,7 @@ export default function Layout({ children }) {
               <Search size={18} />
             </button>
 
-            {/* Language Switch — Desktop only */}
-            <div className="hidden sm:flex bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-full p-0.5 text-[10px] font-bold">
-              <button
-                onClick={() => setLanguage('en')}
-                className={`px-2 py-0.5 rounded-full transition-all ${language === 'en' ? 'bg-amber-500 text-slate-950' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => setLanguage('ta')}
-                className={`px-2 py-0.5 rounded-full transition-all ${language === 'ta' ? 'bg-amber-500 text-slate-950' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'}`}
-              >
-                தமிழ்
-              </button>
-            </div>
+
 
             {/* Dark Mode Toggle */}
             <button
