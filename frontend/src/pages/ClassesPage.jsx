@@ -68,9 +68,16 @@ export default function ClassesPage() {
         return (a.section || '').localeCompare(b.section || '');
       });
       setClasses(sorted);
+      try { localStorage.setItem('cache_classes', JSON.stringify(sorted)); } catch (e) {}
     }).catch(() => {}); 
   }
-  useEffect(load, []);
+  useEffect(() => {
+    try {
+      const cCls = localStorage.getItem('cache_classes');
+      if (cCls) setClasses(JSON.parse(cCls));
+    } catch (e) {}
+    load(); 
+  }, []);
 
   // Filter & Search Logic
   const filteredClasses = useMemo(() => {

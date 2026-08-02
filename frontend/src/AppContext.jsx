@@ -236,6 +236,16 @@ export function AppProvider({ children }) {
     }
   }, [darkMode]);
 
+  // Keep Render server warm
+  useEffect(() => {
+    const ping = () => {
+      fetch('https://thayagam-school-final-account.onrender.com/docs', { mode: 'no-cors' }).catch(() => {});
+    };
+    ping();
+    const interval = setInterval(ping, 180000); // Every 3 minutes
+    return () => clearInterval(interval);
+  }, []);
+
   const t = (key) => {
     return translations[language][key] || translations['en'][key] || key;
   };

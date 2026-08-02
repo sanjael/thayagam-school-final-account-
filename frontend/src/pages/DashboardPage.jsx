@@ -45,10 +45,23 @@ export default function DashboardPage() {
   const [showQuickStudentForm, setShowQuickStudentForm] = useState(false);
 
   useEffect(() => {
-    api.getSummary().then(setSummary).catch(() => {});
-    api.getClasses().then(setClasses).catch(() => {});
-    api.getTimeAnalytics().then(setTimeData).catch(() => {});
-    api.getRecentPayments(6).then(setRecentPayments).catch(() => {});
+    // 1. Instant load from local cache for 0ms render on reload
+    try {
+      const cSum = localStorage.getItem('cache_summary');
+      const cCls = localStorage.getItem('cache_classes');
+      const cTime = localStorage.getItem('cache_time');
+      const cRec = localStorage.getItem('cache_recent');
+      if (cSum) setSummary(JSON.parse(cSum));
+      if (cCls) setClasses(JSON.parse(cCls));
+      if (cTime) setTimeData(JSON.parse(cTime));
+      if (cRec) setRecentPayments(JSON.parse(cRec));
+    } catch (e) {}
+
+    // 2. Fetch fresh data in background
+    api.getSummary().then(data => { setSummary(data); localStorage.setItem('cache_summary', JSON.stringify(data)); }).catch(() => {});
+    api.getClasses().then(data => { setClasses(data); localStorage.setItem('cache_classes', JSON.stringify(data)); }).catch(() => {});
+    api.getTimeAnalytics().then(data => { setTimeData(data); localStorage.setItem('cache_time', JSON.stringify(data)); }).catch(() => {});
+    api.getRecentPayments(6).then(data => { setRecentPayments(data); localStorage.setItem('cache_recent', JSON.stringify(data)); }).catch(() => {});
   }, []);
 
   useEffect(() => {

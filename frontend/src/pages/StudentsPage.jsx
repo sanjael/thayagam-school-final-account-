@@ -59,17 +59,30 @@ export default function StudentsPage() {
     if (search) params.search = search;
     if (filterClass) params.class_id = filterClass;
     api.getStudents(params).then((data) => {
-      // Mocking status if not available from backend
       const mapped = data.map(s => ({
         ...s,
         status: s.status || 'Active'
       }));
       setStudents(mapped);
-      setCurrentPage(1); // Reset page on new load
+      if (!search && !filterClass) {
+        try { localStorage.setItem('cache_students', JSON.stringify(mapped)); } catch (e) {}
+      }
+      setCurrentPage(1);
     }).catch(() => {});
   }
 
-  useEffect(() => { api.getClasses().then(setClasses).catch(() => {}); }, []);
+  useEffect(() => { 
+    try {
+      const cSt = localStorage.getItem('cache_students');
+      const cCls = localStorage.getItem('cache_classes');
+      if (cSt) setStudents(JSON.parse(cSt));
+      if (cCls) setClasses(JSON.parse(cCls));
+    } catch (e) {}
+    api.getClasses().then(data => {
+      setClasses(data);
+      try { localStorage.setItem('cache_classes', JSON.stringify(data)); } catch (e) {}
+    }).catch(() => {});
+  }, []);
   
   // Debounced search
   useEffect(() => {
