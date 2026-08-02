@@ -94,6 +94,78 @@ export default function ReportsPage() {
     window.open(`https://api.whatsapp.com/send?phone=91${phone.replace(/\D/g,'')}&text=${encodeURIComponent(message)}`, '_blank');
   }
 
+  function handleExportReports() {
+    if (tab === 'pending') {
+      if (filteredPending.length === 0) {
+        alert("No pending fee records to export.");
+        return;
+      }
+      const headers = ["Admission No", "Student Name", "Class", "Term", "Total Fee", "Amount Paid", "Balance", "Phone"];
+      const rows = filteredPending.map(p => [
+        `"${p.admission_no || ''}"`,
+        `"${p.student_name.replace(/"/g, '""')}"`,
+        `"${p.class || ''}"`,
+        `"${p.term || ''}"`,
+        p.total_fee || 0,
+        p.amount_paid || 0,
+        p.balance || 0,
+        `"${p.phone || ''}"`
+      ]);
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Pending_Fees_Report_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else if (tab === 'class') {
+      if (classWise.length === 0) {
+        alert("No class-wise collection data to export.");
+        return;
+      }
+      const headers = ["Class", "Collected Amount", "Remaining Dues", "Transactions"];
+      const rows = classWise.map(c => [
+        `"${c.class_name || ''}"`,
+        c.collected_amount || 0,
+        c.remaining_dues || 0,
+        c.transactions || 0
+      ]);
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Class_Collection_Report_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else if (tab === 'daybook') {
+      const payments = daybook?.payments || [];
+      if (payments.length === 0) {
+        alert("No daily report records to export.");
+        return;
+      }
+      const headers = ["Receipt No", "Student Name", "Class", "Term", "Amount Paid", "Payment Mode", "Date"];
+      const rows = payments.map(p => [
+        `"${p.receipt_no || ''}"`,
+        `"${p.student_name || ''}"`,
+        `"${p.class_name || ''}"`,
+        `"${p.term || ''}"`,
+        p.amount_paid || 0,
+        `"${p.payment_mode || ''}"`,
+        `"${p.payment_date || ''}"`
+      ]);
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Daily_Report_${daybook?.date || new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+
   function handlePrint() {
     window.print();
   }
@@ -213,8 +285,8 @@ export default function ReportsPage() {
                 <option>Custom Range</option>
               </select>
               
-              <button onClick={() => alert('Export feature will be available in the next update!')} className="p-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-white hover:bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                <Download size={18} />
+              <button onClick={handleExportReports} title="Export CSV Report" className="px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-white hover:bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition flex items-center gap-1.5 font-bold text-xs shadow-sm">
+                <Download size={16} /> Export CSV
               </button>
             </div>
           </div>
