@@ -621,8 +621,9 @@ export default function PaymentsPage() {
                             <div className="border-t border-slate-100 dark:border-slate-700 p-2 bg-slate-50 dark:bg-slate-900/50">
                               <button onClick={() => {
                                 if (!p.phone) { alert('No phone number found for this student. Please update their profile.'); return; }
-                                const msg = `Dear Parent 👨‍👩‍👧,\nGreetings from *Thaayagam School* 🏫!\n\nWe have successfully received the fee payment for your ward, *${p.student_name}*.\n\n🧾 *Receipt No:* ${p.receipt_no}\n💰 *Amount Paid:* ₹${p.amount_paid}\n📅 *Date:* ${p.payment_date}\n\nThank you for your prompt payment! ✨`;
-                                window.open(`https://api.whatsapp.com/send?phone=91${p.phone.replace(/\\D/g,'')}&text=${encodeURIComponent(msg)}`, '_blank');
+                                const modeLabel = p.payment_mode ? p.payment_mode.toUpperCase() : 'CASH';
+                                const msg = `Dear Parent 👨‍👩‍👧,\nGreetings from *Thaayagam School* 🏫!\n\nWe have successfully received the fee payment for your ward. Here are the payment details:\n\n👤 *Student Name:* ${p.student_name}\n🆔 *Admission No:* ${p.admission_no || '-'}\n🏫 *Class & Term:* ${p.class_name || ''} (${p.term})\n\n🧾 *Receipt No:* ${p.receipt_no || '-'}\n💰 *Amount Paid:* ₹${Number(p.amount_paid).toLocaleString('en-IN')}\n💳 *Payment Mode:* ${modeLabel}\n📅 *Payment Date:* ${p.payment_date}\n\nThank you for your prompt payment! ✨\n— *Thaayagam School Management*`;
+                                window.open(`https://api.whatsapp.com/send?phone=91${p.phone.replace(/\D/g,'')}&text=${encodeURIComponent(msg)}`, '_blank');
                               }} className="w-full px-4 py-2.5 text-xs font-bold text-emerald-600 hover:bg-emerald-100 rounded-xl flex items-center gap-2 transition">
                                 <MessageCircle size={16} /> WhatsApp Receipt
                               </button>
