@@ -72,7 +72,7 @@ def get_backup_pdf(type: str = "daily", date: str = "", db: Session = Depends(ge
     elements = []
     styles = getSampleStyleSheet()
     
-    title_text = "Thayagam Academy - Detailed Backup Report"
+    title_text = "Thaayagam School - Detailed Backup Report"
     if type == "monthly":
         title_text += " (Monthly)"
     elif type == "custom":

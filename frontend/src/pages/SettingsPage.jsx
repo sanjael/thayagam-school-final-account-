@@ -222,34 +222,136 @@ export default function SettingsPage() {
     setTimeout(() => setToast(''), 3000);
   }
 
+  async function generatePdfBackup(type, customDt) {
+    try {
+      const [studentsData, summaryData] = await Promise.all([
+        api.getStudents(),
+        api.getSummary()
+      ]);
+
+      const dateStr = type === 'custom' && customDt ? customDt : new Date().toLocaleDateString('en-IN');
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        alert("Please allow popup windows to download the PDF Backup.");
+        return;
+      }
+
+      const totalStudents = studentsData.length;
+      const totalCollected = summaryData?.total_collected || 0;
+      const totalPending = summaryData?.total_balance || 0;
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>System Data Backup - Thaayagam School</title>
+            <style>
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 25px; color: #1e293b; }
+              .header { text-align: center; border-bottom: 3px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px; }
+              .header h1 { margin: 0; font-size: 26px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px; }
+              .header p { margin: 5px 0 0 0; font-size: 13px; color: #64748b; font-weight: bold; }
+              .meta-box { display: flex; justify-content: space-between; background: #f8fafc; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 20px; font-size: 12px; }
+              .meta-item { display: flex; flex-direction: column; }
+              .meta-label { color: #64748b; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+              .meta-val { color: #0f172a; font-weight: bold; font-size: 13px; margin-top: 2px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+              th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; font-size: 11px; }
+              th { background-color: #f59e0b; color: #000; font-weight: bold; text-transform: uppercase; font-size: 10px; }
+              tr:nth-child(even) { background-color: #f8fafc; }
+              .footer { margin-top: 30px; text-align: right; font-size: 11px; color: #94a3b8; font-weight: bold; }
+              @page { size: A4; margin: 12mm; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>THAAYAGAM SCHOOL</h1>
+              <p>SYSTEM DATA BACKUP REPORT (${type.toUpperCase()})</p>
+            </div>
+
+            <div class="meta-box">
+              <div class="meta-item">
+                <span class="meta-label">Backup Date</span>
+                <span class="meta-val">${dateStr}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Total Students</span>
+                <span class="meta-val">${totalStudents}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Total Collection</span>
+                <span class="meta-val" style="color: #16a34a;">₹${Number(totalCollected).toLocaleString('en-IN')}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Total Pending Dues</span>
+                <span class="meta-val" style="color: #dc2626;">₹${Number(totalPending).toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 35px; text-align: center;">#</th>
+                  <th>Adm No</th>
+                  <th>Student Name</th>
+                  <th>Class</th>
+                  <th>Phone</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${studentsData.map((s, i) => `
+                  <tr>
+                    <td style="text-align: center;">${i + 1}</td>
+                    <td><b>${s.admission_no || '-'}</b></td>
+                    <td><b>${s.name}</b></td>
+                    <td>${s.class_name || '-'}</td>
+                    <td>${s.phone || '-'}</td>
+                    <td>${s.status || 'Active'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+
+            <div class="footer">
+              Generated on ${new Date().toLocaleString('en-IN')} | Thaayagam School System Backup
+            </div>
+
+            <script>
+              window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 500); }
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    } catch (err) {
+      console.error("Backup failed", err);
+      alert("Failed to generate PDF Backup: " + err.message);
+    }
+  }
+
   function triggerBackup() {
     setShowBackupModal(false);
     setIsBackingUp(true);
-    setTimeout(() => {
-      let dateString = new Date().toLocaleString();
-      if (backupOption === 'custom' && customDate) {
-         dateString = `Custom Backup (${customDate})`;
-      } else if (backupOption === 'monthly') {
-         dateString = `Monthly Backup (${new Date().toLocaleString('default', { month: 'long', year: 'numeric' })})`;
-      } else {
-         dateString = `Daily Backup (${new Date().toLocaleDateString()})`;
-      }
-      
-      const savedExtras = JSON.parse(localStorage.getItem('thayagam_extra_settings')) || {};
-      const extras = { ...DEFAULT_EXTRAS, ...savedExtras };
-      extras.last_backup = dateString;
-      localStorage.setItem('thayagam_extra_settings', JSON.stringify(extras));
-      
-      setForm(p => ({ ...p, last_backup: dateString }));
-      setOriginalForm(p => ({ ...p, last_backup: dateString }));
-      setIsBackingUp(false);
-      showToast(' Backup Generated Successfully!');
-      
-      // Download PDF Backup
-      const token = localStorage.getItem('thayagam_token');
-      const url = `${BASE_URL}/settings/backup/pdf?type=${backupOption}&date=${customDate}&token=${token}`;
-      window.open(url, '_blank');
-    }, 1500);
+    let dateString = new Date().toLocaleString();
+    if (backupOption === 'custom' && customDate) {
+       dateString = `Custom Backup (${customDate})`;
+    } else if (backupOption === 'monthly') {
+       dateString = `Monthly Backup (${new Date().toLocaleString('default', { month: 'long', year: 'numeric' })})`;
+    } else {
+       dateString = `Daily Backup (${new Date().toLocaleDateString()})`;
+    }
+    
+    const savedExtras = JSON.parse(localStorage.getItem('thayagam_extra_settings')) || {};
+    const extras = { ...DEFAULT_EXTRAS, ...savedExtras };
+    extras.last_backup = dateString;
+    localStorage.setItem('thayagam_extra_settings', JSON.stringify(extras));
+    
+    setForm(p => ({ ...p, last_backup: dateString }));
+    setOriginalForm(p => ({ ...p, last_backup: dateString }));
+    setIsBackingUp(false);
+    showToast(' Backup Generated Successfully!');
+
+    generatePdfBackup(backupOption, customDate);
   }
 
   return (
