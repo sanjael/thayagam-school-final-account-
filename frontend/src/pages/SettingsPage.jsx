@@ -224,27 +224,27 @@ export default function SettingsPage() {
 
   async function generatePdfBackup(type, customDt) {
     try {
-      const [studentsData, summaryData] = await Promise.all([
-        api.getStudents(),
-        api.getSummary()
-      ]);
+      const todayISO = new Date().toISOString().slice(0, 10);
+      const targetDate = type === 'custom' && customDt ? customDt : todayISO;
+      const displayDate = new Date(targetDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
-      const dateStr = type === 'custom' && customDt ? customDt : new Date().toLocaleDateString('en-IN');
+      // Fetch DayBook data for the specific target date
+      const daybookData = await api.getDayBook(targetDate);
+      const paymentsList = daybookData?.transactions || daybookData?.payments || [];
+      const totalCollectedToday = daybookData?.total_collected || 0;
+      const totalCount = paymentsList.length;
+
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
         alert("Please allow popup windows to download the PDF Backup.");
         return;
       }
 
-      const totalStudents = studentsData.length;
-      const totalCollected = summaryData?.total_collected || 0;
-      const totalPending = summaryData?.total_balance || 0;
-
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
           <head>
-            <title>System Data Backup - Thaayagam School</title>
+            <title>Daily Backup (${displayDate}) - Thaayagam School</title>
             <style>
               body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 25px; color: #1e293b; }
               .header { text-align: center; border-bottom: 3px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px; }
@@ -258,6 +258,7 @@ export default function SettingsPage() {
               th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; font-size: 11px; }
               th { background-color: #f59e0b; color: #000; font-weight: bold; text-transform: uppercase; font-size: 10px; }
               tr:nth-child(even) { background-color: #f8fafc; }
+              .no-records { text-align: center; color: #64748b; font-style: italic; padding: 20px; }
               .footer { margin-top: 30px; text-align: right; font-size: 11px; color: #94a3b8; font-weight: bold; }
               @page { size: A4; margin: 12mm; }
             </style>
@@ -265,25 +266,21 @@ export default function SettingsPage() {
           <body>
             <div class="header">
               <h1>THAAYAGAM SCHOOL</h1>
-              <p>SYSTEM DATA BACKUP REPORT (${type.toUpperCase()})</p>
+              <p>DAILY SYSTEM BACKUP REPORT (${displayDate})</p>
             </div>
 
             <div class="meta-box">
               <div class="meta-item">
                 <span class="meta-label">Backup Date</span>
-                <span class="meta-val">${dateStr}</span>
+                <span class="meta-val">${displayDate}</span>
               </div>
               <div class="meta-item">
-                <span class="meta-label">Total Students</span>
-                <span class="meta-val">${totalStudents}</span>
+                <span class="meta-label">Total Transactions</span>
+                <span class="meta-val">${totalCount}</span>
               </div>
               <div class="meta-item">
-                <span class="meta-label">Total Collection</span>
-                <span class="meta-val" style="color: #16a34a;">₹${Number(totalCollected).toLocaleString('en-IN')}</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-label">Total Pending Dues</span>
-                <span class="meta-val" style="color: #dc2626;">₹${Number(totalPending).toLocaleString('en-IN')}</span>
+                <span class="meta-label">Total Collection Today</span>
+                <span class="meta-val" style="color: #16a34a;">₹${Number(totalCollectedToday).toLocaleString('en-IN')}</span>
               </div>
             </div>
 
@@ -291,29 +288,35 @@ export default function SettingsPage() {
               <thead>
                 <tr>
                   <th style="width: 35px; text-align: center;">#</th>
-                  <th>Adm No</th>
+                  <th>Time</th>
+                  <th>Receipt No</th>
                   <th>Student Name</th>
                   <th>Class</th>
-                  <th>Phone</th>
-                  <th>Status</th>
+                  <th>Payment Mode</th>
+                  <th style="text-align: right;">Amount Paid</th>
                 </tr>
               </thead>
               <tbody>
-                ${studentsData.map((s, i) => `
+                ${paymentsList.length > 0 ? paymentsList.map((p, i) => `
                   <tr>
                     <td style="text-align: center;">${i + 1}</td>
-                    <td><b>${s.admission_no || '-'}</b></td>
-                    <td><b>${s.name}</b></td>
-                    <td>${s.class_name || '-'}</td>
-                    <td>${s.phone || '-'}</td>
-                    <td>${s.status || 'Active'}</td>
+                    <td>${p.time || '—'}</td>
+                    <td><b>${p.receipt_no || '—'}</b></td>
+                    <td><b>${p.student_name || '—'}</b></td>
+                    <td>${p.class_name || p.class || '—'}</td>
+                    <td style="text-transform: capitalize;">${p.mode || p.payment_mode || '—'}</td>
+                    <td style="text-align: right; color: #16a34a; font-weight: bold;">₹${Number(p.amount ?? p.amount_paid ?? 0).toLocaleString('en-IN')}</td>
                   </tr>
-                `).join('')}
+                `).join('') : `
+                  <tr>
+                    <td colspan="7" class="no-records">No fee collection transactions recorded on ${displayDate}.</td>
+                  </tr>
+                `}
               </tbody>
             </table>
 
             <div class="footer">
-              Generated on ${new Date().toLocaleString('en-IN')} | Thaayagam School System Backup
+              Generated on ${new Date().toLocaleString('en-IN')} | Thaayagam School Daily Backup
             </div>
 
             <script>
@@ -325,7 +328,7 @@ export default function SettingsPage() {
       printWindow.document.close();
     } catch (err) {
       console.error("Backup failed", err);
-      alert("Failed to generate PDF Backup: " + err.message);
+      alert("Failed to generate Daily Backup PDF: " + err.message);
     }
   }
 
