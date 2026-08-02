@@ -208,6 +208,14 @@ export default function ReportsPage() {
               </tr>
             `).join('')}
           </tbody>
+          <tfoot>
+            <tr style="font-weight: bold; border-top: 2px solid #cbd5e1; background-color: #f8fafc;">
+              <td colspan="5" style="padding: 9px 12px; font-size: 12px; text-align: left;">Total</td>
+              <td style="padding: 9px 12px; font-size: 12px; font-weight: bold;">₹${filteredPending.reduce((sum, p) => sum + (p.total_fee || 0), 0).toLocaleString('en-IN')}</td>
+              <td style="color: #16a34a; padding: 9px 12px; font-size: 12px; font-weight: bold;">₹${filteredPending.reduce((sum, p) => sum + (p.amount_paid || 0), 0).toLocaleString('en-IN')}</td>
+              <td style="color: #dc2626; padding: 9px 12px; font-size: 12px; font-weight: bold;">₹${filteredPending.reduce((sum, p) => sum + (p.balance || 0), 0).toLocaleString('en-IN')}</td>
+            </tr>
+          </tfoot>
         </table>
       `;
     } else if (tab === 'classwise' || tab === 'class') {
@@ -337,12 +345,20 @@ export default function ReportsPage() {
                 <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;"><b>${p.student_name}</b></td>
                 <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${p.class || ''}</td>
                 <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${p.term || ''}</td>
-                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">₹${Number(p.total_fee || 0).toLocaleString('en-IN')}</td>
-                <td style="color: #16a34a; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">₹${Number(p.amount_paid || 0).toLocaleString('en-IN')}</td>
-                <td style="color: #dc2626; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">₹${Number(p.balance || 0).toLocaleString('en-IN')}</td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">₹${Number(p.total_fee || 0).toLocaleString('en-IN')}</td>
+                <td style="color: #16a34a; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">₹${Number(p.amount_paid || 0).toLocaleString('en-IN')}</td>
+                <td style="color: #dc2626; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">₹${Number(p.balance || 0).toLocaleString('en-IN')}</td>
               </tr>
             `).join('')}
           </tbody>
+          <tfoot>
+            <tr style="font-weight: bold; border-top: 2px solid #cbd5e1; background-color: #f8fafc;">
+              <td colspan="5" style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: left;">Total</td>
+              <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredPending.reduce((sum, p) => sum + (p.total_fee || 0), 0).toLocaleString('en-IN')}</td>
+              <td style="color: #16a34a; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredPending.reduce((sum, p) => sum + (p.amount_paid || 0), 0).toLocaleString('en-IN')}</td>
+              <td style="color: #dc2626; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredPending.reduce((sum, p) => sum + (p.balance || 0), 0).toLocaleString('en-IN')}</td>
+            </tr>
+          </tfoot>
         </table>
       `;
     } else if (tab === 'classwise' || tab === 'class') {
@@ -646,6 +662,15 @@ export default function ReportsPage() {
                         </tr>
                       ))}
                     </tbody>
+                    <tfoot className="bg-slate-50 dark:bg-slate-900 border-t-2 border-slate-200 dark:border-slate-700 font-extrabold text-slate-900 dark:text-white">
+                      <tr>
+                        <td className="px-6 py-4" colSpan={3}>Total</td>
+                        <td className="px-6 py-4 text-right font-black">{fmt(filteredPending.reduce((sum, p) => sum + (p.total_fee || 0), 0))}</td>
+                        <td className="px-6 py-4 text-right font-black text-emerald-600">{fmt(filteredPending.reduce((sum, p) => sum + (p.amount_paid || 0), 0))}</td>
+                        <td className="px-6 py-4 text-right font-black text-rose-600">{fmt(filteredPending.reduce((sum, p) => sum + (p.balance || 0), 0))}</td>
+                        <td className="px-6 py-4 print:hidden"></td>
+                      </tr>
+                    </tfoot>
                   </table>
                 )}
               </div>
