@@ -216,6 +216,74 @@ export default function StudentsPage() {
     printWindow.document.close();
   };
 
+  const handlePrintStudentList = () => {
+    const listToPrint = filteredStudents.length > 0 ? filteredStudents : students;
+    if (listToPrint.length === 0) {
+      alert("No students to print.");
+      return;
+    }
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Student List - Thaayagam School</title>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #1e293b; }
+            .header { text-align: center; border-bottom: 2px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px; }
+            .header h1 { margin: 0; font-size: 24px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px; }
+            .header p { margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: bold; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th, td { border: 1px solid #cbd5e1; padding: 9px 12px; text-align: left; font-size: 12px; }
+            th { background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+            tr:nth-child(even) { background-color: #f8fafc; }
+            .status-active { color: #16a34a; font-weight: bold; }
+            .status-inactive { color: #dc2626; font-weight: bold; }
+            .footer { margin-top: 25px; text-align: right; font-size: 11px; color: #94a3b8; font-weight: bold; }
+            @page { size: A4; margin: 12mm; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>THAAYAGAM SCHOOL</h1>
+            <p>STUDENT DIRECTORY REPORT</p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 40px; text-align: center;">#</th>
+                <th>Adm. No</th>
+                <th>Student Name</th>
+                <th>Class</th>
+                <th>Phone Number</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${listToPrint.map((s, i) => `
+                <tr>
+                  <td style="text-align: center;">${i + 1}</td>
+                  <td><b>${s.admission_no}</b></td>
+                  <td><b>${s.name}</b></td>
+                  <td>${s.class_name || 'N/A'}</td>
+                  <td>${s.phone || '—'}</td>
+                  <td class="${s.status === 'Active' ? 'status-active' : 'status-inactive'}">${s.status || 'Active'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="footer">
+            Generated on ${new Date().toLocaleDateString('en-IN')} | Total Students: ${listToPrint.length}
+          </div>
+          <script>
+            window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 500); }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   function exportToCSV() {
     if (students.length === 0) {
       alert("No students to export.");
@@ -293,7 +361,7 @@ export default function StudentsPage() {
               <p className="text-xs text-slate-500 mt-0.5 print:hidden">Manage and view student information</p>
             </div>
             <div className="flex flex-wrap gap-2 sm:gap-3 print:hidden">
-              <button onClick={() => window.print()} className="rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 transition flex items-center gap-1.5 shadow-sm">
+              <button onClick={handlePrintStudentList} className="rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 transition flex items-center gap-1.5 shadow-sm">
                  <FileText size={14} /> <span className="hidden sm:inline">Export</span> PDF
               </button>
               <button onClick={exportToCSV} className="rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 transition flex items-center gap-1.5 shadow-sm">
