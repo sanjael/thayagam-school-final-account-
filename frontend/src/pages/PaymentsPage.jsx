@@ -62,10 +62,26 @@ export default function PaymentsPage() {
   }, [selectedStudentForPayment]);
 
   function loadPayments() {
-    api.getPayments().then(setPayments).catch(() => {});
-    api.getSummary().then(setSummary).catch(() => {});
+    api.getPayments().then(data => {
+      setPayments(data);
+      try { localStorage.setItem('cache_payments', JSON.stringify(data)); } catch (e) {}
+    }).catch(() => {});
+
+    api.getSummary().then(data => {
+      setSummary(data);
+      try { localStorage.setItem('cache_summary', JSON.stringify(data)); } catch (e) {}
+    }).catch(() => {});
   }
-  useEffect(loadPayments, []);
+
+  useEffect(() => {
+    try {
+      const cPay = localStorage.getItem('cache_payments');
+      const cSum = localStorage.getItem('cache_summary');
+      if (cPay) setPayments(JSON.parse(cPay));
+      if (cSum) setSummary(JSON.parse(cSum));
+    } catch (e) {}
+    loadPayments();
+  }, []);
 
   // Filtered Payments for UI
   const filteredPayments = useMemo(() => {

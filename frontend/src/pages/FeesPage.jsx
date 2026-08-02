@@ -6,7 +6,7 @@ import { useAuth } from '../AuthContext';
 
 const TERMS = ['Term 1', 'Term 2', 'Term 3'];
 const FEE_TYPES = ['Tuition Fee', 'Admission Fee', 'Exam Fee', 'Transport Fee', 'Books Fee', 'Uniform Fee', 'Hostel Fee', 'Other'];
-const EMPTY = { class_id: '', term: 'Term 1', fee_type: 'Tuition Fee', custom_fee: '', amount: '', academic_year: '2026-2027' };
+const EMPTY = { class_id: '', term: 'Term 1', fee_type: 'Tuition Fee', custom_fee: '', amount: '', academic_year: '2024-2025' };
 
 export default function FeesPage() {
   const { t } = useApp();
@@ -30,16 +30,33 @@ export default function FeesPage() {
   const [expandedClasses, setExpandedClasses] = useState({});
 
   function load() {
-    api.getFeeStructure().then(setStructures).catch(() => {});
+    api.getFeeStructure().then(data => {
+      setStructures(data);
+      try { localStorage.setItem('cache_fee_structures', JSON.stringify(data)); } catch (e) {}
+    }).catch(() => {});
   }
 
   useEffect(() => { 
-    api.getClasses().then(setClasses).catch(() => {}); 
+    // 1. Instant load from local cache (0ms render)
+    try {
+      const cCls = localStorage.getItem('cache_classes');
+      const cSt = localStorage.getItem('cache_fee_structures');
+      if (cCls) setClasses(JSON.parse(cCls));
+      if (cSt) setStructures(JSON.parse(cSt));
+    } catch (e) {}
+
+    // 2. Fresh background fetch
+    api.getClasses().then(data => {
+      setClasses(data);
+      try { localStorage.setItem('cache_classes', JSON.stringify(data)); } catch (e) {}
+    }).catch(() => {});
+
     api.getSettings().then(s => {
       if (s.current_academic_year) {
         setForm(p => ({ ...p, academic_year: s.current_academic_year }));
       }
     }).catch(() => {});
+
     load();
   }, []);
 
