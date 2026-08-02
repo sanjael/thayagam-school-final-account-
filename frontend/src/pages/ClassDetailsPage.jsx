@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
-import { api } from '../api';
+import { api, BASE_URL } from '../api';
 import { useAuth } from '../AuthContext';
 import { useApp } from '../AppContext';
 
@@ -13,16 +13,21 @@ export default function ClassDetailsPage() {
   const [cls, setCls] = useState(null);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [logoUrl, setLogoUrl] = useState(window.location.origin + '/logo.jpg');
 
   useEffect(() => {
     setLoading(true);
     Promise.all([
       api.getClass(id),
-      api.getClassFees(id)
+      api.getClassFees(id),
+      api.getSettings().catch(() => null)
     ])
-      .then(([classData, feesData]) => {
+      .then(([classData, feesData, settingsData]) => {
         setCls(classData);
         setStudents(feesData);
+        if (settingsData?.logo_path) {
+          setLogoUrl(settingsData.logo_path.startsWith('data:image') ? settingsData.logo_path : `${BASE_URL.replace(/\/+$/, '')}/${settingsData.logo_path}`);
+        }
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
@@ -72,13 +77,16 @@ export default function ClassDetailsPage() {
     const container = document.createElement('div');
     container.innerHTML = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #1e293b;">
-        <div style="text-align: center; border-bottom: 2px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px;">
-          <h1 style="margin: 0; font-size: 24px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px;">THAAYAGAM SCHOOL</h1>
-          <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: bold;">${title.toUpperCase()}</p>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; border-bottom: 2px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px;">
+          <img src="${logoUrl}" style="height: 60px; width: 60px; object-fit: contain; display: inline-block; vertical-align: middle;" />
+          <div style="text-align: left; display: inline-block; vertical-align: middle;">
+            <h1 style="margin: 0; font-size: 24px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px; line-height: 1.2;">THAAYAGAM SCHOOL</h1>
+            <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: bold;">${title.toUpperCase()}</p>
+          </div>
         </div>
         ${contentHtml}
         <div style="margin-top: 25px; text-align: right; font-size: 11px; color: #94a3b8; font-weight: bold;">
-          Generated on ${new Date().toLocaleDateString('en-IN')} | Thaayagam School Class Reports
+          Generated on ${new Date().toLocaleDateString('en-IN')} at ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} | Thaayagam School Class Reports
         </div>
       </div>
     `;

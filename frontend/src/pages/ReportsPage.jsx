@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
-import { api } from '../api';
+import { api, BASE_URL } from '../api';
 import { useApp } from '../AppContext';
 import { 
   BarChart, Bar, PieChart, Pie, Cell,
@@ -24,6 +24,7 @@ export default function ReportsPage() {
   const [classWise, setClassWise] = useState([]);
   const [daybook, setDaybook] = useState(null);
   const [collectionTrend, setCollectionTrend] = useState([]);
+  const [logoUrl, setLogoUrl] = useState(window.location.origin + '/logo.jpg');
   
   // Filters
   const [dateFilter, setDateFilter] = useState('This Month');
@@ -37,6 +38,14 @@ export default function ReportsPage() {
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [selectedYear, setSelectedYear] = useState('2024 - 2025');
   const [isCustomYear, setIsCustomYear] = useState(false);
+
+  useEffect(() => {
+    api.getSettings().then(s => {
+      if (s?.logo_path) {
+        setLogoUrl(s.logo_path.startsWith('data:image') ? s.logo_path : `${BASE_URL.replace(/\/+$/, '')}/${s.logo_path}`);
+      }
+    }).catch(console.error);
+  }, []);
 
   // Load Initial Data
   useEffect(() => {
@@ -284,9 +293,6 @@ export default function ReportsPage() {
           <title>${title} - Thaayagam School</title>
           <style>
             body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #1e293b; }
-            .header { text-align: center; border-bottom: 2px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px; }
-            .header h1 { margin: 0; font-size: 24px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px; }
-            .header p { margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: bold; }
             table { width: 100%; border-collapse: collapse; margin-top: 10px; }
             th, td { border: 1px solid #cbd5e1; padding: 9px 12px; text-align: left; font-size: 12px; }
             th { background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px; }
@@ -296,13 +302,16 @@ export default function ReportsPage() {
           </style>
         </head>
         <body>
-          <div class="header">
-            <h1>THAAYAGAM SCHOOL</h1>
-            <p>${title.toUpperCase()}</p>
+          <div class="header" style="display: flex; align-items: center; justify-content: center; gap: 15px; border-bottom: 2px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px;">
+            <img src="${logoUrl}" style="height: 60px; width: 60px; object-fit: contain; display: inline-block; vertical-align: middle;" />
+            <div style="text-align: left; display: inline-block; vertical-align: middle;">
+              <h1 style="margin: 0; font-size: 24px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px; line-height: 1.2;">THAAYAGAM SCHOOL</h1>
+              <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: bold;">${title.toUpperCase()}</p>
+            </div>
           </div>
           ${contentHtml}
           <div class="footer">
-            Generated on ${new Date().toLocaleDateString('en-IN')} | Thaayagam School Financial Reports
+            Generated on ${new Date().toLocaleDateString('en-IN')} at ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} | Thaayagam School Financial Reports
           </div>
           <script>
             window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 500); }
@@ -423,13 +432,16 @@ export default function ReportsPage() {
     const container = document.createElement('div');
     container.innerHTML = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #1e293b;">
-        <div style="text-align: center; border-bottom: 2px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px;">
-          <h1 style="margin: 0; font-size: 24px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px;">THAAYAGAM SCHOOL</h1>
-          <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: bold;">${title.toUpperCase()}</p>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; border-bottom: 2px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px;">
+          <img src="${logoUrl}" style="height: 60px; width: 60px; object-fit: contain; display: inline-block; vertical-align: middle;" />
+          <div style="text-align: left; display: inline-block; vertical-align: middle;">
+            <h1 style="margin: 0; font-size: 24px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px; line-height: 1.2;">THAAYAGAM SCHOOL</h1>
+            <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: bold;">${title.toUpperCase()}</p>
+          </div>
         </div>
         ${contentHtml}
         <div style="margin-top: 25px; text-align: right; font-size: 11px; color: #94a3b8; font-weight: bold;">
-          Generated on ${new Date().toLocaleDateString('en-IN')} | Thaayagam School Financial Reports
+          Generated on ${new Date().toLocaleDateString('en-IN')} at ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} | Thaayagam School Financial Reports
         </div>
       </div>
     `;
