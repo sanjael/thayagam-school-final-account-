@@ -79,8 +79,12 @@ def get_fee_status(
     }
 
 
-@router.post("/", response_model=schemas.FeePaymentOut, dependencies=[Depends(require_role(["admin", "accountant"]))])
-def create_payment(payload: schemas.FeePaymentCreate, db: Session = Depends(get_db)):
+@router.post("/", response_model=schemas.FeePaymentOut)
+def create_payment(
+    payload: schemas.FeePaymentCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_role(["admin", "accountant"]))
+):
     student = db.query(models.Student).filter(models.Student.id == payload.student_id).first()
     if not student:
         raise HTTPException(404, "Student not found")
@@ -121,7 +125,7 @@ def create_payment(payload: schemas.FeePaymentCreate, db: Session = Depends(get_
         fine          = fine_amt,
         discount      = discount_amt,
         reference_no  = payload.reference_no,
-        collected_by  = None,
+        collected_by  = current_user.username if current_user else None,
         notes         = payload.notes,
     )
     db.add(payment)
@@ -129,13 +133,15 @@ def create_payment(payload: schemas.FeePaymentCreate, db: Session = Depends(get_
 
     receipt = models.Receipt(receipt_no=_build_receipt_no(db), payment_id=payment.id)
     db.add(receipt)
+
     # Audit log
-    audit = models.AuditLog(
-        user_id=1,  # We need the current user ID. Wait, the endpoint doesn't have current_user.
-        action="Record Payment",
-        details=f"Payment of ₹{payload.amount_paid} recorded for Student ID: {student.admission_no} ({payload.term})"
-    )
-    db.add(audit)
+    if current_user:
+        audit = models.AuditLog(
+            user_id=current_user.id,
+            action="Record Payment",
+            details=f"Payment of ₹{payload.amount_paid} recorded for Student: {student.name} ({student.admission_no}) for {payload.term}"
+        )
+        db.add(audit)
     
     db.commit()
     db.refresh(payment)
