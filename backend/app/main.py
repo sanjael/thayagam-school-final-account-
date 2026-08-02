@@ -88,6 +88,15 @@ async def validation_exception_handler(request, exc):
         f.write("BODY: " + body.decode('utf-8', 'ignore') + "\n")
     return JSONResponse(status_code=422, content={"detail": err})
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    print("UNHANDLED SERVER ERROR:", exc)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc)},
+        headers={"Access-Control-Allow-Origin": "*"}
+    )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

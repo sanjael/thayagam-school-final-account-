@@ -125,7 +125,7 @@ def create_payment(
         fine          = fine_amt,
         discount      = discount_amt,
         reference_no  = payload.reference_no,
-        collected_by  = current_user.username if current_user else None,
+        collected_by  = current_user.id if current_user else None,
         notes         = payload.notes,
     )
     db.add(payment)
