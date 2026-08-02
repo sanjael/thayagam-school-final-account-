@@ -90,7 +90,7 @@ export default function ReportsPage() {
       alert("No phone number found for this student. Please update their profile.");
       return;
     }
-    const message = `Dear Parent 👨‍👩‍👧,\nGreetings from *Sri Thayagam Matriculation School* 🏫!\n\nThis is a gentle reminder regarding the pending fee balance for your ward, *${studentName}*.\n\n💰 *Pending Amount:* ${fmt(balance)}\n\nKindly clear the dues at the earliest to ensure uninterrupted services for your child's education 📚.\n\nIf you have already paid, please ignore this message.\nThank you for your cooperation! ✨`;
+    const message = `Dear Parent 👨‍👩‍👧,\nGreetings from *Thaayagam School* 🏫!\n\nThis is a gentle reminder regarding the pending fee balance for your ward, *${studentName}*.\n\n💰 *Pending Amount:* ${fmt(balance)}\n\nKindly clear the dues at the earliest to ensure uninterrupted services for your child's education 📚.\n\nIf you have already paid, please ignore this message.\nThank you for your cooperation! ✨`;
     window.open(`https://api.whatsapp.com/send?phone=91${phone.replace(/\D/g,'')}&text=${encodeURIComponent(message)}`, '_blank');
   }
 

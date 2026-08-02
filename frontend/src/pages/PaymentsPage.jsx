@@ -546,7 +546,7 @@ export default function PaymentsPage() {
                                   </head>
                                   <body>
                                     <div class="header">
-                                      <h2>SRI THAYAGAM MATRICULATION SCHOOL</h2>
+                                      <h2>THAAYAGAM SCHOOL</h2>
                                       <p>OFFICIAL FEE RECEIPT</p>
                                     </div>
                                     <div class="row"><span>Receipt No:</span> <span>${p.receipt_no}</span></div>
@@ -583,14 +583,14 @@ export default function PaymentsPage() {
                             <div className="border-t border-slate-100 dark:border-slate-700 p-2 bg-slate-50 dark:bg-slate-900/50">
                               <button onClick={() => {
                                 if (!p.phone) { alert('No phone number found for this student. Please update their profile.'); return; }
-                                const msg = `Dear Parent 👨‍👩‍👧,\nGreetings from *Sri Thayagam Matriculation School* 🏫!\n\nWe have successfully received the fee payment for your ward, *${p.student_name}*.\n\n🧾 *Receipt No:* ${p.receipt_no}\n💰 *Amount Paid:* ₹${p.amount_paid}\n📅 *Date:* ${p.payment_date}\n\nThank you for your prompt payment! ✨`;
+                                const msg = `Dear Parent 👨‍👩‍👧,\nGreetings from *Thaayagam School* 🏫!\n\nWe have successfully received the fee payment for your ward, *${p.student_name}*.\n\n🧾 *Receipt No:* ${p.receipt_no}\n💰 *Amount Paid:* ₹${p.amount_paid}\n📅 *Date:* ${p.payment_date}\n\nThank you for your prompt payment! ✨`;
                                 window.open(`https://api.whatsapp.com/send?phone=91${p.phone.replace(/\\D/g,'')}&text=${encodeURIComponent(msg)}`, '_blank');
                               }} className="w-full px-4 py-2.5 text-xs font-bold text-emerald-600 hover:bg-emerald-100 rounded-xl flex items-center gap-2 transition">
                                 <MessageCircle size={16} /> WhatsApp Receipt
                               </button>
                               <button onClick={() => {
-                                const subject = encodeURIComponent(`Fee Receipt - ${p.student_name} - Sri Thayagam Matriculation School`);
-                                const body = encodeURIComponent(`Dear Parent,\n\nWe have successfully received the fee payment for your ward, ${p.student_name}.\n\nReceipt No: ${p.receipt_no}\nAmount Paid: ₹${p.amount_paid}\nDate: ${p.payment_date}\n\nYou can download the PDF receipt using this link: ${window.location.origin}/api/payments/${p.id}/receipt/pdf\n\nThank you for your prompt payment!\nSri Thayagam Matriculation School`);
+                                const subject = encodeURIComponent(`Fee Receipt - ${p.student_name} - Thaayagam School`);
+                                const body = encodeURIComponent(`Dear Parent,\n\nWe have successfully received the fee payment for your ward, ${p.student_name}.\n\nReceipt No: ${p.receipt_no}\nAmount Paid: ₹${p.amount_paid}\nDate: ${p.payment_date}\n\nYou can download the PDF receipt using this link: ${window.location.origin}/api/payments/${p.id}/receipt/pdf\n\nThank you for your prompt payment!\nThaayagam School`);
                                 window.location.href = `mailto:?subject=${subject}&body=${body}`;
                               }} className="w-full px-4 py-2.5 text-xs font-bold text-blue-600 hover:bg-blue-100 rounded-xl flex items-center gap-2 transition mt-1">
                                 <span className="text-base">✉️</span> Email Receipt
