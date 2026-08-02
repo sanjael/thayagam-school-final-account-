@@ -115,11 +115,11 @@ class FeeStructureOut(BaseModel):
 # ── Fee Payment ──────────────────────────────────────────────
 class FeePaymentCreate(BaseModel):
     student_id: int
-    term: Term
+    term: str
     academic_year: str
     amount_paid: float
     payment_date: date
-    payment_mode: PaymentMode = PaymentMode.cash
+    payment_mode: str = "cash"
     fine: Optional[float] = 0.0
     discount: Optional[float] = 0.0
     reference_no: Optional[str] = None
