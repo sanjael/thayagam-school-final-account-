@@ -28,7 +28,6 @@ def auto_seed():
                     role=role, is_active=True
                 ))
             else:
-                u.hashed_password = hash_password('Admin@123')
                 u.role = role
 
         s = db.query(SchoolSettings).first()

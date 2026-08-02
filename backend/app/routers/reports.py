@@ -120,7 +120,6 @@ def get_pending(academic_year: Optional[str] = Query(None), class_id: Optional[i
                     "amount_paid":  float(total_paid),
                     "balance":      float(balance),
                     "phone":        s.phone or "",
-                    "parent_name":  s.parent_name or "",
                 })
     return results
 

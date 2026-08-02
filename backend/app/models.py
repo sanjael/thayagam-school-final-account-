@@ -71,8 +71,6 @@ class Student(Base):
     name         = Column(String(150), nullable=False, index=True)
     class_id     = Column(Integer, ForeignKey("classes.id"), nullable=False)
     gender       = Column(Enum("male", "female", "other", name="gender_type"))
-    dob          = Column(Date)
-    parent_name  = Column(String(150))
     phone        = Column(String(15))
     address      = Column(Text)
     is_active    = Column(Boolean, default=True)

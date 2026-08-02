@@ -35,7 +35,7 @@ export default function ClassDetailsPage() {
     
     // Header row
     const headers = [
-      "Adm. No", "Student Name", "Parent Name", "Phone", "Class", "Section",
+      "Adm. No", "Student Name", "Phone", "Class", "Section",
       "Term 1 Total", "Term 1 Paid", "Term 1 Balance",
       "Term 2 Total", "Term 2 Paid", "Term 2 Balance",
       "Term 3 Total", "Term 3 Paid", "Term 3 Balance",
@@ -46,7 +46,6 @@ export default function ClassDetailsPage() {
       const row = [
         s.admission_no, 
         `"${s.student_name.replace(/"/g, '""')}"`,
-        `"${(s.parent_name || '').replace(/"/g, '""')}"`,
         `"${s.phone || ''}"`,
         `"${cls.name}"`,
         `"${cls.section || ''}"`

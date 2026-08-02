@@ -8,7 +8,7 @@ import { FileText, FileSpreadsheet, Plus, Search, MoreVertical, Edit, Trash2, Ey
 
 const EMPTY = {
   admission_no: '', name: '', class_id: '', gender: '',
-  parent_name: '', phone: '', address: '', status: 'Active'
+  phone: '', address: '', status: 'Active'
 };
 
 export default function StudentsPage() {
@@ -115,7 +115,7 @@ export default function StudentsPage() {
   function openEdit(s) {
     setForm({
       admission_no: s.admission_no, name: s.name, class_id: s.class_id,
-      gender: s.gender || '', parent_name: s.parent_name || '',
+      gender: s.gender || '',
       phone: s.phone || '', address: s.address || '', status: s.status || 'Active'
     });
     setEditId(s.id); setShowForm(true);
@@ -148,8 +148,8 @@ export default function StudentsPage() {
   const handleExportSelected = () => {
     const selectedStudents = students.filter(s => selectedIds.includes(s.id));
     const csvContent = "data:text/csv;charset=utf-8," 
-      + "Adm No,Name,Class,Parent Name,Phone,Status\n"
-      + selectedStudents.map(s => `${s.admission_no},${s.name},${s.class_name},${s.parent_name || ''},${s.phone || ''},${s.status}`).join("\n");
+      + "Adm No,Name,Class,Phone,Status\n"
+      + selectedStudents.map(s => `${s.admission_no},${s.name},${s.class_name},${s.phone || ''},${s.status}`).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -166,7 +166,7 @@ export default function StudentsPage() {
       await Promise.all(selectedStudents.map(s => {
         const payload = {
           admission_no: s.admission_no, name: s.name, class_id: Number(s.class_id),
-          gender: s.gender || '', parent_name: s.parent_name || '',
+          gender: s.gender || '',
           phone: s.phone || '', address: s.address || '', status: 'Inactive'
         };
         return api.updateStudent(s.id, payload);
@@ -203,7 +203,6 @@ export default function StudentsPage() {
               <div class="student-name">${s.name}</div>
               <div class="detail">Adm No: &nbsp;&nbsp;<b>${s.admission_no}</b></div>
               <div class="detail">Class: &nbsp;&nbsp;&nbsp;&nbsp;<b>${s.class_name}</b></div>
-              <div class="detail">Parent: &nbsp;&nbsp;<b>${s.parent_name || 'N/A'}</b></div>
               <div class="detail">Phone: &nbsp;&nbsp;<b>${s.phone || 'N/A'}</b></div>
               <div class="footer"></div>
             </div>
@@ -222,12 +221,11 @@ export default function StudentsPage() {
       alert("No students to export.");
       return;
     }
-    const headers = ["Adm No", "Student Name", "Class", "Parent Name", "Phone", "Status", "Gender", "Fee Route", "Transport Route"];
+    const headers = ["Adm No", "Student Name", "Class", "Phone", "Status", "Gender", "Fee Route", "Transport Route"];
     const rows = filteredStudents.map(s => [
       s.admission_no || '',
       s.name || '',
       s.class_name || '',
-      s.parent_name || '',
       s.phone || '',
       s.status || 'Active',
       s.gender || '',
@@ -396,7 +394,6 @@ export default function StudentsPage() {
                 <div className="flex items-center gap-3 text-[10px] text-slate-500 flex-wrap">
                   <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg font-bold text-slate-700 dark:text-slate-300">{s.class_name || 'N/A'}</span>
                   {s.phone && <span className="flex items-center gap-1"><Phone size={10} />{s.phone}</span>}
-                  {s.parent_name && <span>{s.parent_name}</span>}
                 </div>
                 {s.pending_fees > 0 && (
                   <div className="text-[10px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-500/10 px-2 py-1 rounded-lg w-fit">
@@ -437,7 +434,6 @@ export default function StudentsPage() {
                   <th className="px-5 py-3.5">{t('studentCol')}</th>
                   <th className="px-5 py-3.5">Class & Sec</th>
                   <th className="px-5 py-3.5">Pending Fees</th>
-                  <th className="px-5 py-3.5">{t('parentName')}</th>
                   <th className="px-5 py-3.5">{t('phone')}</th>
                   <th className="px-5 py-3.5 text-center">Status</th>
                   <th className="px-5 py-3.5 text-center print:hidden">{t('actionsCol')}</th>
@@ -488,15 +484,7 @@ export default function StudentsPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-5 py-3 text-slate-600 dark:text-slate-400 font-medium relative">
-                      <span className="peer cursor-default">{s.parent_name || '—'}</span>
-                      {/* Parent Phone Hover Tooltip */}
-                      {s.phone && (
-                        <div className="absolute bottom-full left-5 mb-1 hidden peer-hover:block bg-slate-800 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-30 font-semibold">
-                           {s.phone}
-                        </div>
-                      )}
-                    </td>
+
                     <td className="px-5 py-3 text-slate-600 dark:text-slate-400 font-medium">
                       {s.phone ? (
                         <a href={`tel:${s.phone}`} className="flex items-center gap-1.5 hover:text-amber-500 transition group/phone">
@@ -619,10 +607,7 @@ export default function StudentsPage() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Gender</p>
                     <p className="font-bold text-slate-800 dark:text-slate-200 capitalize">{viewStudent.gender || '—'}</p>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Parent Name</p>
-                    <p className="font-bold text-slate-800 dark:text-slate-200">{viewStudent.parent_name || '—'}</p>
-                  </div>
+
                   <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
                     <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Phone</p>
                     <p className="font-bold text-slate-800 dark:text-slate-200">{viewStudent.phone || '—'}</p>
@@ -671,7 +656,6 @@ export default function StudentsPage() {
                 {[
                   ['Admission No', 'admission_no', 'text', !editId],
                   ['Full Name',    'name',         'text', true],
-                  [t('parentName'),'parent_name',  'text', false],
                   [t('phone'),     'phone',        'tel',  false],
                 ].map(([label, key, type, req]) => (
                   <div key={key} className={key === 'name' ? 'col-span-2' : ''}>

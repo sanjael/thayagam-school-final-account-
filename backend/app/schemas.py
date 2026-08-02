@@ -65,8 +65,6 @@ class StudentCreate(BaseModel):
     name: str
     class_id: int
     gender: Optional[str] = None
-    dob: Optional[date] = None
-    parent_name: Optional[str] = None
     phone: Optional[str] = None
     address: Optional[str] = None
 
@@ -74,8 +72,6 @@ class StudentUpdate(BaseModel):
     name: Optional[str] = None
     class_id: Optional[int] = None
     gender: Optional[str] = None
-    dob: Optional[date] = None
-    parent_name: Optional[str] = None
     phone: Optional[str] = None
     address: Optional[str] = None
     is_active: Optional[bool] = None
@@ -87,8 +83,6 @@ class StudentOut(BaseModel):
     class_id: int
     class_name: Optional[str] = None
     gender: Optional[str]
-    dob: Optional[date]
-    parent_name: Optional[str]
     phone: Optional[str]
     address: Optional[str]
     is_active: bool

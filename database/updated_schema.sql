@@ -1,10 +1,12 @@
 -- ============================================================
--- School Fee Management System — PostgreSQL / Supabase Schema
--- Database: PostgreSQL (Supabase)
+-- School Fee Management System — Supabase / PostgreSQL Schema
+-- Database: thayagam_school
+-- Converted from MySQL schema for use with Supabase
 -- ============================================================
 
 -- ------------------------------------------------------------
 -- Custom ENUM types
+-- (PostgreSQL uses CREATE TYPE instead of inline ENUM)
 -- ------------------------------------------------------------
 DO $$ BEGIN
   CREATE TYPE user_role    AS ENUM ('admin', 'accountant', 'principal');
@@ -46,12 +48,15 @@ CREATE TABLE IF NOT EXISTS users (
   created_at      TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
 
+-- Enable Row Level Security (Supabase best practice)
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
+-- Allow authenticated users to read their own row
 CREATE POLICY "Users can view own profile"
   ON users FOR SELECT
   USING (auth.uid()::text = id::text);
 
+-- Allow admins full access (adjust to your auth strategy)
 CREATE POLICY "Admins have full access to users"
   ON users FOR ALL
   USING (
@@ -65,7 +70,7 @@ CREATE POLICY "Admins have full access to users"
 -- ============================================================
 CREATE TABLE IF NOT EXISTS classes (
   id         BIGSERIAL PRIMARY KEY,
-  name       VARCHAR(50)  NOT NULL UNIQUE,
+  name       VARCHAR(50)  NOT NULL UNIQUE,  -- e.g. "5A", "9B"
   section    VARCHAR(10),
   created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
@@ -93,8 +98,6 @@ CREATE TABLE IF NOT EXISTS students (
   name         VARCHAR(150) NOT NULL,
   class_id     BIGINT       NOT NULL REFERENCES classes(id) ON DELETE RESTRICT,
   gender       gender_type,
-  dob          DATE,
-  parent_name  VARCHAR(150),
   phone        VARCHAR(15),
   address      TEXT,
   is_active    BOOLEAN      NOT NULL DEFAULT TRUE,
@@ -128,9 +131,9 @@ CREATE TABLE IF NOT EXISTS fee_structure (
   id            BIGSERIAL PRIMARY KEY,
   class_id      BIGINT         NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
   term          term_type      NOT NULL,
-  fee_type      VARCHAR(100)   NOT NULL,
+  fee_type      VARCHAR(100)   NOT NULL,   -- e.g. "Tuition Fee", "Lab Fee"
   amount        NUMERIC(10, 2) NOT NULL,
-  academic_year VARCHAR(20)    NOT NULL,
+  academic_year VARCHAR(20)    NOT NULL,   -- e.g. "2024-2025"
   created_at    TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
 
   CONSTRAINT uq_fee_structure UNIQUE (class_id, term, fee_type, academic_year)
@@ -154,6 +157,8 @@ CREATE POLICY "Admins can manage fee_structure"
 
 -- ============================================================
 -- 5. fee_payments
+-- NOTE: PostgreSQL 12+ supports GENERATED ALWAYS AS (expr) STORED
+--       so we keep the computed "balance" column as-is.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS fee_payments (
   id            BIGSERIAL PRIMARY KEY,
@@ -220,7 +225,7 @@ CREATE POLICY "Admins and accountants can manage receipts"
   );
 
 -- ============================================================
--- 7. school_settings
+-- 7. school_settings  (logo path, name, correspondent, etc.)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS school_settings (
   id                    BIGSERIAL PRIMARY KEY,
@@ -235,6 +240,7 @@ CREATE TABLE IF NOT EXISTS school_settings (
   updated_at            TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
+-- Trigger to auto-update "updated_at" on school_settings
 CREATE OR REPLACE TRIGGER set_school_settings_updated_at
   BEFORE UPDATE ON school_settings
   FOR EACH ROW
@@ -255,7 +261,7 @@ CREATE POLICY "Admins can manage school_settings"
   );
 
 -- ============================================================
--- Seed: Default Admin User (username: admin / password: Admin@123)
+-- Seed: default admin user  (password: Admin@123 — bcrypt hash)
 -- ============================================================
 INSERT INTO users (username, email, hashed_password, role)
 VALUES (
@@ -267,15 +273,7 @@ VALUES (
 ON CONFLICT (username) DO NOTHING;
 
 -- ============================================================
--- Seed: Default School Classes (LKG, UKG, Class 1 to 12)
--- ============================================================
-INSERT INTO classes (name) VALUES 
-('LKG'), ('UKG'), ('Class 1'), ('Class 2'), ('Class 3'), ('Class 4'), ('Class 5'),
-('Class 6'), ('Class 7'), ('Class 8'), ('Class 9'), ('Class 10'), ('Class 11'), ('Class 12')
-ON CONFLICT (name) DO NOTHING;
-
--- ============================================================
--- Seed: Default School Settings
+-- Seed: default school settings
 -- ============================================================
 INSERT INTO school_settings (school_name, address, phone, correspondent_name, principal_name)
 VALUES (

@@ -154,7 +154,6 @@ def get_class_fees(class_id: int, academic_year: Optional[str] = None, db: Sessi
             "student_id": s.id,
             "admission_no": s.admission_no,
             "student_name": s.name,
-            "parent_name": s.parent_name or "",
             "phone": s.phone or "",
             "total_fee": float(s_total),
             "amount_paid": float(s_paid),
