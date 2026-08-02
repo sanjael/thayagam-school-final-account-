@@ -35,6 +35,8 @@ export default function ReportsPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [selectedYear, setSelectedYear] = useState('2024 - 2025');
+  const [isCustomYear, setIsCustomYear] = useState(false);
 
   // Load Initial Data
   useEffect(() => {
@@ -584,11 +586,49 @@ export default function ReportsPage() {
             </div>
             <form onSubmit={handleGenerateReport} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Academic Year</label>
-                <select className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-semibold">
-                  <option>2024 - 2025</option>
-                  <option>2023 - 2024</option>
-                </select>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-500 uppercase">Academic Year</label>
+                  <button
+                    type="button"
+                    onClick={() => setIsCustomYear(!isCustomYear)}
+                    className="text-[11px] font-bold text-amber-500 hover:underline flex items-center gap-1"
+                  >
+                    {isCustomYear ? '📋 Select Dropdown' : '✏️ Edit / Custom Year'}
+                  </button>
+                </div>
+
+                {isCustomYear ? (
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={selectedYear}
+                      onChange={(e) => setSelectedYear(e.target.value)}
+                      placeholder="e.g. 2025 - 2026 or 2026 - 2027"
+                      className="w-full p-3 bg-slate-50 dark:bg-slate-800 border-2 border-amber-500 rounded-xl outline-none font-bold text-sm text-slate-900 dark:text-white"
+                      autoFocus
+                    />
+                    <span className="text-[10px] text-slate-400 mt-1 block">Type any custom academic year above</span>
+                  </div>
+                ) : (
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => {
+                      if (e.target.value === 'CUSTOM_EDIT') {
+                        setIsCustomYear(true);
+                      } else {
+                        setSelectedYear(e.target.value);
+                      }
+                    }}
+                    className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-semibold text-sm text-slate-900 dark:text-white"
+                  >
+                    <option value="2026 - 2027">2026 - 2027</option>
+                    <option value="2025 - 2026">2025 - 2026</option>
+                    <option value="2024 - 2025">2024 - 2025</option>
+                    <option value="2023 - 2024">2023 - 2024</option>
+                    <option value="2022 - 2023">2022 - 2023</option>
+                    <option value="CUSTOM_EDIT">✏️ Edit / Type Custom Year...</option>
+                  </select>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Term / Period</label>
