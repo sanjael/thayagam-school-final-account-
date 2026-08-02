@@ -421,9 +421,6 @@ export default function ReportsPage() {
               <button onClick={handlePrintReportsPDF} title="Export PDF Report" className="px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 transition flex items-center gap-1.5 font-bold text-xs shadow-sm">
                 <FileText size={16} /> Export PDF
               </button>
-              <button onClick={handleExportReports} title="Export CSV Report" className="px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-white hover:bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 transition flex items-center gap-1.5 font-bold text-xs shadow-sm">
-                <Download size={16} /> Export CSV
-              </button>
             </div>
           </div>
 
