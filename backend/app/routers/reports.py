@@ -49,16 +49,15 @@ def get_summary(academic_year: Optional[str] = Query(None), db: Session = Depend
         models.FeePayment.is_cancelled == False
     ).scalar() or 0
 
-    # Expected only for active terms
-    students = db.query(models.Student).filter(models.Student.is_active == True).all()
-    total_expected = Decimal("0")
-    for s in students:
-        class_total = db.query(func.sum(models.FeeStructure.amount)).filter(
-            models.FeeStructure.class_id      == s.class_id,
+    # Expected only for active terms (calculated in 1 single aggregate SQL query)
+    total_expected = db.query(func.sum(models.FeeStructure.amount))\
+        .select_from(models.Student)\
+        .join(models.FeeStructure, models.FeeStructure.class_id == models.Student.class_id)\
+        .filter(
+            models.Student.is_active == True,
             models.FeeStructure.term.in_(active_terms),
             models.FeeStructure.academic_year == ay
         ).scalar() or Decimal("0")
-        total_expected += class_total
 
     total_balance = max(Decimal("0"), total_expected - Decimal(str(total_collected)))
     total_receipts = db.query(func.count(models.Receipt.id)).join(models.FeePayment).filter(
@@ -89,25 +88,43 @@ def get_pending(academic_year: Optional[str] = Query(None), class_id: Optional[i
         students_q = students_q.filter(models.Student.class_id == class_id)
     students = students_q.all()
 
+    if not students:
+        return []
+
+    # Batch query fee structures: (class_id, term) -> sum(amount)
+    class_ids = list({s.class_id for s in students})
+    fee_rows = db.query(
+        models.FeeStructure.class_id,
+        models.FeeStructure.term,
+        func.sum(models.FeeStructure.amount)
+    ).filter(
+        models.FeeStructure.class_id.in_(class_ids),
+        models.FeeStructure.term.in_(active_terms),
+        models.FeeStructure.academic_year == ay
+    ).group_by(models.FeeStructure.class_id, models.FeeStructure.term).all()
+    fee_map = {(cid, term): Decimal(str(amt or 0)) for cid, term, amt in fee_rows}
+
+    # Batch query payments: (student_id, term) -> sum(amount_paid)
+    student_ids = [s.id for s in students]
+    payment_rows = db.query(
+        models.FeePayment.student_id,
+        models.FeePayment.term,
+        func.sum(models.FeePayment.amount_paid)
+    ).filter(
+        models.FeePayment.student_id.in_(student_ids),
+        models.FeePayment.term.in_(active_terms),
+        models.FeePayment.academic_year == ay,
+        models.FeePayment.is_cancelled == False
+    ).group_by(models.FeePayment.student_id, models.FeePayment.term).all()
+    paid_map = {(sid, term): Decimal(str(amt or 0)) for sid, term, amt in payment_rows}
+
     results = []
     for s in students:
-        for term in active_terms:   # ← only active terms, not future ones
-            total_fee = db.query(func.sum(models.FeeStructure.amount)).filter(
-                models.FeeStructure.class_id      == s.class_id,
-                models.FeeStructure.term          == term,
-                models.FeeStructure.academic_year == ay
-            ).scalar() or Decimal("0")
-
+        for term in active_terms:
+            total_fee = fee_map.get((s.class_id, term), Decimal("0"))
             if total_fee == 0:
                 continue
-
-            total_paid = db.query(func.sum(models.FeePayment.amount_paid)).filter(
-                models.FeePayment.student_id      == s.id,
-                models.FeePayment.term            == term,
-                models.FeePayment.academic_year   == ay,
-                models.FeePayment.is_cancelled    == False
-            ).scalar() or Decimal("0")
-
+            total_paid = paid_map.get((s.id, term), Decimal("0"))
             balance = total_fee - total_paid
             if balance > 0:
                 results.append({
