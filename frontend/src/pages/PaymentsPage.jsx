@@ -52,6 +52,20 @@ export default function PaymentsPage() {
   const [quickCollect, setQuickCollect] = useState(null);
   const [summary, setSummary] = useState(null);
 
+  function selectStudent(s) {
+    if (!s) return;
+    const normalized = {
+      id: s.id || s.student_id,
+      name: s.name || s.student_name || 'Student',
+      admission_no: s.admission_no || '',
+      class_name: s.class_name || s.class || ''
+    };
+    setSelectedStudent(normalized);
+    setForm(p => ({ ...p, student_id: normalized.id }));
+    setStudentSearch('');
+    setStudents([]);
+  }
+
   // Auto-redirect workflow from other pages
   useEffect(() => {
     if (selectedStudentForPayment) {
