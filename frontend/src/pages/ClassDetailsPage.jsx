@@ -30,54 +30,80 @@ export default function ClassDetailsPage() {
 
   const fmt = (v) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v);
 
-  function exportCSV() {
+  const exportPDF = () => {
     if (!cls || students.length === 0) return;
-    
-    // Header row
-    const headers = [
-      "Adm. No", "Student Name", "Phone", "Class", "Section",
-      "Term 1 Total", "Term 1 Paid", "Term 1 Balance",
-      "Term 2 Total", "Term 2 Paid", "Term 2 Balance",
-      "Term 3 Total", "Term 3 Paid", "Term 3 Balance",
-      "Overall Total", "Overall Paid", "Overall Balance", "Status"
-    ];
-    
-    const rows = students.map(s => {
-      const row = [
-        s.admission_no, 
-        `"${s.student_name.replace(/"/g, '""')}"`,
-        `"${s.phone || ''}"`,
-        `"${cls.name}"`,
-        `"${cls.section || ''}"`
-      ];
-      
-      // Terms
-      ['Term 1', 'Term 2', 'Term 3'].forEach(tName => {
-        const t = s.terms?.find(x => x.term === tName);
-        if (t) {
-          row.push(t.total_fee, t.amount_paid, t.balance);
-        } else {
-          row.push(0, 0, 0);
-        }
-      });
-      
-      // Overall
-      row.push(s.total_fee, s.amount_paid, s.balance, s.status);
-      return row;
-    });
-    
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    const filename = `Class_${cls.name}${cls.section ? `_${cls.section}` : ''}_Fee_Report.csv`.replace(/\s+/g, '_');
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
+
+    const classNameFull = `${cls.name}${cls.section ? ` - Section ${cls.section}` : ''}`;
+    const title = `Class Fee Report - ${classNameFull}`;
+
+    const contentHtml = `
+      <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+        <thead>
+          <tr>
+            <th style="width: 40px; text-align: center; border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">#</th>
+            <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Adm. No</th>
+            <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Student Name</th>
+            <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Total Fee</th>
+            <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Paid</th>
+            <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Balance</th>
+            <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px; text-align: center;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${students.map((s, i) => `
+            <tr style="${i % 2 === 1 ? 'background-color: #f8fafc;' : ''}">
+              <td style="text-align: center; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${i + 1}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;"><b>${s.admission_no || ''}</b></td>
+              <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;"><b>${s.student_name}</b></td>
+              <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">₹${Number(s.total_fee || 0).toLocaleString('en-IN')}</td>
+              <td style="color: #16a34a; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">₹${Number(s.amount_paid || 0).toLocaleString('en-IN')}</td>
+              <td style="color: #dc2626; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">₹${Number(s.balance || 0).toLocaleString('en-IN')}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: center;">
+                <span style="font-weight: bold; color: ${s.balance <= 0 ? '#16a34a' : '#dc2626'};">
+                  ${s.balance <= 0 ? 'Paid' : 'Pending'}
+                </span>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+
+    const container = document.createElement('div');
+    container.innerHTML = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #1e293b;">
+        <div style="text-align: center; border-bottom: 2px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px;">
+          <h1 style="margin: 0; font-size: 24px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px;">THAAYAGAM SCHOOL</h1>
+          <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: bold;">${title.toUpperCase()}</p>
+        </div>
+        ${contentHtml}
+        <div style="margin-top: 25px; text-align: right; font-size: 11px; color: #94a3b8; font-weight: bold;">
+          Generated on ${new Date().toLocaleDateString('en-IN')} | Thaayagam School Class Reports
+        </div>
+      </div>
+    `;
+
+    const opt = {
+      margin:       10,
+      filename:     `Class_${cls.name}${cls.section ? `_${cls.section}` : ''}_Fee_Report.pdf`.replace(/\s+/g, '_'),
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    const runHtml2Pdf = () => {
+      window.html2pdf().from(container).set(opt).save();
+    };
+
+    if (window.html2pdf) {
+      runHtml2Pdf();
+    } else {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+      script.onload = runHtml2Pdf;
+      document.head.appendChild(script);
+    }
+  };
 
   return (
     <Layout>
@@ -105,11 +131,11 @@ export default function ClassDetailsPage() {
                   <p className="text-lg font-black text-slate-800 dark:text-slate-200">{students.length}</p>
                 </div>
                 <button
-                  onClick={exportCSV}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                  onClick={exportPDF}
+                  className="bg-rose-600 hover:bg-rose-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                  <span className="hidden sm:inline">Download </span>Excel
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  <span className="hidden sm:inline">Download </span>PDF
                 </button>
               </div>
             )}

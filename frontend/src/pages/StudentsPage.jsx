@@ -160,16 +160,18 @@ export default function StudentsPage() {
 
   const handleExportSelected = () => {
     const selectedStudents = students.filter(s => selectedIds.includes(s.id));
-    const csvContent = "data:text/csv;charset=utf-8," 
+    const csvContent = "\uFEFF"
       + "Adm No,Name,Class,Phone,Status\n"
-      + selectedStudents.map(s => `${s.admission_no},${s.name},${s.class_name},${s.phone || ''},${s.status}`).join("\n");
-    const encodedUri = encodeURI(csvContent);
+      + selectedStudents.map(s => `"${s.admission_no || ''}","${(s.name || '').replace(/"/g, '""')}","${s.class_name || ''}","\t${s.phone || ''}","${s.status || ''}"`).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
+    link.setAttribute("href", url);
     link.setAttribute("download", "students_export.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleBulkDeactivate = async () => {
@@ -304,26 +306,28 @@ export default function StudentsPage() {
     }
     const headers = ["Adm No", "Student Name", "Class", "Phone", "Status", "Gender", "Fee Route", "Transport Route"];
     const rows = filteredStudents.map(s => [
-      s.admission_no || '',
-      s.name || '',
-      s.class_name || '',
-      s.phone || '',
-      s.status || 'Active',
-      s.gender || '',
-      s.fee_route || '',
-      s.transport_route || ''
+      `"${s.admission_no || ''}"`,
+      `"${(s.name || '').replace(/"/g, '""')}"`,
+      `"${s.class_name || ''}"`,
+      `"\t${s.phone || ''}"`,
+      `"${s.status || 'Active'}"`,
+      `"${s.gender || ''}"`,
+      `"${s.fee_route || ''}"`,
+      `"${s.transport_route || ''}"`
     ]);
     
-    const csvContent = "data:text/csv;charset=utf-8," 
+    const csvContent = "\uFEFF" 
       + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
       
-    const encodedUri = encodeURI(csvContent);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
+    link.setAttribute("href", url);
     link.setAttribute("download", `students_export_${new Date().toISOString().slice(0,10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   return (

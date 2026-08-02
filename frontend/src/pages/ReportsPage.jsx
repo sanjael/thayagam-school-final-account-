@@ -111,16 +111,18 @@ export default function ReportsPage() {
         p.total_fee || 0,
         p.amount_paid || 0,
         p.balance || 0,
-        `"${p.phone || ''}"`
+        `"\t${p.phone || ''}"`
       ]);
-      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-      const encodedUri = encodeURI(csvContent);
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
+      link.setAttribute("href", url);
       link.setAttribute("download", `Pending_Fees_Report_${new Date().toISOString().slice(0,10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } else if (tab === 'classwise' || tab === 'class') {
       if (classWise.length === 0) {
         alert("No class-wise collection data to export.");
@@ -133,14 +135,16 @@ export default function ReportsPage() {
         c.balance ?? c.remaining_dues ?? 0,
         c.payments ?? c.transactions ?? 0
       ]);
-      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-      const encodedUri = encodeURI(csvContent);
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
+      link.setAttribute("href", url);
       link.setAttribute("download", `Class_Collection_Report_${new Date().toISOString().slice(0,10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } else if (tab === 'daybook') {
       const payments = daybook?.transactions || daybook?.payments || [];
       if (payments.length === 0) {
@@ -156,14 +160,16 @@ export default function ReportsPage() {
         `"${p.mode || p.payment_mode || ''}"`,
         p.amount ?? p.amount_paid ?? 0
       ]);
-      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-      const encodedUri = encodeURI(csvContent);
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
+      link.setAttribute("href", url);
       link.setAttribute("download", `Daily_Report_${daybook?.date || new Date().toISOString().slice(0,10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
   }
 
@@ -303,6 +309,137 @@ export default function ReportsPage() {
     handlePrintReportsPDF();
   }
   
+  const handleExportPDF = () => {
+    let title = "Financial Report";
+    let contentHtml = "";
+
+    if (tab === 'pending') {
+      title = "Pending Fees Report";
+      contentHtml = `
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center; border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">#</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Adm No</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Student Name</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Class</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Term</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Total Fee</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Paid</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredPending.map((p, i) => `
+              <tr style="${i % 2 === 1 ? 'background-color: #f8fafc;' : ''}">
+                <td style="text-align: center; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${i + 1}</td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;"><b>${p.admission_no || ''}</b></td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;"><b>${p.student_name}</b></td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${p.class || ''}</td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${p.term || ''}</td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">₹${Number(p.total_fee || 0).toLocaleString('en-IN')}</td>
+                <td style="color: #16a34a; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">₹${Number(p.amount_paid || 0).toLocaleString('en-IN')}</td>
+                <td style="color: #dc2626; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">₹${Number(p.balance || 0).toLocaleString('en-IN')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } else if (tab === 'classwise' || tab === 'class') {
+      title = "Class-wise Collection Report";
+      contentHtml = `
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center; border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">#</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Class Name</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Collected Amount</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Remaining Dues</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Transactions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${classWise.map((c, i) => `
+              <tr style="${i % 2 === 1 ? 'background-color: #f8fafc;' : ''}">
+                <td style="text-align: center; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${i + 1}</td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;"><b>${c.class || c.class_name || ''}</b></td>
+                <td style="color: #16a34a; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">₹${Number(c.collected ?? c.collected_amount ?? 0).toLocaleString('en-IN')}</td>
+                <td style="color: #dc2626; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">₹${Number(c.balance ?? c.remaining_dues ?? 0).toLocaleString('en-IN')}</td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${c.payments ?? c.transactions ?? 0}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } else if (tab === 'daybook') {
+      title = `Daily Collection Report (${daybook?.date || new Date().toISOString().slice(0, 10)})`;
+      const payments = daybook?.transactions || daybook?.payments || [];
+      contentHtml = `
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center; border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">#</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Time</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Receipt No</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Student Name</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Class</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Payment Mode</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Amount Paid</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${payments.map((p, i) => `
+              <tr style="${i % 2 === 1 ? 'background-color: #f8fafc;' : ''}">
+                <td style="text-align: center; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${i + 1}</td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${p.time || '—'}</td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;"><b>${p.receipt_no || '—'}</b></td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;"><b>${p.student_name || '—'}</b></td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${p.class_name || p.class || '—'}</td>
+                <td style="text-transform: capitalize; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${p.mode || p.payment_mode || '—'}</td>
+                <td style="color: #16a34a; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">₹${Number(p.amount ?? p.amount_paid ?? 0).toLocaleString('en-IN')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    const container = document.createElement('div');
+    container.innerHTML = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #1e293b;">
+        <div style="text-align: center; border-bottom: 2px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px;">
+          <h1 style="margin: 0; font-size: 24px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px;">THAAYAGAM SCHOOL</h1>
+          <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: bold;">${title.toUpperCase()}</p>
+        </div>
+        ${contentHtml}
+        <div style="margin-top: 25px; text-align: right; font-size: 11px; color: #94a3b8; font-weight: bold;">
+          Generated on ${new Date().toLocaleDateString('en-IN')} | Thaayagam School Financial Reports
+        </div>
+      </div>
+    `;
+
+    const opt = {
+      margin:       10,
+      filename:     `${title.replace(/\\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    const runHtml2Pdf = () => {
+      window.html2pdf().from(container).set(opt).save();
+    };
+
+    if (window.html2pdf) {
+      runHtml2Pdf();
+    } else {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+      script.onload = runHtml2Pdf;
+      document.head.appendChild(script);
+    }
+  };
+  
   function handleGenerateReport(e) {
     e.preventDefault();
     setIsGenerating(true);
@@ -418,7 +555,7 @@ export default function ReportsPage() {
                 <option>Custom Range</option>
               </select>
               
-              <button onClick={handlePrintReportsPDF} title="Export PDF Report" className="px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 transition flex items-center gap-1.5 font-bold text-xs shadow-sm">
+              <button onClick={handleExportPDF} title="Export PDF Report" className="px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 transition flex items-center gap-1.5 font-bold text-xs shadow-sm">
                 <FileText size={16} /> Export PDF
               </button>
             </div>
