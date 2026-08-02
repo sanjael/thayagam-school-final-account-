@@ -119,17 +119,17 @@ export default function ReportsPage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } else if (tab === 'class') {
+    } else if (tab === 'classwise' || tab === 'class') {
       if (classWise.length === 0) {
         alert("No class-wise collection data to export.");
         return;
       }
       const headers = ["Class", "Collected Amount", "Remaining Dues", "Transactions"];
       const rows = classWise.map(c => [
-        `"${c.class_name || ''}"`,
-        c.collected_amount || 0,
-        c.remaining_dues || 0,
-        c.transactions || 0
+        `"${c.class || c.class_name || ''}"`,
+        c.collected ?? c.collected_amount ?? 0,
+        c.balance ?? c.remaining_dues ?? 0,
+        c.payments ?? c.transactions ?? 0
       ]);
       const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
       const encodedUri = encodeURI(csvContent);
@@ -140,20 +140,19 @@ export default function ReportsPage() {
       link.click();
       document.body.removeChild(link);
     } else if (tab === 'daybook') {
-      const payments = daybook?.payments || [];
+      const payments = daybook?.transactions || daybook?.payments || [];
       if (payments.length === 0) {
         alert("No daily report records to export.");
         return;
       }
-      const headers = ["Receipt No", "Student Name", "Class", "Term", "Amount Paid", "Payment Mode", "Date"];
+      const headers = ["Time", "Receipt No", "Student Name", "Class", "Payment Mode", "Amount Paid"];
       const rows = payments.map(p => [
+        `"${p.time || ''}"`,
         `"${p.receipt_no || ''}"`,
         `"${p.student_name || ''}"`,
-        `"${p.class_name || ''}"`,
-        `"${p.term || ''}"`,
-        p.amount_paid || 0,
-        `"${p.payment_mode || ''}"`,
-        `"${p.payment_date || ''}"`
+        `"${p.class_name || p.class || ''}"`,
+        `"${p.mode || p.payment_mode || ''}"`,
+        p.amount ?? p.amount_paid ?? 0
       ]);
       const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
       const encodedUri = encodeURI(csvContent);
@@ -203,7 +202,7 @@ export default function ReportsPage() {
           </tbody>
         </table>
       `;
-    } else if (tab === 'class') {
+    } else if (tab === 'classwise' || tab === 'class') {
       title = "Class-wise Collection Report";
       contentHtml = `
         <table>
@@ -220,10 +219,10 @@ export default function ReportsPage() {
             ${classWise.map((c, i) => `
               <tr>
                 <td style="text-align: center;">${i + 1}</td>
-                <td><b>${c.class_name}</b></td>
-                <td style="color: #16a34a; font-weight: bold;">₹${Number(c.collected_amount || 0).toLocaleString('en-IN')}</td>
-                <td style="color: #dc2626; font-weight: bold;">₹${Number(c.remaining_dues || 0).toLocaleString('en-IN')}</td>
-                <td>${c.transactions || 0}</td>
+                <td><b>${c.class || c.class_name || ''}</b></td>
+                <td style="color: #16a34a; font-weight: bold;">₹${Number(c.collected ?? c.collected_amount ?? 0).toLocaleString('en-IN')}</td>
+                <td style="color: #dc2626; font-weight: bold;">₹${Number(c.balance ?? c.remaining_dues ?? 0).toLocaleString('en-IN')}</td>
+                <td>${c.payments ?? c.transactions ?? 0}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -231,16 +230,16 @@ export default function ReportsPage() {
       `;
     } else if (tab === 'daybook') {
       title = `Daily Collection Report (${daybook?.date || new Date().toISOString().slice(0, 10)})`;
-      const payments = daybook?.payments || [];
+      const payments = daybook?.transactions || daybook?.payments || [];
       contentHtml = `
         <table>
           <thead>
             <tr>
               <th style="width: 40px; text-align: center;">#</th>
+              <th>Time</th>
               <th>Receipt No</th>
               <th>Student Name</th>
               <th>Class</th>
-              <th>Term</th>
               <th>Payment Mode</th>
               <th>Amount Paid</th>
             </tr>
@@ -249,12 +248,12 @@ export default function ReportsPage() {
             ${payments.map((p, i) => `
               <tr>
                 <td style="text-align: center;">${i + 1}</td>
-                <td><b>${p.receipt_no}</b></td>
-                <td><b>${p.student_name}</b></td>
-                <td>${p.class_name}</td>
-                <td>${p.term}</td>
-                <td style="text-transform: capitalize;">${p.payment_mode}</td>
-                <td style="color: #16a34a; font-weight: bold;">₹${Number(p.amount_paid || 0).toLocaleString('en-IN')}</td>
+                <td>${p.time || '—'}</td>
+                <td><b>${p.receipt_no || '—'}</b></td>
+                <td><b>${p.student_name || '—'}</b></td>
+                <td>${p.class_name || p.class || '—'}</td>
+                <td style="text-transform: capitalize;">${p.mode || p.payment_mode || '—'}</td>
+                <td style="color: #16a34a; font-weight: bold;">₹${Number(p.amount ?? p.amount_paid ?? 0).toLocaleString('en-IN')}</td>
               </tr>
             `).join('')}
           </tbody>
