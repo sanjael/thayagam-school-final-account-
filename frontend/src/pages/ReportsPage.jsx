@@ -24,7 +24,7 @@ export default function ReportsPage() {
   const [classWise, setClassWise] = useState([]);
   const [daybook, setDaybook] = useState(null);
   const [collectionTrend, setCollectionTrend] = useState([]);
-  const [logoUrl, setLogoUrl] = useState(window.location.origin + '/logo.jpg');
+  const [logoBase64, setLogoBase64] = useState('');
   
   // Filters
   const [dateFilter, setDateFilter] = useState('This Month');
@@ -40,11 +40,25 @@ export default function ReportsPage() {
   const [isCustomYear, setIsCustomYear] = useState(false);
 
   useEffect(() => {
-    api.getSettings().then(s => {
-      if (s?.logo_path) {
-        setLogoUrl(s.logo_path.startsWith('data:image') ? s.logo_path : `${BASE_URL.replace(/\/+$/, '')}/${s.logo_path}`);
+    async function loadLogo() {
+      try {
+        const s = await api.getSettings();
+        let targetUrl = window.location.origin + '/logo.jpg';
+        if (s?.logo_path) {
+          targetUrl = s.logo_path.startsWith('data:image') ? s.logo_path : `${BASE_URL.replace(/\/+$/, '')}/${s.logo_path}`;
+        }
+        const res = await fetch(targetUrl);
+        const blob = await res.blob();
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setLogoBase64(reader.result);
+        };
+        reader.readAsDataURL(blob);
+      } catch (err) {
+        console.error("Error loading logo:", err);
       }
-    }).catch(console.error);
+    }
+    loadLogo();
   }, []);
 
   // Load Initial Data
@@ -303,7 +317,7 @@ export default function ReportsPage() {
         </head>
         <body>
           <div class="header" style="display: flex; align-items: center; justify-content: center; gap: 15px; border-bottom: 2px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px;">
-            <img src="${logoUrl}" style="height: 60px; width: 60px; object-fit: contain; display: inline-block; vertical-align: middle;" />
+            <img src="${logoBase64}" style="height: 60px; width: 60px; object-fit: contain; display: inline-block; vertical-align: middle;" />
             <div style="text-align: left; display: inline-block; vertical-align: middle;">
               <h1 style="margin: 0; font-size: 24px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px; line-height: 1.2;">THAAYAGAM SCHOOL</h1>
               <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: bold;">${title.toUpperCase()}</p>
@@ -433,7 +447,7 @@ export default function ReportsPage() {
     container.innerHTML = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #1e293b;">
         <div style="display: flex; align-items: center; justify-content: center; gap: 15px; border-bottom: 2px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px;">
-          <img src="${logoUrl}" style="height: 60px; width: 60px; object-fit: contain; display: inline-block; vertical-align: middle;" />
+          <img src="${logoBase64}" style="height: 60px; width: 60px; object-fit: contain; display: inline-block; vertical-align: middle;" />
           <div style="text-align: left; display: inline-block; vertical-align: middle;">
             <h1 style="margin: 0; font-size: 24px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px; line-height: 1.2;">THAAYAGAM SCHOOL</h1>
             <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: bold;">${title.toUpperCase()}</p>

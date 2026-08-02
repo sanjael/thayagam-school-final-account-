@@ -12,25 +12,39 @@ export default function ClassDetailsPage() {
   
   const [cls, setCls] = useState(null);
   const [students, setStudents] = useState([]);
+  const [logoBase64, setLogoBase64] = useState('');
   const [loading, setLoading] = useState(true);
-  const [logoUrl, setLogoUrl] = useState(window.location.origin + '/logo.jpg');
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([
-      api.getClass(id),
-      api.getClassFees(id),
-      api.getSettings().catch(() => null)
-    ])
-      .then(([classData, feesData, settingsData]) => {
+    async function loadData() {
+      try {
+        const [classData, feesData, settingsData] = await Promise.all([
+          api.getClass(id),
+          api.getClassFees(id),
+          api.getSettings().catch(() => null)
+        ]);
         setCls(classData);
         setStudents(feesData);
+        
+        let targetUrl = window.location.origin + '/logo.jpg';
         if (settingsData?.logo_path) {
-          setLogoUrl(settingsData.logo_path.startsWith('data:image') ? settingsData.logo_path : `${BASE_URL.replace(/\/+$/, '')}/${settingsData.logo_path}`);
+          targetUrl = settingsData.logo_path.startsWith('data:image') ? settingsData.logo_path : `${BASE_URL.replace(/\/+$/, '')}/${settingsData.logo_path}`;
         }
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+        const res = await fetch(targetUrl);
+        const blob = await res.blob();
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setLogoBase64(reader.result);
+        };
+        reader.readAsDataURL(blob);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
   }, [id]);
 
   const fmt = (v) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v);
@@ -78,7 +92,7 @@ export default function ClassDetailsPage() {
     container.innerHTML = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #1e293b;">
         <div style="display: flex; align-items: center; justify-content: center; gap: 15px; border-bottom: 2px solid #f59e0b; padding-bottom: 12px; margin-bottom: 20px;">
-          <img src="${logoUrl}" style="height: 60px; width: 60px; object-fit: contain; display: inline-block; vertical-align: middle;" />
+          <img src="${logoBase64}" style="height: 60px; width: 60px; object-fit: contain; display: inline-block; vertical-align: middle;" />
           <div style="text-align: left; display: inline-block; vertical-align: middle;">
             <h1 style="margin: 0; font-size: 24px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px; line-height: 1.2;">THAAYAGAM SCHOOL</h1>
             <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: bold;">${title.toUpperCase()}</p>
