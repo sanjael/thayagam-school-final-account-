@@ -202,8 +202,11 @@ export default function PaymentsPage() {
     document.body.removeChild(link);
   }
 
+  const [submitting, setSubmitting] = useState(false);
+
   async function handleSubmit(e) {
     e.preventDefault();
+    setError('');
     
     const parsedStudentId = parseInt(form.student_id, 10);
     if (!parsedStudentId) {
@@ -217,6 +220,7 @@ export default function PaymentsPage() {
       return;
     }
     
+    setSubmitting(true);
     try {
       await api.createPayment({
         ...form,
@@ -231,7 +235,11 @@ export default function PaymentsPage() {
       setForm(EMPTY); 
       setSelectedStudent(null);
       loadPayments();
-    } catch (err) { setError(err.message); }
+    } catch (err) { 
+      setError(err.message || 'Failed to record payment. Server is waking up, please try again.'); 
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   // Quick Collect Submit
@@ -888,7 +896,9 @@ export default function PaymentsPage() {
 
                 <div className="flex gap-4 pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
                   <button type="button" onClick={() => setShowForm(false)} className="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold transition">Cancel</button>
-                  <button type="submit" disabled={!selectedStudent || !form.amount_paid} className="flex-[2] px-4 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black transition shadow-lg shadow-emerald-500/30">Collect Payment</button>
+                  <button type="submit" disabled={submitting || !selectedStudent || !form.amount_paid} className="flex-[2] px-4 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black transition shadow-lg shadow-emerald-500/30">
+                    {submitting ? 'Processing Payment...' : 'Collect Payment'}
+                  </button>
                 </div>
               </form>
             </div>
