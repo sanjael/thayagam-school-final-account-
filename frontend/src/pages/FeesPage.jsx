@@ -6,7 +6,7 @@ import { useAuth } from '../AuthContext';
 
 const TERMS = ['Term 1', 'Term 2', 'Term 3'];
 const FEE_TYPES = ['Tuition Fee', 'Admission Fee', 'Exam Fee', 'Transport Fee', 'Books Fee', 'Uniform Fee', 'Hostel Fee', 'Other'];
-const EMPTY = { class_id: '', term: 'Term 1', fee_type: 'Tuition Fee', custom_fee: '', amount: '', academic_year: '2024-2025' };
+const EMPTY = { class_id: '', term: 'Term 1', fee_type: 'Tuition Fee', custom_fee: '', amount: '', academic_year: '2026-2027' };
 
 export default function FeesPage() {
   const { t } = useApp();
