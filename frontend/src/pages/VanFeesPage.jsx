@@ -474,7 +474,7 @@ export default function VanFeesPage() {
                     <option value="">Choose active rider...</option>
                     {riders.map(r => (
                       <option key={r.student_id} value={r.student_id}>
-                        {r.student_name} ({r.admission_no}) · {r.class_name || 'N/A'} (₹{Number(r.monthly_fee)})
+                        {r.student_name} - ₹{Number(r.monthly_fee).toLocaleString('en-IN')}
                       </option>
                     ))}
                   </select>
