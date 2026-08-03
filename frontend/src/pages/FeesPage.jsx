@@ -3,6 +3,7 @@ import Layout from '../components/Layout';
 import { api } from '../api';
 import { useApp } from '../AppContext';
 import { useAuth } from '../AuthContext';
+import { Plus, Edit } from 'lucide-react';
 
 const TERMS = ['Term 1', 'Term 2', 'Term 3'];
 const FEE_TYPES = ['Tuition Fee', 'Admission Fee', 'Exam Fee', 'Transport Fee', 'Books Fee', 'Uniform Fee', 'Hostel Fee', 'Other'];
@@ -237,25 +238,36 @@ export default function FeesPage() {
         {user?.role === 'admin' && (
           <section className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 p-6 md:p-8 shadow-sm">
             <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2 mb-6">
-              <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 p-1.5 rounded-xl shadow-sm">
-                {editId ? '️' : ''}
-              </span>
-              {editId ? 'Edit Fee Structure' : 'Add Fee Structure'}
+              {editId ? (
+                <>
+                  <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 p-1.5 rounded-xl shadow-sm">
+                    <Edit size={16} className="text-amber-500" />
+                  </span>
+                  Edit Fee Structure
+                </>
+              ) : (
+                <>
+                  <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-500 p-1.5 rounded-xl shadow-sm">
+                    <Plus size={16} className="text-amber-500" />
+                  </span>
+                  Add Fee Structure
+                </>
+              )}
             </h2>
             
             <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-7 gap-4 items-end">
               <div className="md:col-span-1">
                 <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Class</label>
-                <select required value={form.class_id} onChange={f('class_id')}
-                  className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition shadow-sm">
+                <select required value={form.class_id} onChange={f('class_id')} disabled={!!editId}
+                  className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition shadow-sm disabled:opacity-75">
                   <option value="">Select Class</option>
                   {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div className="md:col-span-1">
                 <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Term</label>
-                <select value={form.term} onChange={f('term')}
-                  className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition shadow-sm">
+                <select value={form.term} onChange={f('term')} disabled={!!editId}
+                  className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition shadow-sm disabled:opacity-75">
                   {TERMS.map((t) => <option key={t}>{t}</option>)}
                 </select>
               </div>
@@ -267,8 +279,9 @@ export default function FeesPage() {
                   value={form.academic_year}
                   onChange={f('academic_year')}
                   required
+                  disabled={!!editId}
                   placeholder="2026-2027"
-                  className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition shadow-sm"
+                  className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition shadow-sm disabled:opacity-75"
                 />
                 <datalist id="ay-form-list">
                   <option value="2023-2024" />
@@ -297,15 +310,15 @@ export default function FeesPage() {
                   className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm font-bold text-emerald-600 dark:text-emerald-500 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition shadow-sm" />
               </div>
               
-              <div className="md:col-span-1 flex gap-2">
-                {editId && (
-                  <button type="button" onClick={() => {setForm(EMPTY); setEditId(null);}} className="w-12 h-[46px] flex items-center justify-center rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 transition shadow-sm">
-                    X
-                  </button>
-                )}
-                <button disabled={loading} className="flex-1 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-3 text-sm font-black transition shadow-md shadow-amber-500/20 h-[46px] flex items-center justify-center gap-1.5">
+              <div className="md:col-span-1 flex flex-col gap-2">
+                <button disabled={loading} className="w-full rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-3 text-sm font-black transition shadow-md shadow-amber-500/20 h-[46px] flex items-center justify-center gap-1.5">
                   {loading ? 'Saving...' : (editId ? 'Update Fee' : 'Save Fee')}
                 </button>
+                {editId && (
+                  <button type="button" onClick={() => {setForm(EMPTY); setEditId(null);}} className="w-full rounded-2xl bg-slate-200 hover:bg-slate-350 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-750 dark:text-slate-300 px-4 py-2 text-xs font-bold transition shadow-sm h-[36px] flex items-center justify-center">
+                    Cancel Edit
+                  </button>
+                )}
               </div>
             </form>
             
