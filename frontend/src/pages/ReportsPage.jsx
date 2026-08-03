@@ -25,8 +25,8 @@ export default function ReportsPage() {
   const [students, setStudents] = useState([]);
   const [classWise, setClassWise] = useState([]);
   const [daybook, setDaybook] = useState(null);
-  const [collectionTrend, setCollectionTrend] = useState([]);
   const [logoBase64, setLogoBase64] = useState('');
+  const [loading, setLoading] = useState(false);
   
   // Filters
   const [dateFilter, setDateFilter] = useState('All');
@@ -63,21 +63,49 @@ export default function ReportsPage() {
     loadLogo();
   }, []);
 
-  // Load Initial Data
+  // Load summary and pending list on mount / filter change (critical path)
   useEffect(() => {
-    loadDashboardData();
+    setLoading(true);
+    Promise.all([
+      api.getSummary(),
+      api.getPendingReport()
+    ])
+    .then(([sumData, pendData]) => {
+      setSummary(sumData);
+      setPending(pendData);
+    })
+    .catch(console.error)
+    .finally(() => setLoading(false));
   }, [dateFilter]);
 
-  function loadDashboardData() {
-    api.getSummary().then(setSummary).catch(console.error);
-    api.getPendingReport().then(setPending).catch(console.error);
-    api.getClassWiseReport().then(setClassWise).catch(console.error);
-    api.getCollectionTrend(dateFilter === 'This Month' ? 'month' : 'week').then(setCollectionTrend).catch(console.error);
-    api.getPayments().then(setPayments).catch(console.error);
-    api.getStudents().then(setStudents).catch(console.error);
-    
-    api.getDayBook(new Date().toISOString().slice(0, 10)).then(setDaybook).catch(console.error);
-  }
+  // Lazy-load tab data only when the tab becomes active
+  useEffect(() => {
+    if (tab === 'overall' && students.length === 0) {
+      setLoading(true);
+      api.getStudents()
+        .then(setStudents)
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    } else if (tab === 'collection' && payments.length === 0) {
+      setLoading(true);
+      api.getPayments()
+        .then(setPayments)
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    } else if (tab === 'classwise' && classWise.length === 0) {
+      setLoading(true);
+      api.getClassWiseReport()
+        .then(setClassWise)
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    } else if (tab === 'daybook' && !daybook) {
+      setLoading(true);
+      api.getDayBook(new Date().toISOString().slice(0, 10))
+        .then(setDaybook)
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    }
+  }, [tab]);
 
   // Format currency
   const fmt = (n) => `₹${Number(n || 0).toLocaleString('en-IN')}`;
@@ -917,7 +945,15 @@ export default function ReportsPage() {
           )}
 
           {/* Content Area */}
-          <div className="p-0">
+          <div className="p-0 relative min-h-[250px]">
+            {loading && (
+              <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 dark:bg-slate-800/70 backdrop-blur-[1px] transition-all">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="animate-spin w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full" />
+                  <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Loading data...</p>
+                </div>
+              </div>
+            )}
             {tab === 'pending' && (
               <div className="overflow-x-auto">
                 {filteredPending.length === 0 ? (
