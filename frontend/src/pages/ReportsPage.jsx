@@ -28,7 +28,7 @@ export default function ReportsPage() {
   const [logoBase64, setLogoBase64] = useState('');
   
   // Filters
-  const [dateFilter, setDateFilter] = useState('This Month');
+  const [dateFilter, setDateFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [classFilter, setClassFilter] = useState('');
   const [termFilter, setTermFilter] = useState('');
@@ -731,6 +731,7 @@ export default function ReportsPage() {
                 onChange={e => setDateFilter(e.target.value)}
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-amber-500"
               >
+                <option>All</option>
                 <option>Today</option>
                 <option>Yesterday</option>
                 <option>This Week</option>
