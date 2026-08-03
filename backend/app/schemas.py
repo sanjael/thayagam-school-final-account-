@@ -132,6 +132,15 @@ class FeePaymentCreate(BaseModel):
     reference_no: Optional[str] = None
     notes: Optional[str] = None
 
+class FeePaymentUpdate(BaseModel):
+    amount_paid: float
+    payment_date: date
+    payment_mode: str
+    fine: Optional[float] = 0.0
+    discount: Optional[float] = 0.0
+    reference_no: Optional[str] = None
+    notes: Optional[str] = None
+
 class FeePaymentOut(BaseModel):
     id: int
     student_id: int
@@ -224,6 +233,12 @@ class VanPaymentCreate(BaseModel):
     payment_date: dt.date
     payment_mode: str
     academic_year: str
+
+class VanPaymentUpdate(BaseModel):
+    amount_paid: float
+    payment_date: dt.date
+    payment_mode: str
+    month: str
 
 class VanPaymentOut(BaseModel):
     id: int

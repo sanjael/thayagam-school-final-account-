@@ -197,3 +197,21 @@ def get_van_dues_report(academic_year: Optional[str] = Query(None), db: Session 
         })
 
     return results
+
+
+@router.put("/payments/{payment_id}", response_model=schemas.VanPaymentOut, dependencies=[Depends(require_role(["admin"]))])
+def update_van_payment(payment_id: int, payload: schemas.VanPaymentUpdate, db: Session = Depends(get_db)):
+    payment = db.query(models.VanPayment).filter(models.VanPayment.id == payment_id).first()
+    if not payment:
+        raise HTTPException(404, "Payment not found")
+    if payment.is_cancelled:
+        raise HTTPException(400, "Cannot edit a cancelled payment")
+
+    payment.amount_paid = Decimal(str(payload.amount_paid))
+    payment.payment_date = payload.payment_date
+    payment.payment_mode = payload.payment_mode
+    payment.month = payload.month
+
+    db.commit()
+    db.refresh(payment)
+    return _enrich_payment(payment)

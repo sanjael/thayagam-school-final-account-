@@ -36,6 +36,7 @@ export default function PaymentsPage() {
   // Form & Workflow
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY);
+  const [editPaymentId, setEditPaymentId] = useState(null);
   const [error, setError] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [feeItems, setFeeItems] = useState([]);
@@ -165,14 +166,40 @@ export default function PaymentsPage() {
       api.getFeeStatus(form.student_id, form.term, form.academic_year)
         .then((res) => {
           setFeeStatus(res);
-          setForm((p) => ({ ...p, amount_paid: res.balance }));
+          if (!editPaymentId) {
+            setForm((p) => ({ ...p, amount_paid: res.balance }));
+          }
         })
         .catch(() => setFeeStatus(null))
         .finally(() => setLoadingFeeStatus(false));
     } else {
       setFeeStatus(null);
     }
-  }, [form.student_id, form.term, form.academic_year]);
+  }, [form.student_id, form.term, form.academic_year, editPaymentId]);
+
+  function openEditPayment(p) {
+    setEditPaymentId(p.id);
+    setForm({
+      student_id: p.student_id,
+      term: p.term,
+      academic_year: p.academic_year || '2026-2027',
+      amount_paid: p.amount_paid,
+      payment_date: p.payment_date,
+      payment_mode: p.payment_mode || 'cash',
+      notes: p.notes || '',
+      fine: p.fine || 0,
+      discount: p.discount || 0,
+      reference_no: p.reference_no || ''
+    });
+    setSelectedStudent({
+      id: p.student_id,
+      name: p.student_name,
+      admission_no: p.admission_no,
+      class_name: p.class_name
+    });
+    setShowForm(true);
+    setActiveDropdown(null);
+  }
 
   async function handleCancel(paymentId) {
     try {
@@ -238,21 +265,35 @@ export default function PaymentsPage() {
     
     setSubmitting(true);
     try {
-      await api.createPayment({
-        ...form,
-        student_id: parsedStudentId,
-        amount_paid: parsedAmount,
-        fine: Number(form.fine || 0),
-        discount: Number(form.discount || 0),
-      });
-      setToastMessage('Fee collected successfully!');
+      if (editPaymentId) {
+        await api.updatePayment(editPaymentId, {
+          amount_paid: parsedAmount,
+          payment_date: form.payment_date,
+          payment_mode: form.payment_mode,
+          fine: Number(form.fine || 0),
+          discount: Number(form.discount || 0),
+          reference_no: form.reference_no,
+          notes: form.notes,
+        });
+        setToastMessage('Payment updated successfully!');
+      } else {
+        await api.createPayment({
+          ...form,
+          student_id: parsedStudentId,
+          amount_paid: parsedAmount,
+          fine: Number(form.fine || 0),
+          discount: Number(form.discount || 0),
+        });
+        setToastMessage('Fee collected successfully!');
+      }
       setTimeout(() => setToastMessage(''), 4000);
       setShowForm(false); 
       setForm(EMPTY); 
       setSelectedStudent(null);
+      setEditPaymentId(null);
       loadPayments();
     } catch (err) { 
-      setError(err.message || 'Failed to record payment. Server is waking up, please try again.'); 
+      setError(err.message || 'Failed to save payment.'); 
     } finally {
       setSubmitting(false);
     }
@@ -443,7 +484,12 @@ export default function PaymentsPage() {
                 <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
                   {getModeBadge(p.payment_mode)}
                   <div className="flex gap-2">
-                    <button onClick={() => setPreviewReceipt(p)} className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-lg text-xs">
+                    {user?.role === 'admin' && !p.is_cancelled && (
+                      <button onClick={() => openEditPayment(p)} className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold rounded-lg text-xs">
+                        Edit
+                      </button>
+                    )}
+                    <button onClick={() => setPreviewReceipt(p)} className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-750 dark:text-slate-300 font-bold rounded-lg text-xs">
                       Receipt
                     </button>
                     <button onClick={() => setQuickCollect(p)} className="px-3 py-1 bg-amber-500 text-slate-950 font-black rounded-lg text-xs">
@@ -561,6 +607,11 @@ export default function PaymentsPage() {
                         {/* Dropdown Menu */}
                         {activeDropdown === p.id && (
                           <div className="absolute right-12 top-2 w-56 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-2xl z-50 text-left overflow-hidden animate-fade-in">
+                            {user?.role === 'admin' && !p.is_cancelled && (
+                              <button onClick={() => openEditPayment(p)} className="w-full px-5 py-3 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-3 border-b border-slate-100 dark:border-slate-750">
+                                <span>✏️</span> Edit Payment
+                              </button>
+                            )}
                             <button onClick={() => setPreviewReceipt(p)} className="w-full px-5 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-3">
                               <span className="text-base">👁️</span> View Receipt
                             </button>
@@ -787,11 +838,11 @@ export default function PaymentsPage() {
 
         {/* --- WOW FEATURE: Record Payment Modal --- */}
         {showForm && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/60 sm:p-4 backdrop-blur-sm animate-fade-in" onClick={() => setShowForm(false)}>
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/60 sm:p-4 backdrop-blur-sm animate-fade-in" onClick={() => { setShowForm(false); setEditPaymentId(null); }}>
             <div className="w-full sm:max-w-2xl bg-white dark:bg-slate-900 rounded-t-[2rem] sm:rounded-[2rem] p-5 sm:p-8 shadow-2xl border border-slate-100 dark:border-slate-800 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-black text-slate-900 dark:text-white">Record New Payment</h2>
-                <button onClick={() => setShowForm(false)} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">X</button>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white">{editPaymentId ? 'Edit Fee Payment' : 'Record New Payment'}</h2>
+                <button onClick={() => { setShowForm(false); setEditPaymentId(null); }} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">X</button>
               </div>
               
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -830,7 +881,9 @@ export default function PaymentsPage() {
                         <p className="font-bold text-emerald-900 text-sm">{selectedStudent.name}</p>
                         <p className="text-xs font-bold text-emerald-600">{selectedStudent.class_name} • Adm: {selectedStudent.admission_no}</p>
                       </div>
-                      <button type="button" onClick={() => { setSelectedStudent(null); setForm(p => ({...p, student_id: ''})); setStudentSearch(''); }} className="text-xs font-bold text-rose-600 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition">Change</button>
+                      {!editPaymentId && (
+                        <button type="button" onClick={() => { setSelectedStudent(null); setForm(p => ({...p, student_id: ''})); setStudentSearch(''); }} className="text-xs font-bold text-rose-600 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition">Change</button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -838,7 +891,7 @@ export default function PaymentsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 mb-1">Term *</label>
-                    <select value={form.term} onChange={f('term')} required className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-emerald-500">
+                    <select value={form.term} onChange={f('term')} required disabled={!!editPaymentId} className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-emerald-500 disabled:opacity-75">
                       {TERMS.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
@@ -850,8 +903,9 @@ export default function PaymentsPage() {
                       value={form.academic_year} 
                       onChange={f('academic_year')} 
                       required 
+                      disabled={!!editPaymentId}
                       placeholder="e.g. 2026-2027"
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-emerald-500" 
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-emerald-500 disabled:opacity-75" 
                     />
                     <datalist id="academic-years-payment-list">
                       <option value="2023-2024" />
@@ -912,9 +966,9 @@ export default function PaymentsPage() {
                 </div>
 
                 <div className="flex gap-4 pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
-                  <button type="button" onClick={() => setShowForm(false)} className="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold transition">Cancel</button>
+                  <button type="button" onClick={() => { setShowForm(false); setEditPaymentId(null); }} className="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-750 dark:text-slate-300 rounded-xl text-sm font-bold transition">Cancel</button>
                   <button type="submit" disabled={submitting || !selectedStudent || !form.amount_paid} className="flex-[2] px-4 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black transition shadow-lg shadow-emerald-500/30">
-                    {submitting ? 'Processing Payment...' : 'Collect Payment'}
+                    {submitting ? 'Saving...' : (editPaymentId ? 'Update Payment' : 'Collect Payment')}
                   </button>
                 </div>
               </form>

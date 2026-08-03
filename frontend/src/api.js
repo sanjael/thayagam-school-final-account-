@@ -77,6 +77,7 @@ export const api = {
     return request(`/payments/?${q}`);
   },
   createPayment: (data) => request('/payments/', { method: 'POST', body: JSON.stringify(data) }),
+  updatePayment: (id, data) => request(`/payments/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   cancelPayment: (paymentId, reason) => request(`/payments/${paymentId}/cancel`, { method: 'POST', body: JSON.stringify({ reason }) }),
   getFeeStatus: (studentId, term, academicYear) =>
     request(`/payments/fee-status?student_id=${studentId}&term=${encodeURIComponent(term)}&academic_year=${encodeURIComponent(academicYear)}`),
@@ -131,6 +132,7 @@ export const api = {
   deallocateVanRider: (student_id) => request(`/van-fees/riders/${student_id}`, { method: 'DELETE' }),
   payVanFee: (data) => request('/van-fees/pay', { method: 'POST', body: JSON.stringify(data) }),
   getVanPayments: (academic_year) => request(`/van-fees/payments${academic_year ? `?academic_year=${academic_year}` : ''}`),
+  updateVanPayment: (id, data) => request(`/van-fees/payments/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   cancelVanPayment: (id) => request(`/van-fees/payments/${id}/cancel`, { method: 'PUT' }),
   getVanDuesReport: (academic_year) => request(`/van-fees/reports/dues${academic_year ? `?academic_year=${academic_year}` : ''}`),
 };

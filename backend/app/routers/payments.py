@@ -183,3 +183,42 @@ def cancel_payment(payment_id: int, payload: CancelRequest, db: Session = Depend
     
     return {"message": "Payment cancelled successfully"}
 
+
+@router.put("/{payment_id}", response_model=schemas.FeePaymentOut, dependencies=[Depends(require_role(["admin"]))])
+def update_payment(payment_id: int, payload: schemas.FeePaymentUpdate, db: Session = Depends(get_db)):
+    payment = db.query(models.FeePayment).filter(models.FeePayment.id == payment_id).first()
+    if not payment:
+        raise HTTPException(404, "Payment not found")
+    if payment.is_cancelled:
+        raise HTTPException(400, "Cannot edit a cancelled payment")
+
+    payment.amount_paid = Decimal(str(payload.amount_paid))
+    payment.payment_date = payload.payment_date
+    payment.payment_mode = payload.payment_mode
+    payment.fine = Decimal(str(payload.fine or 0))
+    payment.discount = Decimal(str(payload.discount or 0))
+    payment.reference_no = payload.reference_no
+    payment.notes = payload.notes
+
+    # Recalculate balance
+    previous_paid = db.query(func.sum(models.FeePayment.amount_paid)).filter(
+        models.FeePayment.student_id      == payment.student_id,
+        models.FeePayment.term            == payment.term,
+        models.FeePayment.academic_year   == payment.academic_year,
+        models.FeePayment.is_cancelled    == False,
+        models.FeePayment.id              != payment_id
+    ).scalar() or Decimal("0")
+
+    new_total_paid = previous_paid + payment.amount_paid
+    payment.balance = max(Decimal("0"), (payment.total_fee + payment.fine) - payment.discount - new_total_paid)
+
+    audit = models.AuditLog(
+        user_id=1,
+        action="Update Payment",
+        details=f"Payment ID {payment.id} updated. New amount: ₹{payload.amount_paid}, Date: {payload.payment_date}"
+    )
+    db.add(audit)
+    db.commit()
+    db.refresh(payment)
+    return _enrich(payment)
+
