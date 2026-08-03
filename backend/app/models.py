@@ -74,6 +74,8 @@ class Student(Base):
     phone        = Column(String(15))
     address      = Column(Text)
     is_active    = Column(Boolean, default=True)
+    old_fee      = Column(DECIMAL(10, 2), default=0.0)
+    van_fee      = Column(DECIMAL(10, 2), default=0.0)
     created_at   = Column(DateTime, server_default=func.now())
 
     class_    = relationship("Class",       back_populates="students")

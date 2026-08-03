@@ -67,6 +67,8 @@ class StudentCreate(BaseModel):
     gender: Optional[str] = None
     phone: Optional[str] = None
     address: Optional[str] = None
+    old_fee: Optional[float] = 0.0
+    van_fee: Optional[float] = 0.0
 
 class StudentUpdate(BaseModel):
     name: Optional[str] = None
@@ -75,6 +77,8 @@ class StudentUpdate(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
     is_active: Optional[bool] = None
+    old_fee: Optional[float] = None
+    van_fee: Optional[float] = None
 
 class StudentOut(BaseModel):
     id: int
@@ -86,6 +90,8 @@ class StudentOut(BaseModel):
     phone: Optional[str]
     address: Optional[str]
     is_active: bool
+    old_fee: Optional[float] = 0.0
+    van_fee: Optional[float] = 0.0
     created_at: Optional[datetime] = None
     pending_fees: Optional[float] = 0.0
     class Config:
