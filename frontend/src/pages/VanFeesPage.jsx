@@ -24,6 +24,7 @@ export default function VanFeesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [classFilter, setClassFilter] = useState('');
   const [paymentClassFilter, setPaymentClassFilter] = useState('');
+  const [historyDateFilter, setHistoryDateFilter] = useState('All');
 
   // Forms
   const [riderForm, setRiderForm] = useState({ student_id: '', monthly_fee: '' });
@@ -205,6 +206,83 @@ export default function VanFeesPage() {
     window.open(`https://api.whatsapp.com/send?phone=91${phone.replace(/\D/g,'')}&text=${encodeURIComponent(message)}`, '_blank');
   }
 
+  function printPaymentsHistory() {
+    const printWindow = window.open('', '_blank');
+    const today = new Date().toLocaleDateString('en-GB');
+    const filterText = historyDateFilter === 'All' ? 'All Payments' : `${historyDateFilter} Payments`;
+    
+    let tableRows = filteredPayments.map((p) => `
+      <tr style="${p.is_cancelled ? 'text-decoration: line-through; opacity: 0.6;' : ''}">
+        <td>${p.payment_date}</td>
+        <td style="font-family: monospace; font-weight: bold;">${p.receipt_no}</td>
+        <td>
+          <div style="font-weight: bold;">${p.student_name}</div>
+          <div style="font-size: 10px; color: #64748b;">${p.admission_no}</div>
+        </td>
+        <td>${p.class_name || 'N/A'}</td>
+        <td style="font-weight: bold;">${p.month}</td>
+        <td style="text-transform: capitalize;">${p.payment_mode}</td>
+        <td style="text-align: right; font-weight: bold; color: #059669;">₹${Number(p.amount_paid).toLocaleString('en-IN')}</td>
+      </tr>
+    `).join('');
+
+    const totalCollected = filteredPayments.reduce((sum, p) => sum + (p.is_cancelled ? 0 : Number(p.amount_paid)), 0);
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Van Fee Payment Collection - ${today}</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; color: #1e293b; }
+            .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; }
+            .school-name { font-size: 24px; font-weight: 900; color: #0f172a; text-transform: uppercase; }
+            .report-title { font-size: 14px; font-weight: bold; color: #64748b; margin-top: 5px; letter-spacing: 0.05em; }
+            .meta { display: flex; justify-content: space-between; font-size: 12px; color: #64748b; margin-bottom: 15px; font-weight: 500; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+            th, td { border: 1px solid #cbd5e1; padding: 8px 6px; text-align: left; }
+            th { background-color: #f8fafc; font-weight: bold; color: #475569; }
+            tr:nth-child(even) { background-color: #f8fafc; }
+            .summary-box { text-align: right; font-size: 14px; font-weight: bold; margin-top: 20px; color: #0f172a; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="school-name">Thaayagam School</div>
+            <div class="report-title">VAN FEES PAYMENT COLLECTION REPORT</div>
+          </div>
+          <div class="meta">
+            <span>Filter Period: <strong>${filterText}</strong></span>
+            <span>Academic Year: <strong>${activeYear}</strong></span>
+            <span>Date Generated: <strong>${today}</strong></span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Receipt No</th>
+                <th>Student</th>
+                <th>Class</th>
+                <th>Month</th>
+                <th>Mode</th>
+                <th style="text-align: right;">Amount Paid</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
+          <div class="summary-box">
+            Total Collections: <span style="color: #059669; font-size: 18px;">₹${totalCollected.toLocaleString('en-IN')}</span>
+          </div>
+          <script>
+            window.onload = function() { window.print(); window.close(); }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  }
+
   function printDuesReport() {
     const printWindow = window.open('', '_blank');
     const today = new Date().toLocaleDateString('en-GB');
@@ -317,6 +395,43 @@ export default function VanFeesPage() {
       return matchSearch && matchClass;
     });
   }, [duesReport, searchQuery, classFilter]);
+
+  const filteredPayments = useMemo(() => {
+    return payments.filter(p => {
+      const name = p.student_name || '';
+      const adm = p.admission_no || '';
+      const cls = p.class_name || '';
+      const rcpt = p.receipt_no || '';
+      const matchSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          adm.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          cls.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          rcpt.toLowerCase().includes(searchQuery.toLowerCase());
+                          
+      if (!matchSearch) return false;
+      if (historyDateFilter === 'All') return true;
+      
+      const pDate = new Date(p.payment_date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (historyDateFilter === 'Today') {
+        const compareDate = new Date(p.payment_date);
+        return compareDate.toDateString() === today.toDateString();
+      }
+      
+      if (historyDateFilter === 'This Week') {
+        const diffTime = Math.abs(today - pDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays <= 7;
+      }
+      
+      if (historyDateFilter === 'This Month') {
+        return pDate.getMonth() === today.getMonth() && pDate.getFullYear() === today.getFullYear();
+      }
+      
+      return true;
+    });
+  }, [payments, searchQuery, historyDateFilter]);
 
   // Filtered riders for the payment dropdown (only allocated van riders of the selected class)
   const paymentDropdownRiders = useMemo(() => {
@@ -753,8 +868,38 @@ export default function VanFeesPage() {
           {/* PAYMENTS HISTORY TAB */}
           {tab === 'history' && (
             <div className="p-6 space-y-4">
+              {/* Search / Filters */}
+              <div className="flex gap-3">
+                <div className="relative flex-1">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by student, class, receipt..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl text-xs outline-none focus:border-amber-500"
+                  />
+                </div>
+                <select 
+                  value={historyDateFilter} 
+                  onChange={e => setHistoryDateFilter(e.target.value)}
+                  className="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs outline-none focus:border-amber-500 text-slate-750 dark:text-slate-300"
+                >
+                  <option value="All">All Time</option>
+                  <option value="Today">Today</option>
+                  <option value="This Week">This Week</option>
+                  <option value="This Month">This Month</option>
+                </select>
+                <button
+                  onClick={printPaymentsHistory}
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-slate-950 font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5"
+                >
+                  <FileText size={14} /> Export PDF
+                </button>
+              </div>
+
               <div className="overflow-x-auto border border-slate-100 dark:border-slate-800 rounded-2xl">
-                {payments.length === 0 ? (
+                {filteredPayments.length === 0 ? (
                   <div className="py-12 text-center text-slate-400 text-xs">No payments recorded.</div>
                 ) : (
                   <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
@@ -772,7 +917,7 @@ export default function VanFeesPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {payments.map((p, idx) => (
+                      {filteredPayments.map((p, idx) => (
                         <tr key={idx} className={`hover:bg-slate-50 dark:hover:bg-slate-800/40 transition ${p.is_cancelled ? 'line-through opacity-50 bg-rose-50/20' : ''}`}>
                           <td className="px-5 py-3.5">{p.payment_date}</td>
                           <td className="px-5 py-3.5 font-bold font-mono text-slate-600 dark:text-slate-400">{p.receipt_no}</td>
