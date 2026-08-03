@@ -199,8 +199,13 @@ def get_van_dues_report(academic_year: Optional[str] = Query(None), db: Session 
     return results
 
 
-@router.put("/payments/{payment_id}", response_model=schemas.VanPaymentOut, dependencies=[Depends(require_role(["admin"]))])
-def update_van_payment(payment_id: int, payload: schemas.VanPaymentUpdate, db: Session = Depends(get_db)):
+@router.put("/payments/{payment_id}", response_model=schemas.VanPaymentOut)
+def update_van_payment(
+    payment_id: int, 
+    payload: schemas.VanPaymentUpdate, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_role(["admin"]))
+):
     payment = db.query(models.VanPayment).filter(models.VanPayment.id == payment_id).first()
     if not payment:
         raise HTTPException(404, "Payment not found")
@@ -211,6 +216,14 @@ def update_van_payment(payment_id: int, payload: schemas.VanPaymentUpdate, db: S
     payment.payment_date = payload.payment_date
     payment.payment_mode = payload.payment_mode
     payment.month = payload.month
+
+    if current_user:
+        audit = models.AuditLog(
+            user_id=current_user.id,
+            action="Update Van Payment",
+            details=f"Van Payment ID {payment.id} updated. New amount: ₹{payload.amount_paid}, Month: {payload.month}"
+        )
+        db.add(audit)
 
     db.commit()
     db.refresh(payment)

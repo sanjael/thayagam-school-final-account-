@@ -184,8 +184,13 @@ def cancel_payment(payment_id: int, payload: CancelRequest, db: Session = Depend
     return {"message": "Payment cancelled successfully"}
 
 
-@router.put("/{payment_id}", response_model=schemas.FeePaymentOut, dependencies=[Depends(require_role(["admin"]))])
-def update_payment(payment_id: int, payload: schemas.FeePaymentUpdate, db: Session = Depends(get_db)):
+@router.put("/{payment_id}", response_model=schemas.FeePaymentOut)
+def update_payment(
+    payment_id: int, 
+    payload: schemas.FeePaymentUpdate, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(require_role(["admin"]))
+):
     payment = db.query(models.FeePayment).filter(models.FeePayment.id == payment_id).first()
     if not payment:
         raise HTTPException(404, "Payment not found")
@@ -212,12 +217,14 @@ def update_payment(payment_id: int, payload: schemas.FeePaymentUpdate, db: Sessi
     new_total_paid = previous_paid + payment.amount_paid
     payment.balance = max(Decimal("0"), (payment.total_fee + payment.fine) - payment.discount - new_total_paid)
 
-    audit = models.AuditLog(
-        user_id=1,
-        action="Update Payment",
-        details=f"Payment ID {payment.id} updated. New amount: ₹{payload.amount_paid}, Date: {payload.payment_date}"
-    )
-    db.add(audit)
+    if current_user:
+        audit = models.AuditLog(
+            user_id=current_user.id,
+            action="Update Payment",
+            details=f"Payment ID {payment.id} updated. New amount: ₹{payload.amount_paid}, Date: {payload.payment_date}"
+        )
+        db.add(audit)
+    
     db.commit()
     db.refresh(payment)
     return _enrich(payment)
