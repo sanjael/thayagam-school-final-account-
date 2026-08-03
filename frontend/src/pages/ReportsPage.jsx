@@ -21,6 +21,7 @@ export default function ReportsPage() {
   const [tab, setTab] = useState('pending');
   const [summary, setSummary] = useState(null);
   const [pending, setPending] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [classWise, setClassWise] = useState([]);
   const [daybook, setDaybook] = useState(null);
   const [collectionTrend, setCollectionTrend] = useState([]);
@@ -71,6 +72,7 @@ export default function ReportsPage() {
     api.getPendingReport().then(setPending).catch(console.error);
     api.getClassWiseReport().then(setClassWise).catch(console.error);
     api.getCollectionTrend(dateFilter === 'This Month' ? 'month' : 'week').then(setCollectionTrend).catch(console.error);
+    api.getPayments().then(setPayments).catch(console.error);
     
     api.getDayBook(new Date().toISOString().slice(0, 10)).then(setDaybook).catch(console.error);
   }
@@ -99,6 +101,43 @@ export default function ReportsPage() {
       return matchSearch && matchClass && matchTerm;
     });
   }, [pending, searchQuery, classFilter, termFilter]);
+
+  const filteredPayments = useMemo(() => {
+    return payments.filter(p => {
+      if (p.is_cancelled) return false;
+      const studentName = p.student_name || '';
+      const className = p.class_name || p.class || '';
+      const matchSearch = studentName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          className.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchClass = classFilter ? className === classFilter : true;
+      const matchTerm = termFilter ? p.term === termFilter : true;
+      if (!matchSearch || !matchClass || !matchTerm) return false;
+      
+      if (dateFilter && dateFilter !== 'All') {
+        const pDate = new Date(p.payment_date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (dateFilter === 'Today') {
+          const compDate = new Date(p.payment_date);
+          return compDate.toDateString() === new Date().toDateString();
+        } else if (dateFilter === 'Yesterday') {
+          const compDate = new Date(p.payment_date);
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          return compDate.toDateString() === yesterday.toDateString();
+        } else if (dateFilter === 'This Week') {
+          const startOfWeek = new Date(today);
+          startOfWeek.setDate(today.getDate() - today.getDay());
+          return pDate >= startOfWeek;
+        } else if (dateFilter === 'This Month') {
+          const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+          return pDate >= startOfMonth;
+        }
+      }
+      return true;
+    });
+  }, [payments, searchQuery, classFilter, termFilter, dateFilter]);
 
   // Actions
   function handleCollectNow(studentId) {
@@ -142,6 +181,31 @@ export default function ReportsPage() {
       const link = document.createElement("a");
       link.setAttribute("href", url);
       link.setAttribute("download", `Pending_Fees_Report_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } else if (tab === 'collection') {
+      if (filteredPayments.length === 0) {
+        alert("No fee collection records to export.");
+        return;
+      }
+      const headers = ["Date", "Receipt No", "Student Name", "Class", "Term", "Payment Mode", "Amount Paid"];
+      const rows = filteredPayments.map(p => [
+        `"${p.payment_date || ''}"`,
+        `"${p.receipt_no || ''}"`,
+        `"${p.student_name.replace(/"/g, '""')}"`,
+        `"${p.class_name || p.class || ''}"`,
+        `"${p.term || ''}"`,
+        `"${p.payment_mode || p.mode || ''}"`,
+        p.amount_paid || 0
+      ]);
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Fees_Collection_Report_${new Date().toISOString().slice(0,10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -237,6 +301,44 @@ export default function ReportsPage() {
               <td style="padding: 9px 12px; font-size: 12px; font-weight: bold;">₹${filteredPending.reduce((sum, p) => sum + (p.total_fee || 0), 0).toLocaleString('en-IN')}</td>
               <td style="color: #16a34a; padding: 9px 12px; font-size: 12px; font-weight: bold;">₹${filteredPending.reduce((sum, p) => sum + (p.amount_paid || 0), 0).toLocaleString('en-IN')}</td>
               <td style="color: #dc2626; padding: 9px 12px; font-size: 12px; font-weight: bold;">₹${filteredPending.reduce((sum, p) => sum + (p.balance || 0), 0).toLocaleString('en-IN')}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+    } else if (tab === 'collection') {
+      title = "Fees Collection Report";
+      contentHtml = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center;">#</th>
+              <th>Date</th>
+              <th>Receipt No</th>
+              <th>Student Name</th>
+              <th>Class</th>
+              <th>Term</th>
+              <th>Mode</th>
+              <th>Amount Paid</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredPayments.map((p, i) => `
+              <tr>
+                <td style="text-align: center;">${i + 1}</td>
+                <td>${p.payment_date || ''}</td>
+                <td><b style="color: #059669;">${p.receipt_no || ''}</b></td>
+                <td><b>${p.student_name || ''}</b></td>
+                <td>${p.class_name || p.class || ''}</td>
+                <td>${p.term || ''}</td>
+                <td style="text-transform: capitalize;">${p.payment_mode || p.mode || ''}</td>
+                <td style="color: #16a34a; font-weight: bold;">₹${Number(p.amount_paid || 0).toLocaleString('en-IN')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+          <tfoot>
+            <tr style="font-weight: bold; border-top: 2px solid #cbd5e1; background-color: #f8fafc;">
+              <td colspan="7" style="padding: 9px 12px; font-size: 12px; text-align: left;">Total Collection</td>
+              <td style="color: #16a34a; padding: 9px 12px; font-size: 12px; font-weight: bold;">₹${filteredPayments.reduce((sum, p) => sum + (p.amount_paid || 0), 0).toLocaleString('en-IN')}</td>
             </tr>
           </tfoot>
         </table>
@@ -380,6 +482,44 @@ export default function ReportsPage() {
               <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredPending.reduce((sum, p) => sum + (p.total_fee || 0), 0).toLocaleString('en-IN')}</td>
               <td style="color: #16a34a; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredPending.reduce((sum, p) => sum + (p.amount_paid || 0), 0).toLocaleString('en-IN')}</td>
               <td style="color: #dc2626; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredPending.reduce((sum, p) => sum + (p.balance || 0), 0).toLocaleString('en-IN')}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+    } else if (tab === 'collection') {
+      title = "Fees Collection Report";
+      contentHtml = `
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center; border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">#</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Date</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Receipt No</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Student Name</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Class</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Term</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Mode</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Amount Paid</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredPayments.map((p, i) => `
+              <tr style="${i % 2 === 1 ? 'background-color: #f8fafc;' : ''}">
+                <td style="text-align: center; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${i + 1}</td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${p.payment_date || ''}</td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; color: #059669; font-weight: bold;"><b>${p.receipt_no || ''}</b></td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;"><b>${p.student_name || ''}</b></td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${p.class_name || p.class || ''}</td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${p.term || ''}</td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-transform: capitalize;">${p.payment_mode || p.mode || ''}</td>
+                <td style="color: #16a34a; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">₹${Number(p.amount_paid || 0).toLocaleString('en-IN')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+          <tfoot>
+            <tr style="font-weight: bold; border-top: 2px solid #cbd5e1; background-color: #f8fafc;">
+              <td colspan="7" style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: left;">Total Collection</td>
+              <td style="color: #16a34a; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredPayments.reduce((sum, p) => sum + (p.amount_paid || 0), 0).toLocaleString('en-IN')}</td>
             </tr>
           </tfoot>
         </table>
@@ -568,7 +708,7 @@ export default function ReportsPage() {
             
             {/* Tabs Dropdown/Buttons */}
             <div className="flex gap-2 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
-              {['pending', 'classwise', 'daybook'].map(t => (
+              {['pending', 'collection', 'classwise', 'daybook'].map(t => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
@@ -577,6 +717,7 @@ export default function ReportsPage() {
                   } border border-slate-200 dark:border-slate-700`}
                 >
                   {t === 'pending' ? 'Pending Fees' : 
+                   t === 'collection' ? 'Fees Collection' : 
                    t === 'classwise' ? 'Collection by Class' : 
                    'Daily Report'}
                 </button>
@@ -603,8 +744,8 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          {/* Filters Bar (Only for Pending) */}
-          {tab === 'pending' && (
+          {/* Filters Bar (Only for Pending or Collection) */}
+          {(tab === 'pending' || tab === 'collection') && (
             <div className="p-4 flex flex-wrap gap-4 items-center bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 print:hidden">
               <div className="relative flex-1 min-w-[200px]">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -695,6 +836,53 @@ export default function ReportsPage() {
                         <td className="px-6 py-4 text-right font-black text-emerald-600">{fmt(filteredPending.reduce((sum, p) => sum + (p.amount_paid || 0), 0))}</td>
                         <td className="px-6 py-4 text-right font-black text-rose-600">{fmt(filteredPending.reduce((sum, p) => sum + (p.balance || 0), 0))}</td>
                         <td className="px-6 py-4 print:hidden"></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                )}
+              </div>
+            )}
+
+            {tab === 'collection' && (
+              <div className="overflow-x-auto">
+                {filteredPayments.length === 0 ? (
+                  <div className="py-20 flex flex-col items-center justify-center text-center">
+                    <div className="w-24 h-24 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mb-4">
+                      <IndianRupee size={48} />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">No Fees Collected</h3>
+                    <p className="text-slate-500 mt-1 max-w-sm">No payment records match your filters.</p>
+                  </div>
+                ) : (
+                  <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
+                    <thead className="bg-slate-50 dark:bg-slate-900 text-xs text-slate-500 font-bold uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">
+                      <tr>
+                        <th className="px-6 py-4">Date</th>
+                        <th className="px-6 py-4">Receipt No</th>
+                        <th className="px-6 py-4">Student</th>
+                        <th className="px-6 py-4">Class</th>
+                        <th className="px-6 py-4">Term</th>
+                        <th className="px-6 py-4">Mode</th>
+                        <th className="px-6 py-4 text-right">Amount Paid</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                      {filteredPayments.map((p, i) => (
+                        <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                          <td className="px-6 py-4 text-slate-500">{p.payment_date}</td>
+                          <td className="px-6 py-4 font-mono text-xs font-bold text-emerald-600">{p.receipt_no}</td>
+                          <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">{p.student_name}</td>
+                          <td className="px-6 py-4 text-slate-500">{p.class_name || p.class}</td>
+                          <td className="px-6 py-4"><span className="bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold">{p.term}</span></td>
+                          <td className="px-6 py-4 capitalize"><span className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded text-xs font-bold">{p.payment_mode || p.mode}</span></td>
+                          <td className="px-6 py-4 text-right font-bold text-emerald-600">{fmt(p.amount_paid)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot className="bg-slate-50 dark:bg-slate-900 border-t-2 border-slate-200 dark:border-slate-700 font-extrabold text-slate-900 dark:text-white">
+                      <tr>
+                        <td className="px-6 py-4" colSpan={6}>Total Collected</td>
+                        <td className="px-6 py-4 text-right font-black text-emerald-600">{fmt(filteredPayments.reduce((sum, p) => sum + (p.amount_paid || 0), 0))}</td>
                       </tr>
                     </tfoot>
                   </table>
