@@ -3,7 +3,7 @@ import Layout from '../components/Layout';
 import { api } from '../api';
 import { useApp } from '../AppContext';
 import { useAuth } from '../AuthContext';
-import { Search, Plus, Trash2, Printer, XCircle, CreditCard, Check, AlertTriangle, Users, Bus } from 'lucide-react';
+import { Search, Plus, Trash2, Printer, XCircle, CreditCard, Check, AlertTriangle, Users, Bus, Edit } from 'lucide-react';
 
 export default function VanFeesPage() {
   const { t } = useApp();
@@ -155,6 +155,15 @@ export default function VanFeesPage() {
       .finally(() => setLoading(false));
   }
 
+  function handleSendVanReminder(phone, studentName, unpaidMonths, totalPending) {
+    if (!phone) {
+      alert("No phone number found for this student. Please update their profile.");
+      return;
+    }
+    const message = `Dear Parent 👨‍👩‍👧,\nGreetings from *Thaayagam School* 🏫!\n\nThis is a gentle reminder regarding the pending *Van Fee* balance for your ward, *${studentName}*.\n\n📅 *Unpaid Months:* ${unpaidMonths.join(', ')}\n💰 *Pending Amount:* ${fmt(totalPending)}\n\nKindly clear the dues at the earliest.\n\nThank you for your cooperation! ✨`;
+    window.open(`https://api.whatsapp.com/send?phone=91${phone.replace(/\D/g,'')}&text=${encodeURIComponent(message)}`, '_blank');
+  }
+
   // Filtered riders for search
   const filteredRiders = useMemo(() => {
     return riders.filter(r => {
@@ -184,8 +193,15 @@ export default function VanFeesPage() {
   // Filter out students who are already van riders
   const unassignedStudents = useMemo(() => {
     const riderIds = new Set(riders.map(r => r.student_id));
-    return allStudents.filter(s => !riderIds.has(s.id) && s.is_active);
-  }, [allStudents, riders]);
+    if (riderForm.student_id) {
+      riderIds.delete(Number(riderForm.student_id));
+    }
+    return allStudents.filter(s => {
+      const isUnassigned = !riderIds.has(s.id) && s.is_active;
+      const matchClass = classFilter ? s.class_name && s.class_name.includes(classFilter) : true;
+      return isUnassigned && matchClass;
+    });
+  }, [allStudents, riders, classFilter, riderForm.student_id]);
 
   // Print Receipt handler
   function printReceipt(receipt) {
@@ -322,16 +338,28 @@ export default function VanFeesPage() {
               {/* Allocation form */}
               <div className="bg-slate-50 dark:bg-slate-950 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4">
                 <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
-                  <Plus size={16} className="text-amber-500" /> Allocate Van Rider
+                  {riders.some(r => r.student_id === Number(riderForm.student_id)) ? (
+                    <>
+                      <Edit size={16} className="text-amber-500" /> Edit Van Rider
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={16} className="text-amber-500" /> Allocate Van Rider
+                    </>
+                  )}
                 </h3>
                 <form onSubmit={handleAddRider} className="space-y-4">
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Select Student</label>
+                    <div className="flex justify-between items-center mb-1.5">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Select Student</label>
+                      {classFilter && <span className="text-[9px] font-bold text-amber-500">Filtered by {classFilter}</span>}
+                    </div>
                     <select
                       value={riderForm.student_id}
                       onChange={e => setRiderForm(f => ({ ...f, student_id: e.target.value }))}
+                      disabled={riders.some(r => r.student_id === Number(riderForm.student_id))}
                       required
-                      className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-xs font-bold outline-none focus:border-amber-500 text-slate-900 dark:text-slate-100 transition"
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-xs font-bold outline-none focus:border-amber-500 text-slate-900 dark:text-slate-100 transition disabled:opacity-75"
                     >
                       <option value="">Choose student...</option>
                       {unassignedStudents.map(s => (
@@ -356,8 +384,17 @@ export default function VanFeesPage() {
                     type="submit"
                     className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-slate-950 font-bold py-2.5 rounded-xl text-xs transition shadow-md"
                   >
-                    Allocate Van Route
+                    {riders.some(r => r.student_id === Number(riderForm.student_id)) ? "Update Fee Amount" : "Allocate Van Route"}
                   </button>
+                  {riders.some(r => r.student_id === Number(riderForm.student_id)) && (
+                    <button
+                      type="button"
+                      onClick={() => setRiderForm({ student_id: '', monthly_fee: '' })}
+                      className="w-full bg-slate-200 hover:bg-slate-350 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-750 dark:text-slate-300 font-bold py-2.5 rounded-xl text-xs transition mt-2"
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
                 </form>
               </div>
 
@@ -421,7 +458,14 @@ export default function VanFeesPage() {
                             </td>
                             <td className="px-5 py-3.5">{r.class_name || 'N/A'}</td>
                             <td className="px-5 py-3.5 text-right font-bold text-slate-850 dark:text-slate-100">{fmt(r.monthly_fee)}</td>
-                            <td className="px-5 py-3.5 text-center">
+                            <td className="px-5 py-3.5 text-center flex gap-1 justify-center">
+                              <button
+                                onClick={() => setRiderForm({ student_id: r.student_id, monthly_fee: r.monthly_fee })}
+                                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 transition"
+                                title="Edit monthly fee"
+                              >
+                                <Edit size={14} />
+                              </button>
                               <button
                                 onClick={() => handleDeallocate(r.student_id)}
                                 className="p-1.5 hover:bg-rose-50 hover:text-rose-600 rounded-lg text-slate-400 transition"
@@ -464,7 +508,7 @@ export default function VanFeesPage() {
 
               <form onSubmit={handleRecordPayment} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Select Van Rider</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Student Name</label>
                   <select
                     value={payForm.student_id}
                     onChange={e => handleRiderChange(e.target.value)}
@@ -663,6 +707,7 @@ export default function VanFeesPage() {
                         ))}
                         <th className="px-4 py-3.5 text-right">Total Paid</th>
                         <th className="px-4 py-3.5 text-right">Total Due</th>
+                        <th className="px-4 py-3.5 text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -685,6 +730,22 @@ export default function VanFeesPage() {
                           ))}
                           <td className="px-4 py-3.5 text-right font-black text-emerald-600">{fmt(d.total_paid)}</td>
                           <td className="px-4 py-3.5 text-right font-black text-rose-600">{fmt(d.total_pending)}</td>
+                          <td className="px-4 py-3.5 text-center">
+                            {d.total_pending > 0 ? (
+                              <button 
+                                onClick={() => {
+                                  const unpaidMonthsList = d.months.filter(m => m.status === 'Unpaid').map(m => m.month);
+                                  handleSendVanReminder(d.phone, d.student_name, unpaidMonthsList, d.total_pending);
+                                }}
+                                className="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-[10px] rounded-lg transition"
+                                title="Send WhatsApp Fee Reminder"
+                              >
+                                Remind
+                              </button>
+                            ) : (
+                              <span className="text-emerald-500 text-[10px] font-bold">Paid</span>
+                            )}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
