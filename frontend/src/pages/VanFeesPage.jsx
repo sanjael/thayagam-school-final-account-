@@ -191,13 +191,13 @@ export default function VanFeesPage() {
     });
   }, [duesReport, searchQuery, classFilter]);
 
-  // Filtered riders for the payment dropdown
-  const paymentDropdownRiders = useMemo(() => {
-    return riders.filter(r => {
-      const cls = r.class_name || '';
+  // Filtered students for the payment dropdown (all active students, filtered by class)
+  const paymentDropdownStudents = useMemo(() => {
+    return allStudents.filter(s => {
+      const cls = s.class_name || '';
       return paymentClassFilter ? cls.includes(paymentClassFilter) : true;
     });
-  }, [riders, paymentClassFilter]);
+  }, [allStudents, paymentClassFilter]);
 
   // Filter out students who are already van riders
   const unassignedStudents = useMemo(() => {
@@ -550,12 +550,16 @@ export default function VanFeesPage() {
                     required
                     className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-xs font-bold outline-none focus:border-amber-500 text-slate-900 dark:text-slate-100 transition"
                   >
-                    <option value="">Choose active rider...</option>
-                    {paymentDropdownRiders.map(r => (
-                      <option key={r.student_id} value={r.student_id}>
-                        {r.student_name} - ₹{Number(r.monthly_fee).toLocaleString('en-IN')}
-                      </option>
-                    ))}
+                    <option value="">Choose student...</option>
+                    {paymentDropdownStudents.map(s => {
+                      const rider = riders.find(r => r.student_id === s.id);
+                      const feeText = rider ? ` - ₹${Number(rider.monthly_fee).toLocaleString('en-IN')}` : '';
+                      return (
+                        <option key={s.id} value={s.id}>
+                          {s.name}{feeText}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 
