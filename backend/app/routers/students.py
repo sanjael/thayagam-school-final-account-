@@ -43,6 +43,7 @@ def _enrich(s: models.Student, db: Session = None, ay: str = None, active_terms:
         ).scalar() or 0
 
         bal = float(total_fee) - float(total_paid)
+        out.total_fees = total_fee
         out.pending_fees = bal if bal > 0 else 0.0
 
     return out
@@ -107,6 +108,7 @@ def get_students(
             out.class_name = None
 
         total_fee = fee_map.get(s.class_id, 0.0) + float(s.old_fee or 0) + float(s.van_fee or 0)
+        out.total_fees = total_fee
         total_paid = paid_map.get(s.id, 0.0)
         bal = total_fee - total_paid
         out.pending_fees = bal if bal > 0 else 0.0

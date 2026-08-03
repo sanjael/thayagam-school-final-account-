@@ -22,6 +22,7 @@ export default function ReportsPage() {
   const [summary, setSummary] = useState(null);
   const [pending, setPending] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [students, setStudents] = useState([]);
   const [classWise, setClassWise] = useState([]);
   const [daybook, setDaybook] = useState(null);
   const [collectionTrend, setCollectionTrend] = useState([]);
@@ -73,6 +74,7 @@ export default function ReportsPage() {
     api.getClassWiseReport().then(setClassWise).catch(console.error);
     api.getCollectionTrend(dateFilter === 'This Month' ? 'month' : 'week').then(setCollectionTrend).catch(console.error);
     api.getPayments().then(setPayments).catch(console.error);
+    api.getStudents().then(setStudents).catch(console.error);
     
     api.getDayBook(new Date().toISOString().slice(0, 10)).then(setDaybook).catch(console.error);
   }
@@ -139,6 +141,17 @@ export default function ReportsPage() {
     });
   }, [payments, searchQuery, classFilter, termFilter, dateFilter]);
 
+  const filteredStudents = useMemo(() => {
+    return students.filter(s => {
+      const studentName = s.name || '';
+      const className = s.class_name || '';
+      const matchSearch = studentName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          className.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchClass = classFilter ? className.includes(classFilter) : true;
+      return matchSearch && matchClass;
+    });
+  }, [students, searchQuery, classFilter]);
+
   // Actions
   function handleCollectNow(studentId) {
     api.getStudent(studentId).then((student) => {
@@ -181,6 +194,35 @@ export default function ReportsPage() {
       const link = document.createElement("a");
       link.setAttribute("href", url);
       link.setAttribute("download", `Pending_Fees_Report_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } else if (tab === 'overall') {
+      if (filteredStudents.length === 0) {
+        alert("No overall fee records to export.");
+        return;
+      }
+      const headers = ["Admission No", "Student Name", "Class", "Total Fees", "Amount Paid", "Balance"];
+      const rows = filteredStudents.map(s => {
+        const total = s.total_fees || 0;
+        const balance = s.pending_fees || 0;
+        const paid = Math.max(0, total - balance);
+        return [
+          `"${s.admission_no || ''}"`,
+          `"${s.name.replace(/"/g, '""')}"`,
+          `"${s.class_name || ''}"`,
+          total,
+          paid,
+          balance
+        ];
+      });
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Overall_Fees_Report_${new Date().toISOString().slice(0,10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -301,6 +343,49 @@ export default function ReportsPage() {
               <td style="padding: 9px 12px; font-size: 12px; font-weight: bold;">₹${filteredPending.reduce((sum, p) => sum + (p.total_fee || 0), 0).toLocaleString('en-IN')}</td>
               <td style="color: #16a34a; padding: 9px 12px; font-size: 12px; font-weight: bold;">₹${filteredPending.reduce((sum, p) => sum + (p.amount_paid || 0), 0).toLocaleString('en-IN')}</td>
               <td style="color: #dc2626; padding: 9px 12px; font-size: 12px; font-weight: bold;">₹${filteredPending.reduce((sum, p) => sum + (p.balance || 0), 0).toLocaleString('en-IN')}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+    } else if (tab === 'overall') {
+      title = "Overall Fees Report";
+      contentHtml = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center;">#</th>
+              <th>Adm No</th>
+              <th>Student Name</th>
+              <th>Class</th>
+              <th>Total Fees</th>
+              <th>Paid</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredStudents.map((s, i) => {
+              const total = s.total_fees || 0;
+              const balance = s.pending_fees || 0;
+              const paid = Math.max(0, total - balance);
+              return `
+                <tr>
+                  <td style="text-align: center;">${i + 1}</td>
+                  <td><b>${s.admission_no || ''}</b></td>
+                  <td><b>${s.name}</b></td>
+                  <td>${s.class_name || ''}</td>
+                  <td>₹${total.toLocaleString('en-IN')}</td>
+                  <td style="color: #16a34a;">₹${paid.toLocaleString('en-IN')}</td>
+                  <td style="color: #dc2626; font-weight: bold;">₹${balance.toLocaleString('en-IN')}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+          <tfoot>
+            <tr style="font-weight: bold; border-top: 2px solid #cbd5e1; background-color: #f8fafc;">
+              <td colspan="4" style="padding: 9px 12px; font-size: 12px; text-align: left;">Total</td>
+              <td style="padding: 9px 12px; font-size: 12px; font-weight: bold;">₹${filteredStudents.reduce((sum, s) => sum + (s.total_fees || 0), 0).toLocaleString('en-IN')}</td>
+              <td style="color: #16a34a; padding: 9px 12px; font-size: 12px; font-weight: bold;">₹${filteredStudents.reduce((sum, s) => sum + Math.max(0, (s.total_fees || 0) - (s.pending_fees || 0)), 0).toLocaleString('en-IN')}</td>
+              <td style="color: #dc2626; padding: 9px 12px; font-size: 12px; font-weight: bold;">₹${filteredStudents.reduce((sum, s) => sum + (s.pending_fees || 0), 0).toLocaleString('en-IN')}</td>
             </tr>
           </tfoot>
         </table>
@@ -482,6 +567,49 @@ export default function ReportsPage() {
               <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredPending.reduce((sum, p) => sum + (p.total_fee || 0), 0).toLocaleString('en-IN')}</td>
               <td style="color: #16a34a; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredPending.reduce((sum, p) => sum + (p.amount_paid || 0), 0).toLocaleString('en-IN')}</td>
               <td style="color: #dc2626; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredPending.reduce((sum, p) => sum + (p.balance || 0), 0).toLocaleString('en-IN')}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+    } else if (tab === 'overall') {
+      title = "Overall Fees Report";
+      contentHtml = `
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center; border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">#</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Adm No</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Student Name</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Class</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Total Fees</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Paid</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredStudents.map((s, i) => {
+              const total = s.total_fees || 0;
+              const balance = s.pending_fees || 0;
+              const paid = Math.max(0, total - balance);
+              return `
+                <tr style="${i % 2 === 1 ? 'background-color: #f8fafc;' : ''}">
+                  <td style="text-align: center; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${i + 1}</td>
+                  <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;"><b>${s.admission_no || ''}</b></td>
+                  <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;"><b>${s.name}</b></td>
+                  <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;">${s.class_name || ''}</td>
+                  <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">₹${total.toLocaleString('en-IN')}</td>
+                  <td style="color: #16a34a; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">₹${paid.toLocaleString('en-IN')}</td>
+                  <td style="color: #dc2626; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">₹${balance.toLocaleString('en-IN')}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+          <tfoot>
+            <tr style="font-weight: bold; border-top: 2px solid #cbd5e1; background-color: #f8fafc;">
+              <td colspan="4" style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: left;">Total</td>
+              <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredStudents.reduce((sum, s) => sum + (s.total_fees || 0), 0).toLocaleString('en-IN')}</td>
+              <td style="color: #16a34a; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredStudents.reduce((sum, s) => sum + Math.max(0, (s.total_fees || 0) - (s.pending_fees || 0)), 0).toLocaleString('en-IN')}</td>
+              <td style="color: #dc2626; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredStudents.reduce((sum, s) => sum + (s.pending_fees || 0), 0).toLocaleString('en-IN')}</td>
             </tr>
           </tfoot>
         </table>
@@ -708,7 +836,7 @@ export default function ReportsPage() {
             
             {/* Tabs Dropdown/Buttons */}
             <div className="flex gap-2 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
-              {['pending', 'collection', 'classwise', 'daybook'].map(t => (
+              {['pending', 'overall', 'collection', 'classwise', 'daybook'].map(t => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
@@ -717,6 +845,7 @@ export default function ReportsPage() {
                   } border border-slate-200 dark:border-slate-700`}
                 >
                   {t === 'pending' ? 'Pending Fees' : 
+                   t === 'overall' ? 'Overall Fees' :
                    t === 'collection' ? 'Fees Collection' : 
                    t === 'classwise' ? 'Collection by Class' : 
                    'Daily Report'}
@@ -745,8 +874,8 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          {/* Filters Bar (Only for Pending or Collection) */}
-          {(tab === 'pending' || tab === 'collection') && (
+          {/* Filters Bar (Only for Pending, Overall or Collection) */}
+          {(tab === 'pending' || tab === 'overall' || tab === 'collection') && (
             <div className="p-4 flex flex-wrap gap-4 items-center bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 print:hidden">
               <div className="relative flex-1 min-w-[200px]">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -776,12 +905,14 @@ export default function ReportsPage() {
                 <option value="Class 11">Class 11</option>
                 <option value="Class 12">Class 12</option>
               </select>
-              <select value={termFilter} onChange={e => setTermFilter(e.target.value)} className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-amber-500">
-                <option value="">All Terms</option>
-                <option value="Term 1">Term 1</option>
-                <option value="Term 2">Term 2</option>
-                <option value="Term 3">Term 3</option>
-              </select>
+              {tab !== 'overall' && (
+                <select value={termFilter} onChange={e => setTermFilter(e.target.value)} className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-amber-500">
+                  <option value="">All Terms</option>
+                  <option value="Term 1">Term 1</option>
+                  <option value="Term 2">Term 2</option>
+                  <option value="Term 3">Term 3</option>
+                </select>
+              )}
             </div>
           )}
 
@@ -836,6 +967,63 @@ export default function ReportsPage() {
                         <td className="px-6 py-4 text-right font-black">{fmt(filteredPending.reduce((sum, p) => sum + (p.total_fee || 0), 0))}</td>
                         <td className="px-6 py-4 text-right font-black text-emerald-600">{fmt(filteredPending.reduce((sum, p) => sum + (p.amount_paid || 0), 0))}</td>
                         <td className="px-6 py-4 text-right font-black text-rose-600">{fmt(filteredPending.reduce((sum, p) => sum + (p.balance || 0), 0))}</td>
+                        <td className="px-6 py-4 print:hidden"></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                )}
+              </div>
+            )}
+
+            {tab === 'overall' && (
+              <div className="overflow-x-auto">
+                {filteredStudents.length === 0 ? (
+                  <div className="py-20 flex flex-col items-center justify-center text-center">
+                    <div className="w-24 h-24 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mb-4">
+                      <Users size={48} />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">No Students Found</h3>
+                    <p className="text-slate-500 mt-1 max-w-sm">No students match your filters.</p>
+                  </div>
+                ) : (
+                  <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
+                    <thead className="bg-slate-50 dark:bg-slate-900 text-xs text-slate-500 font-bold uppercase tracking-wider border-b border-slate-100 dark:border-slate-700">
+                      <tr>
+                        <th className="px-6 py-4">Adm No</th>
+                        <th className="px-6 py-4">Student</th>
+                        <th className="px-6 py-4">Class</th>
+                        <th className="px-6 py-4 text-right">Total Fees</th>
+                        <th className="px-6 py-4 text-right">Paid</th>
+                        <th className="px-6 py-4 text-right">Balance</th>
+                        <th className="px-6 py-4 text-center print:hidden">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                      {filteredStudents.map((s, i) => {
+                        const total = s.total_fees || 0;
+                        const balance = s.pending_fees || 0;
+                        const paid = Math.max(0, total - balance);
+                        return (
+                          <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td className="px-6 py-4 font-mono text-xs font-bold text-slate-500">{s.admission_no}</td>
+                            <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">{s.name}</td>
+                            <td className="px-6 py-4 text-slate-500">{s.class_name}</td>
+                            <td className="px-6 py-4 text-right font-bold text-slate-800 dark:text-slate-200">{fmt(total)}</td>
+                            <td className="px-6 py-4 text-right text-emerald-600 font-bold">{fmt(paid)}</td>
+                            <td className="px-6 py-4 text-right font-bold text-rose-600">{fmt(balance)}</td>
+                            <td className="px-6 py-4 text-center print:hidden">
+                              <button onClick={() => handleCollectNow(s.id)} className="px-3 py-1.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs rounded-lg hover:bg-slate-800 transition shadow-sm">Collect</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot className="bg-slate-50 dark:bg-slate-900 border-t-2 border-slate-200 dark:border-slate-700 font-extrabold text-slate-900 dark:text-white">
+                      <tr>
+                        <td className="px-6 py-4" colSpan={3}>Total</td>
+                        <td className="px-6 py-4 text-right font-black">{fmt(filteredStudents.reduce((sum, s) => sum + (s.total_fees || 0), 0))}</td>
+                        <td className="px-6 py-4 text-right font-black text-emerald-600">{fmt(filteredStudents.reduce((sum, s) => sum + Math.max(0, (s.total_fees || 0) - (s.pending_fees || 0)), 0))}</td>
+                        <td className="px-6 py-4 text-right font-black text-rose-600">{fmt(filteredStudents.reduce((sum, s) => sum + (s.pending_fees || 0), 0))}</td>
                         <td className="px-6 py-4 print:hidden"></td>
                       </tr>
                     </tfoot>

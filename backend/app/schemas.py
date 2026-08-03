@@ -93,6 +93,7 @@ class StudentOut(BaseModel):
     old_fee: Optional[float] = 0.0
     van_fee: Optional[float] = 0.0
     created_at: Optional[datetime] = None
+    total_fees: Optional[float] = 0.0
     pending_fees: Optional[float] = 0.0
     class Config:
         from_attributes = True
