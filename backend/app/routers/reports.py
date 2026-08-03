@@ -83,7 +83,7 @@ def get_summary(academic_year: Optional[str] = Query(None), db: Session = Depend
         for term in active_terms:
             total_fee = fee_map.get((s.class_id, term), Decimal("0"))
             if term == "Term 1":
-                total_fee += Decimal(str(s.old_fee or 0)) + Decimal(str(s.van_fee or 0))
+                total_fee += Decimal(str(s.old_fee or 0))
             if total_fee > 0:
                 paid = paid_map.get((s.id, term), Decimal("0"))
                 bal = total_fee - paid
@@ -150,7 +150,7 @@ def get_pending(academic_year: Optional[str] = Query(None), class_id: Optional[i
         for term in active_terms:
             total_fee = fee_map.get((s.class_id, term), Decimal("0"))
             if term == "Term 1":
-                total_fee += Decimal(str(s.old_fee or 0)) + Decimal(str(s.van_fee or 0))
+                total_fee += Decimal(str(s.old_fee or 0))
             if total_fee == 0:
                 continue
             total_paid = paid_map.get((s.id, term), Decimal("0"))
@@ -191,7 +191,7 @@ def student_fee_breakdown(student_id: int, db: Session = Depends(get_db)):
         ).scalar() or Decimal("0")
 
         if term == "Term 1":
-            total_fee += Decimal(str(s.old_fee or 0)) + Decimal(str(s.van_fee or 0))
+            total_fee += Decimal(str(s.old_fee or 0))
 
         total_paid = db.query(func.sum(models.FeePayment.amount_paid)).filter(
             models.FeePayment.student_id      == s.id,

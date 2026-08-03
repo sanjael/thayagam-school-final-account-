@@ -124,4 +124,13 @@ export const api = {
 
   // Receipt PDF URL
   receiptPdfUrl: (paymentId) => `${BASE}/receipts/${paymentId}/pdf`,
+
+  // Van Fees
+  getVanRiders: () => request('/van-fees/riders'),
+  allocateVanRider: (student_id, monthly_fee) => request('/van-fees/riders', { method: 'POST', body: JSON.stringify({ student_id, monthly_fee }) }),
+  deallocateVanRider: (student_id) => request(`/van-fees/riders/${student_id}`, { method: 'DELETE' }),
+  payVanFee: (data) => request('/van-fees/pay', { method: 'POST', body: JSON.stringify(data) }),
+  getVanPayments: (academic_year) => request(`/van-fees/payments${academic_year ? `?academic_year=${academic_year}` : ''}`),
+  cancelVanPayment: (id) => request(`/van-fees/payments/${id}/cancel`, { method: 'PUT' }),
+  getVanDuesReport: (academic_year) => request(`/van-fees/reports/dues${academic_year ? `?academic_year=${academic_year}` : ''}`),
 };

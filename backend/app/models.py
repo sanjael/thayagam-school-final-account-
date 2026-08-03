@@ -2,7 +2,7 @@ from sqlalchemy import (
     Column, Integer, String, Boolean, DateTime, Date,
     Enum, Text, DECIMAL, ForeignKey, UniqueConstraint, func
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from app.database import Base
 import enum
 
@@ -158,3 +158,30 @@ class AuditLog(Base):
     created_at  = Column(DateTime, server_default=func.now())
 
     user = relationship("User")
+
+
+class VanRider(Base):
+    __tablename__ = "van_riders"
+    id           = Column(Integer, primary_key=True, index=True)
+    student_id   = Column(Integer, ForeignKey("students.id"), unique=True, nullable=False)
+    monthly_fee  = Column(DECIMAL(10, 2), nullable=False, default=0.0)
+    created_at   = Column(DateTime, server_default=func.now())
+
+    student = relationship("Student", backref=backref("van_rider", uselist=False, cascade="all, delete-orphan"))
+
+
+class VanPayment(Base):
+    __tablename__ = "van_payments"
+    id            = Column(Integer, primary_key=True, index=True)
+    student_id    = Column(Integer, ForeignKey("students.id"), nullable=False)
+    month         = Column(String(20), nullable=False) # e.g. "June 2026", "July 2026"
+    amount_paid   = Column(DECIMAL(10, 2), nullable=False)
+    payment_date  = Column(Date, nullable=False)
+    payment_mode  = Column(String(50), nullable=False)
+    receipt_no    = Column(String(50), unique=True, nullable=False)
+    academic_year = Column(String(20), nullable=False)
+    is_cancelled  = Column(Boolean, default=False)
+    created_at    = Column(DateTime, server_default=func.now())
+
+    student = relationship("Student")
+

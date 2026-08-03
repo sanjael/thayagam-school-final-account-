@@ -5,7 +5,7 @@ import { useAuth } from '../AuthContext';
 import { api, BASE_URL } from '../api';
 import {
   LayoutDashboard, Users, BookOpen, CreditCard, Receipt,
-  FileBarChart, Settings, ShieldAlert, LogOut, UserCog, KeyRound, X
+  FileBarChart, Settings, ShieldAlert, LogOut, UserCog, KeyRound, X, Bus
 } from 'lucide-react';
 
 const NAV_BY_ROLE = {
@@ -15,6 +15,7 @@ const NAV_BY_ROLE = {
     { to: '/classes',     label: 'Classes',         icon: <BookOpen size={20} strokeWidth={2.5} /> },
     { to: '/fees',        label: 'Fee Structure',   icon: <CreditCard size={20} strokeWidth={2.5} /> },
     { to: '/payments',    label: 'Payments',        icon: <Receipt size={20} strokeWidth={2.5} /> },
+    { to: '/van-fees',    label: 'Van Fees',        icon: <Bus size={20} strokeWidth={2.5} /> },
     { to: '/reports',     label: 'Reports',         icon: <FileBarChart size={20} strokeWidth={2.5} /> },
     { to: '/admin/users', label: 'User Management', icon: <UserCog size={20} strokeWidth={2.5} /> },
     { to: '/audit-logs',  label: 'Audit Logs',      icon: <ShieldAlert size={20} strokeWidth={2.5} /> },
@@ -24,6 +25,7 @@ const NAV_BY_ROLE = {
     { to: '/dashboard',   label: 'Dashboard',      icon: <LayoutDashboard size={20} strokeWidth={2.5} /> },
     { to: '/payments',    label: 'Payments',        icon: <Receipt size={20} strokeWidth={2.5} /> },
     { to: '/students',    label: 'Students',        icon: <Users size={20} strokeWidth={2.5} /> },
+    { to: '/van-fees',    label: 'Van Fees',        icon: <Bus size={20} strokeWidth={2.5} /> },
     { to: '/reports',     label: 'Reports',         icon: <FileBarChart size={20} strokeWidth={2.5} /> },
   ],
   principal: [

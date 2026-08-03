@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from app.database import engine, Base, SessionLocal
 from app.models import User, SchoolSettings, Class
 from app.auth import hash_password
-from app.routers import auth, classes, students, fee_structure, payments, reports, settings, receipts, audit, users
+from app.routers import auth, classes, students, fee_structure, payments, reports, settings, receipts, audit, users, van_fees
 from app.scheduler import start_scheduler
 import os
 
@@ -121,6 +121,7 @@ app.include_router(settings.router)
 app.include_router(receipts.router)
 app.include_router(audit.router)
 app.include_router(users.router)
+app.include_router(van_fees.router)
 
 
 @app.get("/")

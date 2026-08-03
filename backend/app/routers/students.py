@@ -33,7 +33,7 @@ def _enrich(s: models.Student, db: Session = None, ay: str = None, active_terms:
             models.FeeStructure.term.in_(terms),
             models.FeeStructure.academic_year == ay
         ).scalar() or 0
-        total_fee = float(total_fee) + float(s.old_fee or 0) + float(s.van_fee or 0)
+        total_fee = float(total_fee) + float(s.old_fee or 0)
 
         total_paid = db.query(func.sum(models.FeePayment.amount_paid)).filter(
             models.FeePayment.student_id == s.id,
@@ -107,7 +107,7 @@ def get_students(
         else:
             out.class_name = None
 
-        total_fee = fee_map.get(s.class_id, 0.0) + float(s.old_fee or 0) + float(s.van_fee or 0)
+        total_fee = fee_map.get(s.class_id, 0.0) + float(s.old_fee or 0)
         out.total_fees = total_fee
         total_paid = paid_map.get(s.id, 0.0)
         bal = total_fee - total_paid

@@ -8,7 +8,7 @@ import { FileText, FileSpreadsheet, Plus, Search, MoreVertical, Edit, Trash2, Ey
 
 const EMPTY = {
   admission_no: '', name: '', class_id: '', gender: '',
-  phone: '', address: '', status: 'Active', old_fee: '', van_fee: ''
+  phone: '', address: '', status: 'Active', old_fee: ''
 };
 
 export default function StudentsPage() {
@@ -120,8 +120,7 @@ export default function StudentsPage() {
     const payload = { 
       ...form, 
       class_id: Number(form.class_id),
-      old_fee: Number(form.old_fee || 0),
-      van_fee: Number(form.van_fee || 0)
+      old_fee: Number(form.old_fee || 0)
     };
     try {
       if (editId) await api.updateStudent(editId, payload);
@@ -135,8 +134,7 @@ export default function StudentsPage() {
       admission_no: s.admission_no, name: s.name, class_id: s.class_id,
       gender: s.gender || '',
       phone: s.phone || '', address: s.address || '', status: s.status || 'Active',
-      old_fee: s.old_fee || 0,
-      van_fee: s.van_fee || 0
+      old_fee: s.old_fee || 0
     });
     setEditId(s.id); setShowForm(true);
   }
@@ -802,12 +800,7 @@ export default function StudentsPage() {
                     className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-3 text-sm outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 text-slate-900 dark:text-slate-100 font-bold transition shadow-sm resize-none" />
                 </div>
 
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Van Fees Amount</label>
-                  <input type="number" value={form.van_fee} onChange={f('van_fee')} placeholder="0"
-                    className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-3 text-sm outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 text-slate-900 dark:text-slate-100 font-bold transition shadow-sm" />
-                </div>
-                <div>
+                <div className="col-span-2">
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Old Fees (Previous Dues)</label>
                   <input type="number" value={form.old_fee} onChange={f('old_fee')} placeholder="0"
                     className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-3 text-sm outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 text-slate-900 dark:text-slate-100 font-bold transition shadow-sm" />

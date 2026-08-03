@@ -197,3 +197,48 @@ class AuditLogOut(BaseModel):
     username: Optional[str] = None
     class Config:
         from_attributes = True
+
+
+# ── Van Fees ──────────────────────────────────────────────────
+import datetime as dt
+
+class VanRiderCreate(BaseModel):
+    student_id: int
+    monthly_fee: float
+
+class VanRiderOut(BaseModel):
+    id: int
+    student_id: int
+    student_name: Optional[str] = None
+    admission_no: Optional[str] = None
+    class_name: Optional[str] = None
+    monthly_fee: float
+    created_at: dt.datetime
+    class Config:
+        from_attributes = True
+
+class VanPaymentCreate(BaseModel):
+    student_id: int
+    month: str
+    amount_paid: float
+    payment_date: dt.date
+    payment_mode: str
+    academic_year: str
+
+class VanPaymentOut(BaseModel):
+    id: int
+    student_id: int
+    student_name: Optional[str] = None
+    admission_no: Optional[str] = None
+    class_name: Optional[str] = None
+    month: str
+    amount_paid: float
+    payment_date: dt.date
+    payment_mode: str
+    receipt_no: str
+    academic_year: str
+    is_cancelled: bool
+    created_at: dt.datetime
+    class Config:
+        from_attributes = True
+

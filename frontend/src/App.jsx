@@ -11,6 +11,7 @@ import AuditLogsPage from './pages/AuditLogsPage';
 import LoginPage from './pages/LoginPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import UserManagementPage from './pages/UserManagementPage';
+import VanFeesPage from './pages/VanFeesPage';
 import { useAuth } from './AuthContext';
 
 function ProtectedRoute({ element, roles }) {
@@ -40,6 +41,7 @@ export default function App() {
       <Route path="/fees"      element={<ProtectedRoute element={<FeesPage />} roles={['admin']} />} />
       <Route path="/payments"  element={<ProtectedRoute element={<PaymentsPage />} roles={['admin', 'accountant']} />} />
       <Route path="/reports"   element={<ProtectedRoute element={<ReportsPage />} />} />
+      <Route path="/van-fees"  element={<ProtectedRoute element={<VanFeesPage />} roles={['admin', 'accountant']} />} />
       <Route path="/settings"  element={<ProtectedRoute element={<SettingsPage />} roles={['admin']} />} />
       <Route path="/audit-logs" element={<ProtectedRoute element={<AuditLogsPage />} roles={['admin']} />} />
       <Route path="/admin/users" element={<ProtectedRoute element={<UserManagementPage />} roles={['admin']} />} />
