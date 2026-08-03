@@ -970,6 +970,25 @@ export default function StudentsPage() {
                             <p className="font-bold text-rose-700 mt-0.5">₹{t.balance.toLocaleString('en-IN')}</p>
                           </div>
                         </div>
+                        {t.payments && t.payments.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-dashed border-slate-200 dark:border-slate-800">
+                            <p className="text-[9px] font-black text-slate-400 dark:text-slate-550 uppercase tracking-widest mb-2">Payment Logs</p>
+                            <div className="space-y-1.5">
+                              {t.payments.map((pay) => (
+                                <div key={pay.id} className="flex justify-between items-center text-[11px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1.5 rounded-xl shadow-sm">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-black text-emerald-600 dark:text-emerald-450">₹{pay.amount_paid.toLocaleString('en-IN')}</span>
+                                    <span className="text-slate-400 text-[10px]">{pay.payment_date}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-mono text-[9px] text-slate-400 bg-slate-50 dark:bg-slate-950 px-1.5 py-0.5 rounded-lg border border-slate-100 dark:border-slate-800">{pay.receipt_no}</span>
+                                    <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg">{pay.payment_mode}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

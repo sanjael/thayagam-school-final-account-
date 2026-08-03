@@ -237,12 +237,32 @@ def student_fee_breakdown(student_id: int, db: Session = Depends(get_db)):
             balance = Decimal("0")
         total_pending += balance
 
+        # Query payments for this term
+        payments_q = db.query(models.FeePayment).filter(
+            models.FeePayment.student_id      == s.id,
+            models.FeePayment.term            == term,
+            models.FeePayment.academic_year   == ay,
+            models.FeePayment.is_cancelled    == False
+        ).order_by(models.FeePayment.payment_date.desc()).all()
+        
+        term_payments = [{
+            "id": p.id,
+            "amount_paid": float(p.amount_paid),
+            "payment_date": str(p.payment_date),
+            "payment_mode": p.payment_mode.value if hasattr(p.payment_mode, 'value') else str(p.payment_mode),
+            "receipt_no": p.receipt.receipt_no if p.receipt else f"REC-{p.id}",
+            "fine": float(p.fine or 0),
+            "discount": float(p.discount or 0),
+            "notes": p.notes or ""
+        } for p in payments_q]
+
         breakdown.append({
             "term":       term,
             "total_fee":  float(total_fee),
             "paid":       float(total_paid),
             "balance":    float(balance),
             "status":     "Paid" if balance == 0 and total_fee > 0 else ("Pending" if total_fee > 0 else "No Fee Set"),
+            "payments":   term_payments
         })
 
     if s.old_fee and s.old_fee > 0:
@@ -258,12 +278,32 @@ def student_fee_breakdown(student_id: int, db: Session = Depends(get_db)):
             balance = Decimal("0")
         total_pending += balance
 
+        # Query payments for Old Fee
+        payments_q = db.query(models.FeePayment).filter(
+            models.FeePayment.student_id      == s.id,
+            models.FeePayment.term            == "Old Fee",
+            models.FeePayment.academic_year   == ay,
+            models.FeePayment.is_cancelled    == False
+        ).order_by(models.FeePayment.payment_date.desc()).all()
+        
+        term_payments = [{
+            "id": p.id,
+            "amount_paid": float(p.amount_paid),
+            "payment_date": str(p.payment_date),
+            "payment_mode": p.payment_mode.value if hasattr(p.payment_mode, 'value') else str(p.payment_mode),
+            "receipt_no": p.receipt.receipt_no if p.receipt else f"REC-{p.id}",
+            "fine": float(p.fine or 0),
+            "discount": float(p.discount or 0),
+            "notes": p.notes or ""
+        } for p in payments_q]
+
         breakdown.append({
             "term":       "Old Fee",
             "total_fee":  float(s.old_fee),
             "paid":       float(total_paid),
             "balance":    float(balance),
             "status":     "Paid" if balance == 0 else "Pending",
+            "payments":   term_payments
         })
 
     return {
