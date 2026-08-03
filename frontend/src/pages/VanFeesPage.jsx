@@ -40,7 +40,15 @@ export default function VanFeesPage() {
 
   // Load all students for the allocation drop-down on mount
   useEffect(() => {
-    api.getStudents().then(setAllStudents).catch(console.error);
+    try {
+      const cached = localStorage.getItem('cache_students');
+      if (cached) setAllStudents(JSON.parse(cached));
+    } catch (e) {}
+
+    api.getStudents().then(data => {
+      setAllStudents(data);
+      try { localStorage.setItem('cache_students', JSON.stringify(data)); } catch (e) {}
+    }).catch(console.error);
   }, []);
 
   function loadTabSpecificData() {
@@ -49,23 +57,55 @@ export default function VanFeesPage() {
     setSuccess('');
     
     if (tab === 'riders') {
+      try {
+        const cached = localStorage.getItem('cache_van_riders');
+        if (cached) setRiders(JSON.parse(cached));
+      } catch (e) {}
+
       api.getVanRiders()
-        .then(setRiders)
+        .then(data => {
+          setRiders(data);
+          try { localStorage.setItem('cache_van_riders', JSON.stringify(data)); } catch (e) {}
+        })
         .catch(err => setError(err.message))
         .finally(() => setLoading(false));
     } else if (tab === 'pay') {
+      try {
+        const cached = localStorage.getItem('cache_van_riders');
+        if (cached) setRiders(JSON.parse(cached));
+      } catch (e) {}
+
       api.getVanRiders()
-        .then(setRiders)
+        .then(data => {
+          setRiders(data);
+          try { localStorage.setItem('cache_van_riders', JSON.stringify(data)); } catch (e) {}
+        })
         .catch(err => setError(err.message))
         .finally(() => setLoading(false));
     } else if (tab === 'history') {
+      try {
+        const cached = localStorage.getItem('cache_van_payments');
+        if (cached) setPayments(JSON.parse(cached));
+      } catch (e) {}
+
       api.getVanPayments(activeYear)
-        .then(setPayments)
+        .then(data => {
+          setPayments(data);
+          try { localStorage.setItem('cache_van_payments', JSON.stringify(data)); } catch (e) {}
+        })
         .catch(err => setError(err.message))
         .finally(() => setLoading(false));
     } else if (tab === 'dues') {
+      try {
+        const cached = localStorage.getItem('cache_van_dues');
+        if (cached) setDuesReport(JSON.parse(cached));
+      } catch (e) {}
+
       api.getVanDuesReport(activeYear)
-        .then(setDuesReport)
+        .then(data => {
+          setDuesReport(data);
+          try { localStorage.setItem('cache_van_dues', JSON.stringify(data)); } catch (e) {}
+        })
         .catch(err => setError(err.message))
         .finally(() => setLoading(false));
     }
@@ -335,7 +375,7 @@ export default function VanFeesPage() {
         {/* Tab view layout */}
         <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm relative min-h-[350px]">
           
-          {loading && (
+          {loading && !((tab === 'riders' && riders.length > 0) || (tab === 'pay' && riders.length > 0) || (tab === 'history' && payments.length > 0) || (tab === 'dues' && duesReport.length > 0)) && (
             <div className="absolute inset-0 z-30 flex items-center justify-center bg-white/70 dark:bg-slate-900/70 backdrop-blur-[1px]">
               <div className="animate-spin w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full" />
             </div>
