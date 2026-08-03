@@ -149,11 +149,6 @@ def get_van_dues_report(academic_year: Optional[str] = Query(None), db: Session 
         models.VanPayment.is_cancelled == False
     ).all()
 
-    # Paid map: (student_id, month) -> True
-    paid_map = {}
-    for p in payments_list:
-        paid_map[(p.student_id, p.month)] = True
-
     results = []
     for r in riders:
         student = r.student
@@ -164,21 +159,30 @@ def get_van_dues_report(academic_year: Optional[str] = Query(None), db: Session 
         
         # Calculate paid months and unpaid months
         rider_months = []
-        unpaid_count = 0
-        total_paid_amt = 0.0
+        total_pending = 0.0
 
         # Retrieve actual payments for this rider
         rider_payments = [p for p in payments_list if p.student_id == student.id]
         total_paid_amt = float(sum(p.amount_paid for p in rider_payments))
 
         for m in months:
-            is_paid = paid_map.get((student.id, m), False)
+            paid_for_month = sum(p.amount_paid for p in rider_payments if p.month == m)
+            pending_for_month = max(0.0, float(r.monthly_fee) - float(paid_for_month))
+            total_pending += pending_for_month
+
+            if paid_for_month >= float(r.monthly_fee):
+                status = "Paid"
+            elif paid_for_month > 0:
+                status = "Partial"
+            else:
+                status = "Unpaid"
+
             rider_months.append({
                 "month": m,
-                "status": "Paid" if is_paid else "Unpaid"
+                "status": status,
+                "paid_amount": paid_for_month,
+                "pending_amount": pending_for_month
             })
-            if not is_paid:
-                unpaid_count += 1
 
         results.append({
             "student_id": student.id,
@@ -187,9 +191,8 @@ def get_van_dues_report(academic_year: Optional[str] = Query(None), db: Session 
             "class_name": class_name,
             "monthly_fee": float(r.monthly_fee),
             "months": rider_months,
-            "unpaid_count": unpaid_count,
             "total_paid": total_paid_amt,
-            "total_pending": unpaid_count * float(r.monthly_fee),
+            "total_pending": total_pending,
             "phone": student.phone or ""
         })
 

@@ -756,10 +756,15 @@ export default function VanFeesPage() {
                           <td className="px-4 py-3.5 text-center font-bold text-slate-500">{fmt(d.monthly_fee)}</td>
                           {d.months.map((m, mIdx) => (
                             <td key={mIdx} className="px-1.5 py-3.5 text-center">
-                              <span className={`inline-block w-4 h-4 rounded-full ${
-                                m.status === 'Paid' ? 'bg-emerald-500 text-white' : 'bg-rose-100 text-rose-600 dark:bg-rose-950/20'
-                              } text-[9px] font-black text-center leading-4`}>
-                                {m.status === 'Paid' ? '✓' : '—'}
+                              <span 
+                                title={m.status === 'Partial' ? `Paid: ₹${m.paid_amount}, Pending: ₹${m.pending_amount}` : m.status}
+                                className={`inline-block w-4 h-4 rounded-full ${
+                                  m.status === 'Paid' ? 'bg-emerald-500 text-white' : 
+                                  m.status === 'Partial' ? 'bg-amber-500 text-slate-950 font-bold' :
+                                  'bg-rose-100 text-rose-600 dark:bg-rose-950/20'
+                                } text-[9px] font-black text-center leading-4 cursor-help`}
+                              >
+                                {m.status === 'Paid' ? '✓' : m.status === 'Partial' ? 'P' : '—'}
                               </span>
                             </td>
                           ))}
