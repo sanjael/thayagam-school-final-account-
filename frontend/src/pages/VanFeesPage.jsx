@@ -3,7 +3,7 @@ import Layout from '../components/Layout';
 import { api } from '../api';
 import { useApp } from '../AppContext';
 import { useAuth } from '../AuthContext';
-import { Search, Plus, Trash2, Printer, XCircle, CreditCard, Check, AlertTriangle, Users, Bus, Edit } from 'lucide-react';
+import { Search, Plus, Trash2, Printer, XCircle, CreditCard, Check, AlertTriangle, Users, Bus, Edit, FileText } from 'lucide-react';
 
 export default function VanFeesPage() {
   const { t } = useApp();
@@ -203,6 +203,93 @@ export default function VanFeesPage() {
     }
     const message = `Dear Parent 👨‍👩‍👧,\nGreetings from *Thaayagam School* 🏫!\n\nThis is a gentle reminder regarding the pending *Van Fee* balance for your ward, *${studentName}*.\n\n📅 *Unpaid Months:* ${unpaidMonths.join(', ')}\n💰 *Pending Amount:* ${fmt(totalPending)}\n\nKindly clear the dues at the earliest.\n\nThank you for your cooperation! ✨`;
     window.open(`https://api.whatsapp.com/send?phone=91${phone.replace(/\D/g,'')}&text=${encodeURIComponent(message)}`, '_blank');
+  }
+
+  function printDuesReport() {
+    const printWindow = window.open('', '_blank');
+    const today = new Date().toLocaleDateString('en-GB');
+    const classInfo = classFilter ? `Class: ${classFilter}` : 'All Classes';
+    
+    let tableRows = filteredDues.map((d) => {
+      let monthsCells = d.months.map(m => `
+        <td style="text-align: center; color: ${m.status === 'Paid' ? '#059669' : m.status === 'Partial' ? '#d97706' : '#dc2626'}; font-weight: bold;">
+          ${m.status === 'Paid' ? '✓' : m.status === 'Partial' ? 'P' : '—'}
+        </td>
+      `).join('');
+      
+      return `
+        <tr>
+          <td>
+            <div style="font-weight: bold;">${d.student_name}</div>
+            <div style="font-size: 10px; color: #64748b;">${d.admission_no}</div>
+          </td>
+          <td>${d.class_name || 'N/A'}</td>
+          <td style="text-align: right;">₹${Number(d.monthly_fee).toLocaleString('en-IN')}</td>
+          ${monthsCells}
+          <td style="text-align: right; font-weight: bold; color: #059669;">₹${Number(d.total_paid).toLocaleString('en-IN')}</td>
+          <td style="text-align: right; font-weight: bold; color: #dc2626;">₹${Number(d.total_pending).toLocaleString('en-IN')}</td>
+        </tr>
+      `;
+    }).join('');
+
+    let monthsHeaders = months.map(m => `<th style="font-size: 9px; text-align: center;">${m.slice(0, 3)}</th>`).join('');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Van Fee Dues Report - ${today}</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; color: #1e293b; }
+            .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; }
+            .school-name { font-size: 24px; font-weight: 900; color: #0f172a; text-transform: uppercase; }
+            .report-title { font-size: 14px; font-weight: bold; color: #64748b; margin-top: 5px; letter-spacing: 0.05em; }
+            .meta { display: flex; justify-content: space-between; font-size: 12px; color: #64748b; margin-bottom: 15px; font-weight: 500; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+            th, td { border: 1px solid #cbd5e1; padding: 8px 6px; text-align: left; }
+            th { background-color: #f8fafc; font-weight: bold; color: #475569; }
+            tr:nth-child(even) { background-color: #f8fafc; }
+            .legend { display: flex; gap: 15px; font-size: 10px; margin-top: 15px; color: #64748b; justify-content: center; }
+            .legend-item { display: flex; align-items: center; gap: 4px; }
+            .dot { width: 8px; height: 8px; border-radius: 50%; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="school-name">Thaayagam School</div>
+            <div class="report-title">MONTHLY VAN FEES DUES REPORT</div>
+          </div>
+          <div class="meta">
+            <span>Filter: <strong>${classInfo}</strong></span>
+            <span>Academic Year: <strong>${activeYear}</strong></span>
+            <span>Date Generated: <strong>${today}</strong></span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Class</th>
+                <th style="text-align: right;">Monthly Fee</th>
+                ${monthsHeaders}
+                <th style="text-align: right;">Total Paid</th>
+                <th style="text-align: right;">Total Due</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
+          <div class="legend">
+            <div class="legend-item"><span class="dot" style="background-color: #10b981;"></span> ✓ Paid</div>
+            <div class="legend-item"><span class="dot" style="background-color: #f59e0b;"></span> P Partial</div>
+            <div class="legend-item"><span class="dot" style="background-color: #ef4444;"></span> — Unpaid</div>
+          </div>
+          <script>
+            window.onload = function() { window.print(); window.close(); }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   }
 
   // Filtered riders for search
@@ -765,6 +852,12 @@ export default function VanFeesPage() {
                   <option value="Class 11">Class 11</option>
                   <option value="Class 12">Class 12</option>
                 </select>
+                <button
+                  onClick={printDuesReport}
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-amber-500 dark:hover:bg-amber-600 text-white dark:text-slate-950 font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5"
+                >
+                  <FileText size={14} /> Export PDF
+                </button>
               </div>
 
               <div className="overflow-x-auto border border-slate-100 dark:border-slate-800 rounded-2xl">
