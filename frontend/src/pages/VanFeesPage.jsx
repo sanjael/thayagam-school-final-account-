@@ -23,6 +23,7 @@ export default function VanFeesPage() {
   // Search & Filter
   const [searchQuery, setSearchQuery] = useState('');
   const [classFilter, setClassFilter] = useState('');
+  const [paymentClassFilter, setPaymentClassFilter] = useState('');
 
   // Forms
   const [riderForm, setRiderForm] = useState({ student_id: '', monthly_fee: '' });
@@ -189,6 +190,14 @@ export default function VanFeesPage() {
       return matchSearch && matchClass;
     });
   }, [duesReport, searchQuery, classFilter]);
+
+  // Filtered riders for the payment dropdown
+  const paymentDropdownRiders = useMemo(() => {
+    return riders.filter(r => {
+      const cls = r.class_name || '';
+      return paymentClassFilter ? cls.includes(paymentClassFilter) : true;
+    });
+  }, [riders, paymentClassFilter]);
 
   // Filter out students who are already van riders
   const unassignedStudents = useMemo(() => {
@@ -507,7 +516,33 @@ export default function VanFeesPage() {
               )}
 
               <form onSubmit={handleRecordPayment} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Filter by Class</label>
+                  <select
+                    value={paymentClassFilter}
+                    onChange={e => setPaymentClassFilter(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-xs font-bold outline-none focus:border-amber-500 text-slate-900 dark:text-slate-100 transition"
+                  >
+                    <option value="">All Classes</option>
+                    <option value="Pre-KG">Pre-KG</option>
+                    <option value="LKG">LKG</option>
+                    <option value="UKG">UKG</option>
+                    <option value="Class 1">Class 1</option>
+                    <option value="Class 2">Class 2</option>
+                    <option value="Class 3">Class 3</option>
+                    <option value="Class 4">Class 4</option>
+                    <option value="Class 5">Class 5</option>
+                    <option value="Class 6">Class 6</option>
+                    <option value="Class 7">Class 7</option>
+                    <option value="Class 8">Class 8</option>
+                    <option value="Class 9">Class 9</option>
+                    <option value="Class 10">Class 10</option>
+                    <option value="Class 11">Class 11</option>
+                    <option value="Class 12">Class 12</option>
+                  </select>
+                </div>
+
+                <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Student Name</label>
                   <select
                     value={payForm.student_id}
@@ -516,7 +551,7 @@ export default function VanFeesPage() {
                     className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-xs font-bold outline-none focus:border-amber-500 text-slate-900 dark:text-slate-100 transition"
                   >
                     <option value="">Choose active rider...</option>
-                    {riders.map(r => (
+                    {paymentDropdownRiders.map(r => (
                       <option key={r.student_id} value={r.student_id}>
                         {r.student_name} - ₹{Number(r.monthly_fee).toLocaleString('en-IN')}
                       </option>
