@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from typing import Optional
 from decimal import Decimal
@@ -110,7 +110,7 @@ def get_pending(academic_year: Optional[str] = Query(None), class_id: Optional[i
 
     active_terms = ["Term 1", "Term 2", "Term 3"]
 
-    students_q = db.query(models.Student).filter(models.Student.is_active == True)
+    students_q = db.query(models.Student).options(joinedload(models.Student.class_)).filter(models.Student.is_active == True)
     if class_id:
         students_q = students_q.filter(models.Student.class_id == class_id)
     students = students_q.all()
@@ -318,7 +318,10 @@ def yearly_analytics(db: Session = Depends(get_db)):
 @router.get("/daybook")
 def get_daybook(date: Optional[datetime.date] = Query(None), db: Session = Depends(get_db)):
     target_date = date or datetime.date.today()
-    payments = db.query(models.FeePayment).filter(
+    payments = db.query(models.FeePayment).options(
+        joinedload(models.FeePayment.receipt),
+        joinedload(models.FeePayment.student).joinedload(models.Student.class_)
+    ).filter(
         models.FeePayment.payment_date == target_date,
         models.FeePayment.is_cancelled == False
     ).all()

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from typing import List, Optional
 from decimal import Decimal
@@ -35,7 +35,10 @@ def get_payments(
     academic_year: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
-    q = db.query(models.FeePayment)
+    q = db.query(models.FeePayment).options(
+        joinedload(models.FeePayment.receipt),
+        joinedload(models.FeePayment.student).joinedload(models.Student.class_)
+    )
     if student_id:
         q = q.filter(models.FeePayment.student_id == student_id)
     if term:

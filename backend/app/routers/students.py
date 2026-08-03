@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from typing import List, Optional
 from app.database import get_db
@@ -59,7 +59,7 @@ def get_students(
     ay = settings.current_academic_year if settings else "2024-2025"
     active_terms = _terms_up_to(settings.current_term if settings else "Term 1")
 
-    q = db.query(models.Student)
+    q = db.query(models.Student).options(joinedload(models.Student.class_))
     if status == "active" or status is None:
         q = q.filter(models.Student.is_active == True)
     elif status == "inactive":
