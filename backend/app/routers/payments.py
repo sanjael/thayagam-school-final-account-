@@ -59,20 +59,54 @@ def get_fee_status(
     if not student:
         raise HTTPException(404, "Student not found")
     
-    total_fee = db.query(func.sum(models.FeeStructure.amount)).filter(
-        models.FeeStructure.class_id      == student.class_id,
-        models.FeeStructure.term          == term,
-        models.FeeStructure.academic_year == academic_year
-    ).scalar() or Decimal("0")
+    # Calculate term fees and balances sequentially to apply the student-level discount
+    terms_sequence = ["Term 1", "Term 2", "Term 3", "Old Fee"]
+    term_fees = {}
+    term_paid = {}
+    for t in terms_sequence:
+        if t == "Old Fee":
+            term_fees[t] = student.old_fee or Decimal("0")
+        else:
+            term_fees[t] = db.query(func.sum(models.FeeStructure.amount)).filter(
+                models.FeeStructure.class_id      == student.class_id,
+                models.FeeStructure.term          == t,
+                models.FeeStructure.academic_year == academic_year
+            ).scalar() or Decimal("0")
+        
+        term_paid[t] = db.query(func.sum(models.FeePayment.amount_paid)).filter(
+            models.FeePayment.student_id      == student.id,
+            models.FeePayment.term            == t,
+            models.FeePayment.academic_year   == academic_year,
+            models.FeePayment.is_cancelled    == False
+        ).scalar() or Decimal("0")
+
+    remaining_discount = student.discount or Decimal("0")
+    term_balances = {}
+    for t in terms_sequence:
+        bal = max(Decimal("0"), term_fees[t] - term_paid[t])
+        if bal > 0 and remaining_discount > 0:
+            deduct = min(bal, remaining_discount)
+            bal -= deduct
+            remaining_discount -= deduct
+        term_balances[t] = bal
     
-    total_paid = db.query(func.sum(models.FeePayment.amount_paid)).filter(
-        models.FeePayment.student_id      == student_id,
-        models.FeePayment.term            == term,
-        models.FeePayment.academic_year   == academic_year,
-        models.FeePayment.is_cancelled    == False
-    ).scalar() or Decimal("0")
-    
-    balance = max(Decimal("0"), total_fee - total_paid)
+    if term in term_balances:
+        total_fee = term_fees[term]
+        total_paid = term_paid[term]
+        balance = term_balances[term]
+    else:
+        total_fee = db.query(func.sum(models.FeeStructure.amount)).filter(
+            models.FeeStructure.class_id      == student.class_id,
+            models.FeeStructure.term          == term,
+            models.FeeStructure.academic_year == academic_year
+        ).scalar() or Decimal("0")
+        total_paid = db.query(func.sum(models.FeePayment.amount_paid)).filter(
+            models.FeePayment.student_id      == student_id,
+            models.FeePayment.term            == term,
+            models.FeePayment.academic_year   == academic_year,
+            models.FeePayment.is_cancelled    == False
+        ).scalar() or Decimal("0")
+        balance = max(Decimal("0"), total_fee - total_paid)
     
     return {
         "total_fee": float(total_fee),
@@ -92,11 +126,14 @@ def create_payment(
     if not student:
         raise HTTPException(404, "Student not found")
 
-    total = db.query(func.sum(models.FeeStructure.amount)).filter(
-        models.FeeStructure.class_id      == student.class_id,
-        models.FeeStructure.term          == payload.term,
-        models.FeeStructure.academic_year == payload.academic_year
-    ).scalar() or Decimal("0")
+    if payload.term == "Old Fee":
+        total = student.old_fee or Decimal("0")
+    else:
+        total = db.query(func.sum(models.FeeStructure.amount)).filter(
+            models.FeeStructure.class_id      == student.class_id,
+            models.FeeStructure.term          == payload.term,
+            models.FeeStructure.academic_year == payload.academic_year
+        ).scalar() or Decimal("0")
 
     # Fallback to amount_paid if total fee structure is not pre-configured
     if total == 0:
@@ -110,10 +147,42 @@ def create_payment(
         models.FeePayment.is_cancelled    == False
     ).scalar() or Decimal("0")
 
+    # Determine what portion of student-level discount is applicable to this specific term
+    terms_sequence = ["Term 1", "Term 2", "Term 3", "Old Fee"]
+    remaining_discount = student.discount or Decimal("0")
+    term_student_discount = Decimal("0")
+    for t in terms_sequence:
+        if t == "Old Fee":
+            t_fee = student.old_fee or Decimal("0")
+        else:
+            t_fee = db.query(func.sum(models.FeeStructure.amount)).filter(
+                models.FeeStructure.class_id      == student.class_id,
+                models.FeeStructure.term          == t,
+                models.FeeStructure.academic_year == payload.academic_year
+            ).scalar() or Decimal("0")
+            
+        t_paid = db.query(func.sum(models.FeePayment.amount_paid)).filter(
+            models.FeePayment.student_id      == student.id,
+            models.FeePayment.term            == t,
+            models.FeePayment.academic_year   == payload.academic_year,
+            models.FeePayment.is_cancelled    == False
+        ).scalar() or Decimal("0")
+        
+        bal = max(Decimal("0"), t_fee - t_paid)
+        
+        t_disc = Decimal("0")
+        if bal > 0 and remaining_discount > 0:
+            t_disc = min(bal, remaining_discount)
+            remaining_discount -= t_disc
+            
+        if t == payload.term:
+            term_student_discount = t_disc
+            break
+
     fine_amt = Decimal(str(payload.fine or 0))
     discount_amt = Decimal(str(payload.discount or 0))
     new_total_paid = previous_paid + Decimal(str(payload.amount_paid))
-    balance = max(Decimal("0"), (Decimal(str(total)) + fine_amt) - discount_amt - new_total_paid)
+    balance = max(Decimal("0"), (Decimal(str(total)) + fine_amt) - discount_amt - term_student_discount - new_total_paid)
 
     payment = models.FeePayment(
         student_id    = payload.student_id,

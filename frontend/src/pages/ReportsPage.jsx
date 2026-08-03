@@ -41,71 +41,82 @@ export default function ReportsPage() {
   const [selectedYear, setSelectedYear] = useState('2024 - 2025');
   const [isCustomYear, setIsCustomYear] = useState(false);
 
+  // ─── Stale-While-Revalidate helpers ───────────────────────────
+  const lsGet = (key) => { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; } };
+  const lsSet = (key, val) => { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} };
+
   useEffect(() => {
+    // Logo: sessionStorage cache (binary blob - don't put in localStorage)
     async function loadLogo() {
       try {
+        const c = sessionStorage.getItem('cache_logo');
+        if (c) { setLogoBase64(c); return; }
         const s = await api.getSettings();
-        let targetUrl = window.location.origin + '/logo.jpg';
-        if (s?.logo_path) {
-          targetUrl = s.logo_path.startsWith('data:image') ? s.logo_path : `${BASE_URL.replace(/\/+$/, '')}/${s.logo_path}`;
-        }
-        const res = await fetch(targetUrl);
+        let url = window.location.origin + '/logo.jpg';
+        if (s?.logo_path) url = s.logo_path.startsWith('data:image') ? s.logo_path : `${BASE_URL.replace(/\/+$/, '')}/${s.logo_path}`;
+        const res = await fetch(url);
         const blob = await res.blob();
         const reader = new FileReader();
-        reader.onloadend = () => {
-          setLogoBase64(reader.result);
-        };
+        reader.onloadend = () => { setLogoBase64(reader.result); try { sessionStorage.setItem('cache_logo', reader.result); } catch {} };
         reader.readAsDataURL(blob);
-      } catch (err) {
-        console.error("Error loading logo:", err);
-      }
+      } catch {}
     }
     loadLogo();
   }, []);
 
-  // Load summary and pending list on mount / filter change (critical path)
+  // Summary: show cached instantly, refresh in background
   useEffect(() => {
-    setLoading(true);
-    Promise.all([
-      api.getSummary(),
-      api.getPendingReport()
-    ])
-    .then(([sumData, pendData]) => {
-      setSummary(sumData);
-      setPending(pendData);
-    })
-    .catch(console.error)
-    .finally(() => setLoading(false));
+    const cached = lsGet('ls_summary');
+    if (cached) setSummary(cached);                          // ← instant display
+    api.getSummary()
+      .then(data => { setSummary(data); lsSet('ls_summary', data); })
+      .catch(console.error);
   }, [dateFilter]);
 
-  // Lazy-load tab data only when the tab becomes active
+  // Pending: show cached instantly (NO spinner if cache exists), refresh in background
+  useEffect(() => {
+    // Clear old sessionStorage keys
+    try { ['cache_pending','cache_pending_v2','cache_pending_v3'].forEach(k => sessionStorage.removeItem(k)); } catch {}
+
+    const cached = lsGet('ls_pending');
+    if (cached) {
+      setPending(cached);                                    // ← instant display
+    } else {
+      setLoading(true);                                      // ← show spinner only if no cache
+    }
+    api.getPendingReport()
+      .then(data => { setPending(data); lsSet('ls_pending', data); })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+
+  // Lazy-load tab data with localStorage SWR
   useEffect(() => {
     if (tab === 'overall' && students.length === 0) {
-      setLoading(true);
+      const c = lsGet('ls_rpt_students'); if (c) setStudents(c);
       api.getStudents()
-        .then(setStudents)
-        .catch(console.error)
-        .finally(() => setLoading(false));
+        .then(data => { setStudents(data); lsSet('ls_rpt_students', data); })
+        .catch(console.error);
     } else if (tab === 'collection' && payments.length === 0) {
-      setLoading(true);
+      const c = lsGet('ls_rpt_payments');
+      if (c) { setPayments(c); } else { setLoading(true); }
       api.getPayments()
-        .then(setPayments)
+        .then(data => { setPayments(data); lsSet('ls_rpt_payments', data); })
         .catch(console.error)
         .finally(() => setLoading(false));
     } else if (tab === 'classwise' && classWise.length === 0) {
-      setLoading(true);
+      const c = lsGet('ls_rpt_classwise'); if (c) setClassWise(c);
       api.getClassWiseReport()
-        .then(setClassWise)
-        .catch(console.error)
-        .finally(() => setLoading(false));
+        .then(data => { setClassWise(data); lsSet('ls_rpt_classwise', data); })
+        .catch(console.error);
     } else if (tab === 'daybook' && !daybook) {
       setLoading(true);
       api.getDayBook(new Date().toISOString().slice(0, 10))
-        .then(setDaybook)
-        .catch(console.error)
-        .finally(() => setLoading(false));
+        .then(setDaybook).catch(console.error).finally(() => setLoading(false));
     }
   }, [tab]);
+
 
   // Format currency
   const fmt = (n) => `₹${Number(n || 0).toLocaleString('en-IN')}`;
@@ -939,6 +950,7 @@ export default function ReportsPage() {
                   <option value="Term 1">Term 1</option>
                   <option value="Term 2">Term 2</option>
                   <option value="Term 3">Term 3</option>
+                  <option value="Old Fee">Old Fee</option>
                 </select>
               )}
             </div>
@@ -977,26 +989,73 @@ export default function ReportsPage() {
                         <th className="px-6 py-4 text-center print:hidden">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                      {filteredPending.map((p, i) => (
-                        <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                          <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">{p.student_name}</td>
-                          <td className="px-6 py-4 text-slate-500">{p.class}</td>
-                          <td className="px-6 py-4"><span className="bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold">{p.term}</span></td>
-                          <td className="px-6 py-4 text-right">{fmt(p.total_fee)}</td>
-                          <td className="px-6 py-4 text-right text-emerald-600">{fmt(p.amount_paid)}</td>
-                          <td className="px-6 py-4 text-right font-bold text-rose-600">{fmt(p.balance)}</td>
-                          <td className="px-6 py-4 text-center print:hidden">
-                            <div className="flex justify-center gap-2">
-                              <button onClick={() => handleSendReminder(p.phone, p.student_name, p.balance)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition border border-emerald-200" title="Send WhatsApp Reminder">
-                                <MessageCircle size={14} /> Send Reminder
-                              </button>
-                              <button onClick={() => handleCollectNow(p.student_id)} className="px-3 py-1.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs rounded-lg hover:bg-slate-800 transition shadow-sm">Collect</button>
+                    {/* ── Old Fees Section ── */}
+                    {filteredPending.some(p => p.term === 'Old Fee') && (
+                      <tbody className="divide-y divide-amber-100 dark:divide-amber-900/30"  >
+                        <tr>
+                          <td colSpan={7} className="px-6 pt-4 pb-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700 px-3 py-1 rounded-full">⏳ Previous Year Old Fees</span>
+                              <span className="text-[10px] text-slate-400 font-semibold">— Balance from previous academic year</span>
                             </div>
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
+                        {filteredPending.filter(p => p.term === 'Old Fee').map((p, i) => (
+                          <tr key={'of-' + i} className="bg-amber-50/60 dark:bg-amber-900/10 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors">
+                            <td className="px-6 py-3.5 font-bold text-slate-900 dark:text-white">{p.student_name}</td>
+                            <td className="px-6 py-3.5 text-slate-500">{p.class}</td>
+                            <td className="px-6 py-3.5">
+                              <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-700">⏳ Old Fee</span>
+                            </td>
+                            <td className="px-6 py-3.5 text-right text-amber-700 dark:text-amber-400 font-bold">{fmt(p.total_fee)}</td>
+                            <td className="px-6 py-3.5 text-right text-emerald-600">{fmt(p.amount_paid)}</td>
+                            <td className="px-6 py-3.5 text-right font-black text-amber-600 dark:text-amber-400">{fmt(p.balance)}</td>
+                            <td className="px-6 py-3.5 text-center print:hidden">
+                              <div className="flex justify-center gap-2">
+                                <button onClick={() => handleSendReminder(p.phone, p.student_name, p.balance)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition border border-emerald-200" title="Send WhatsApp Reminder">
+                                  <MessageCircle size={14} /> Send Reminder
+                                </button>
+                                <button onClick={() => handleCollectNow(p.student_id)} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-lg transition shadow-sm">Collect</button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    )}
+
+                    {/* ── Regular Term Fees Section ── */}
+                    {filteredPending.some(p => p.term !== 'Old Fee') && (
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                        {filteredPending.some(p => p.term === 'Old Fee') && (
+                          <tr>
+                            <td colSpan={7} className="px-6 pt-4 pb-1">
+                              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full"> Current Year Term Fees</span>
+                            </td>
+                          </tr>
+                        )}
+                        {filteredPending.filter(p => p.term !== 'Old Fee').map((p, i) => (
+                          <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">{p.student_name}</td>
+                            <td className="px-6 py-4 text-slate-500">{p.class}</td>
+                            <td className="px-6 py-4">
+                              <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">{p.term}</span>
+                            </td>
+                            <td className="px-6 py-4 text-right">{fmt(p.total_fee)}</td>
+                            <td className="px-6 py-4 text-right text-emerald-600">{fmt(p.amount_paid)}</td>
+                            <td className="px-6 py-4 text-right font-bold text-rose-600">{fmt(p.balance)}</td>
+                            <td className="px-6 py-4 text-center print:hidden">
+                              <div className="flex justify-center gap-2">
+                                <button onClick={() => handleSendReminder(p.phone, p.student_name, p.balance)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition border border-emerald-200" title="Send WhatsApp Reminder">
+                                  <MessageCircle size={14} /> Send Reminder
+                                </button>
+                                <button onClick={() => handleCollectNow(p.student_id)} className="px-3 py-1.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs rounded-lg hover:bg-slate-800 transition shadow-sm">Collect</button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    )}
+
                     <tfoot className="bg-slate-50 dark:bg-slate-900 border-t-2 border-slate-200 dark:border-slate-700 font-extrabold text-slate-900 dark:text-white">
                       <tr>
                         <td className="px-6 py-4" colSpan={3}>Total</td>

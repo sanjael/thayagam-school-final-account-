@@ -8,7 +8,8 @@ import { FileText, FileSpreadsheet, Plus, Search, MoreVertical, Edit, Trash2, Ey
 
 const EMPTY = {
   admission_no: '', name: '', class_id: '', gender: '',
-  phone: '', address: '', status: 'Active', old_fee: ''
+  phone: '', address: '', status: 'Active', old_fee: '',
+  discount: '', discount_reason: ''
 };
 
 export default function StudentsPage() {
@@ -120,7 +121,9 @@ export default function StudentsPage() {
     const payload = { 
       ...form, 
       class_id: Number(form.class_id),
-      old_fee: Number(form.old_fee || 0)
+      old_fee: Number(form.old_fee || 0),
+      discount: Number(form.discount || 0),
+      discount_reason: form.discount_reason || ''
     };
     try {
       if (editId) await api.updateStudent(editId, payload);
@@ -134,7 +137,9 @@ export default function StudentsPage() {
       admission_no: s.admission_no, name: s.name, class_id: s.class_id,
       gender: s.gender || '',
       phone: s.phone || '', address: s.address || '', status: s.status || 'Active',
-      old_fee: s.old_fee || 0
+      old_fee: s.old_fee || 0,
+      discount: s.discount || 0,
+      discount_reason: s.discount_reason || ''
     });
     setEditId(s.id); setShowForm(true);
   }
@@ -714,6 +719,12 @@ export default function StudentsPage() {
                       <p className="font-bold text-rose-600 dark:text-rose-400">₹{Number(viewStudent.old_fee).toLocaleString('en-IN')}</p>
                     </div>
                   )}
+                  {Number(viewStudent.discount || 0) > 0 && (
+                    <div className="col-span-2 bg-blue-50/50 dark:bg-blue-950/20 p-3 rounded-2xl border border-blue-100/50 dark:border-blue-950/30">
+                      <p className="text-[10px] font-bold text-blue-500 uppercase mb-0.5">Less Amount (Reason: {viewStudent.discount_reason || 'N/A'})</p>
+                      <p className="font-bold text-blue-600 dark:text-blue-400">₹{Number(viewStudent.discount).toLocaleString('en-IN')}</p>
+                    </div>
+                  )}
                   <div className="col-span-2 bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
                     <p className="text-[10px] font-bold text-slate-400 uppercase mb-0.5">Address</p>
                     <p className="font-bold text-slate-800 dark:text-slate-200">{viewStudent.address || '—'}</p>
@@ -805,6 +816,19 @@ export default function StudentsPage() {
                   <input type="number" value={form.old_fee} onChange={f('old_fee')} placeholder="0"
                     className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-3 text-sm outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 text-slate-900 dark:text-slate-100 font-bold transition shadow-sm" />
                 </div>
+
+                <div className="col-span-2 grid grid-cols-2 gap-3 sm:gap-5">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Less Amount</label>
+                    <input type="number" value={form.discount} onChange={f('discount')} placeholder="0"
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-3 text-sm outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 text-slate-900 dark:text-slate-100 font-bold transition shadow-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Less Reason</label>
+                    <input type="text" value={form.discount_reason} onChange={f('discount_reason')} placeholder="e.g. Scholarship"
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-3 text-sm outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 text-slate-900 dark:text-slate-100 font-bold transition shadow-sm" />
+                  </div>
+                </div>
                 
                 {editId && (
                   <div className="col-span-2 bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
@@ -882,11 +906,32 @@ export default function StudentsPage() {
                   </div>
 
                   <div className="space-y-3">
+                    {feeBreakdown.data.discount > 0 && (
+                      <div className="rounded-xl p-4 border bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-700">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                            <span className="font-bold text-sm text-blue-900 dark:text-blue-300">Concession (Less Amount)</span>
+                          </div>
+                          {feeBreakdown.data.discount_reason && (
+                            <span className="text-xs font-semibold text-blue-700 bg-white dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                              {feeBreakdown.data.discount_reason}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-3 flex justify-between items-center text-xs">
+                          <p className="text-blue-600 font-medium">Deduction Amount</p>
+                          <p className="font-bold text-blue-700">-₹{feeBreakdown.data.discount.toLocaleString('en-IN')}</p>
+                        </div>
+                      </div>
+                    )}
                     {feeBreakdown.data.breakdown.map((t) => (
                       <div
                         key={t.term}
                         className={`rounded-xl p-4 border ${
-                          t.status === 'Paid'
+                          t.term === 'Old Fee'
+                            ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-700'
+                            : t.status === 'Paid'
                             ? 'bg-emerald-50 border-emerald-200'
                             : t.status === 'Pending'
                             ? 'bg-rose-50 border-rose-200'
@@ -896,12 +941,16 @@ export default function StudentsPage() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span className={`w-2.5 h-2.5 rounded-full ${
+                              t.term === 'Old Fee' ? 'bg-amber-500' :
                               t.status === 'Paid' ? 'bg-emerald-500' :
                               t.status === 'Pending' ? 'bg-rose-500' : 'bg-slate-400'
                             }`} />
-                            <span className="font-bold text-sm text-slate-800">{t.term}</span>
+                            <span className="font-bold text-sm text-slate-800">
+                              {t.term === 'Old Fee' ? '⏳ Old Fee' : t.term}
+                            </span>
                           </div>
                           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                            t.term === 'Old Fee' ? 'bg-amber-200 text-amber-800' :
                             t.status === 'Paid' ? 'bg-emerald-200 text-emerald-800' :
                             t.status === 'Pending' ? 'bg-rose-200 text-rose-800' :
                             'bg-slate-200 text-slate-600'

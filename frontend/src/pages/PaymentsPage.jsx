@@ -4,7 +4,7 @@ import { api } from '../api';
 import { useApp } from '../AppContext';
 import { useAuth } from '../AuthContext';
 import { MessageCircle, IndianRupee, FileText, AlertCircle, FileCheck, CheckCircle, Zap, History } from 'lucide-react';
-const TERMS = ['Term 1', 'Term 2', 'Term 3'];
+const TERMS = ['Term 1', 'Term 2', 'Term 3', 'Old Fee'];
 const MODES = [
   { val: 'cash', label: ' Cash' },
   { val: 'online', label: ' Online' },
@@ -922,19 +922,34 @@ export default function PaymentsPage() {
                 {/* Fee Status Preview */}
                 {loadingFeeStatus ? (
                   <div className="text-center text-xs font-bold text-slate-400 p-4 border border-dashed rounded-xl border-slate-200">Loading fee details...</div>
-                ) : feeStatus && feeStatus.total > 0 ? (
-                  <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex justify-between items-center shadow-inner">
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Total Fee</p>
-                      <p className="font-bold text-slate-700 dark:text-slate-300">{fmt(feeStatus.total)}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-0.5">Paid</p>
-                      <p className="font-bold text-emerald-600">{fmt(feeStatus.paid)}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-0.5">Balance</p>
-                      <p className="text-xl font-black text-orange-600">{fmt(feeStatus.balance)}</p>
+                ) : feeStatus && selectedStudent ? (
+                  <div className={`border rounded-xl overflow-hidden shadow-inner ${
+                    form.term === 'Old Fee'
+                      ? 'border-amber-200 dark:border-amber-700'
+                      : 'border-slate-200 dark:border-slate-700'
+                  }`}>
+                    {form.term === 'Old Fee' && (
+                      <div className="bg-amber-500 px-4 py-1.5 flex items-center gap-2">
+                        <span className="text-[10px] font-black text-white uppercase tracking-widest">⏳ Previous Year Dues (Old Fee)</span>
+                      </div>
+                    )}
+                    <div className={`p-4 flex justify-between items-center ${
+                      form.term === 'Old Fee'
+                        ? 'bg-amber-50 dark:bg-amber-900/20'
+                        : 'bg-slate-50 dark:bg-slate-900'
+                    }`}>
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Total Fee</p>
+                        <p className="font-bold text-slate-700 dark:text-slate-300">{fmt(feeStatus.total_fee)}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-0.5">Paid</p>
+                        <p className="font-bold text-emerald-600">{fmt(feeStatus.total_paid)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-0.5">Balance</p>
+                        <p className="text-xl font-black text-orange-600">{fmt(feeStatus.balance)}</p>
+                      </div>
                     </div>
                   </div>
                 ) : selectedStudent && (

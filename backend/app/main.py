@@ -14,6 +14,14 @@ Base.metadata.create_all(bind=engine)
 def auto_seed():
     db = SessionLocal()
     try:
+        # Alter Enum type in PG
+        try:
+            from sqlalchemy import text
+            db.execute(text("ALTER TYPE term_type ADD VALUE 'Old Fee'"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
         for username, role, email in [
             ('admin', 'admin', 'admin@school.com'),
             ('accountant', 'accountant', 'accountant@school.com'),
@@ -127,3 +135,8 @@ app.include_router(van_fees.router)
 @app.get("/")
 def root():
     return {"message": "School Fee System backend is running.", "version": "1.0.0"}
+
+@app.get("/health")
+def health():
+    """Lightweight keep-warm endpoint — no DB hit."""
+    return {"status": "ok"}

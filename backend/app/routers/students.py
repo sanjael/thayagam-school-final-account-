@@ -33,11 +33,12 @@ def _enrich(s: models.Student, db: Session = None, ay: str = None, active_terms:
             models.FeeStructure.term.in_(terms),
             models.FeeStructure.academic_year == ay
         ).scalar() or 0
-        total_fee = float(total_fee) + float(s.old_fee or 0)
+        total_fee = max(0.0, float(total_fee) + float(s.old_fee or 0) - float(s.discount or 0))
 
+        search_terms = list(terms) + ["Old Fee"]
         total_paid = db.query(func.sum(models.FeePayment.amount_paid)).filter(
             models.FeePayment.student_id == s.id,
-            models.FeePayment.term.in_(terms),
+            models.FeePayment.term.in_(search_terms),
             models.FeePayment.academic_year == ay,
             models.FeePayment.is_cancelled == False
         ).scalar() or 0
@@ -91,9 +92,12 @@ def get_students(
 
     # Batch query payments per student (1 query)
     student_ids = [s.id for s in students]
-    payment_rows = db.query(models.FeePayment.student_id, func.sum(models.FeePayment.amount_paid)).filter(
+    payment_rows = db.query(
+        models.FeePayment.student_id,
+        func.sum(models.FeePayment.amount_paid)
+    ).filter(
         models.FeePayment.student_id.in_(student_ids),
-        models.FeePayment.term.in_(active_terms),
+        models.FeePayment.term.in_(list(active_terms) + ["Old Fee"]),
         models.FeePayment.academic_year == ay,
         models.FeePayment.is_cancelled == False
     ).group_by(models.FeePayment.student_id).all()
@@ -107,7 +111,7 @@ def get_students(
         else:
             out.class_name = None
 
-        total_fee = fee_map.get(s.class_id, 0.0) + float(s.old_fee or 0)
+        total_fee = max(0.0, fee_map.get(s.class_id, 0.0) + float(s.old_fee or 0) - float(s.discount or 0))
         out.total_fees = total_fee
         total_paid = paid_map.get(s.id, 0.0)
         bal = total_fee - total_paid

@@ -27,35 +27,32 @@ def get_summary(academic_year: Optional[str] = Query(None), db: Session = Depend
         ay = latest_fs[0] if latest_fs else (settings.current_academic_year if settings else "2026-2027")
         
     active_terms = ["Term 1", "Term 2", "Term 3"]
+    today = datetime.date.today()
 
-    total_students  = db.query(func.count(models.Student.id)).filter(models.Student.is_active == True).scalar()
+    # Run simple scalar queries (fast)
+    total_students = db.query(func.count(models.Student.id)).filter(models.Student.is_active == True).scalar() or 0
     total_collected = db.query(func.sum(models.FeePayment.amount_paid)).filter(
         models.FeePayment.academic_year == ay,
         models.FeePayment.is_cancelled == False
     ).scalar() or 0
-
-    today = datetime.date.today()
     today_collected = db.query(func.sum(models.FeePayment.amount_paid)).filter(
         models.FeePayment.payment_date == today,
         models.FeePayment.is_cancelled == False
     ).scalar() or 0
-
     first_of_month = today.replace(day=1)
     month_collected = db.query(func.sum(models.FeePayment.amount_paid)).filter(
         models.FeePayment.payment_date >= first_of_month,
         models.FeePayment.payment_date <= today,
         models.FeePayment.is_cancelled == False
     ).scalar() or 0
-
     total_receipts = db.query(func.count(models.FeePayment.id)).filter(
         models.FeePayment.academic_year == ay,
         models.FeePayment.is_cancelled == False
     ).scalar() or 0
 
-    # Calculate Total Balance (Pending Amount across all students for this academic year)
-    students = db.query(models.Student).filter(models.Student.is_active == True).all()
-    class_ids = list({s.class_id for s in students if s.class_id})
-
+    # Calculate total balance: load only (id, class_id, old_fee) columns — not full Student objects
+    class_ids_q = db.query(models.Student.class_id).filter(models.Student.is_active == True).distinct().all()
+    class_ids = [r[0] for r in class_ids_q if r[0]]
     fee_rows = db.query(
         models.FeeStructure.class_id,
         models.FeeStructure.term,
@@ -66,7 +63,14 @@ def get_summary(academic_year: Optional[str] = Query(None), db: Session = Depend
     ).group_by(models.FeeStructure.class_id, models.FeeStructure.term).all()
     fee_map = {(cid, term): Decimal(str(amt or 0)) for cid, term, amt in fee_rows}
 
-    student_ids = [s.id for s in students]
+    student_class_rows = db.query(
+        models.Student.id,
+        models.Student.class_id,
+        models.Student.old_fee,
+        models.Student.discount
+    ).filter(models.Student.is_active == True).all()
+
+    student_ids = [r[0] for r in student_class_rows]
     payment_rows = db.query(
         models.FeePayment.student_id,
         models.FeePayment.term,
@@ -79,16 +83,23 @@ def get_summary(academic_year: Optional[str] = Query(None), db: Session = Depend
     paid_map = {(sid, term): Decimal(str(amt or 0)) for sid, term, amt in payment_rows}
 
     total_balance = Decimal("0")
-    for s in students:
+    for sid, cid, old_fee, discount in student_class_rows:
+        student_bal = Decimal("0")
         for term in active_terms:
-            total_fee = fee_map.get((s.class_id, term), Decimal("0"))
-            if term == "Term 1":
-                total_fee += Decimal(str(s.old_fee or 0))
+            total_fee = fee_map.get((cid, term), Decimal("0"))
             if total_fee > 0:
-                paid = paid_map.get((s.id, term), Decimal("0"))
+                paid = paid_map.get((sid, term), Decimal("0"))
                 bal = total_fee - paid
                 if bal > 0:
-                    total_balance += bal
+                    student_bal += bal
+        if old_fee and old_fee > 0:
+            paid = paid_map.get((sid, "Old Fee"), Decimal("0"))
+            bal = Decimal(str(old_fee)) - paid
+            if bal > 0:
+                student_bal += bal
+        
+        student_bal = max(Decimal("0"), student_bal - Decimal(str(discount or 0)))
+        total_balance += student_bal
 
     return {
         "total_students":   total_students,
@@ -147,26 +158,50 @@ def get_pending(academic_year: Optional[str] = Query(None), class_id: Optional[i
 
     results = []
     for s in students:
+        remaining_discount = Decimal(str(s.discount or 0))
         for term in active_terms:
             total_fee = fee_map.get((s.class_id, term), Decimal("0"))
-            if term == "Term 1":
-                total_fee += Decimal(str(s.old_fee or 0))
             if total_fee == 0:
                 continue
             total_paid = paid_map.get((s.id, term), Decimal("0"))
             balance = total_fee - total_paid
             if balance > 0:
-                results.append({
-                    "student_id":   s.id,
-                    "student_name": s.name,
-                    "admission_no": s.admission_no,
-                    "class":        s.class_.name if s.class_ else "",
-                    "term":         term,
-                    "total_fee":    float(total_fee),
-                    "amount_paid":  float(total_paid),
-                    "balance":      float(balance),
-                    "phone":        s.phone or "",
-                })
+                if remaining_discount > 0:
+                    deduct = min(balance, remaining_discount)
+                    balance -= deduct
+                    remaining_discount -= deduct
+                if balance > 0:
+                    results.append({
+                        "student_id":   s.id,
+                        "student_name": s.name,
+                        "admission_no": s.admission_no,
+                        "class":        s.class_.name if s.class_ else "",
+                        "term":         term,
+                        "total_fee":    float(total_fee),
+                        "amount_paid":  float(total_paid),
+                        "balance":      float(balance),
+                        "phone":        s.phone or "",
+                    })
+        if s.old_fee and s.old_fee > 0:
+            total_paid = paid_map.get((s.id, "Old Fee"), Decimal("0"))
+            balance = s.old_fee - total_paid
+            if balance > 0:
+                if remaining_discount > 0:
+                    deduct = min(balance, remaining_discount)
+                    balance -= deduct
+                    remaining_discount -= deduct
+                if balance > 0:
+                    results.append({
+                        "student_id":   s.id,
+                        "student_name": s.name,
+                        "admission_no": s.admission_no,
+                        "class":        s.class_.name if s.class_ else "",
+                        "term":         "Old Fee",
+                        "total_fee":    float(s.old_fee),
+                        "amount_paid":  float(total_paid),
+                        "balance":      float(balance),
+                        "phone":        s.phone or "",
+                    })
     return results
 
 
@@ -190,9 +225,6 @@ def student_fee_breakdown(student_id: int, db: Session = Depends(get_db)):
             models.FeeStructure.academic_year == ay
         ).scalar() or Decimal("0")
 
-        if term == "Term 1":
-            total_fee += Decimal(str(s.old_fee or 0))
-
         total_paid = db.query(func.sum(models.FeePayment.amount_paid)).filter(
             models.FeePayment.student_id      == s.id,
             models.FeePayment.term            == term,
@@ -213,6 +245,27 @@ def student_fee_breakdown(student_id: int, db: Session = Depends(get_db)):
             "status":     "Paid" if balance == 0 and total_fee > 0 else ("Pending" if total_fee > 0 else "No Fee Set"),
         })
 
+    if s.old_fee and s.old_fee > 0:
+        total_paid = db.query(func.sum(models.FeePayment.amount_paid)).filter(
+            models.FeePayment.student_id      == s.id,
+            models.FeePayment.term            == "Old Fee",
+            models.FeePayment.academic_year   == ay,
+            models.FeePayment.is_cancelled    == False
+        ).scalar() or Decimal("0")
+
+        balance = s.old_fee - total_paid
+        if balance < 0:
+            balance = Decimal("0")
+        total_pending += balance
+
+        breakdown.append({
+            "term":       "Old Fee",
+            "total_fee":  float(s.old_fee),
+            "paid":       float(total_paid),
+            "balance":    float(balance),
+            "status":     "Paid" if balance == 0 else "Pending",
+        })
+
     return {
         "student_id":    s.id,
         "student_name":  s.name,
@@ -220,7 +273,9 @@ def student_fee_breakdown(student_id: int, db: Session = Depends(get_db)):
         "class_name":    s.class_.name if s.class_ else "",
         "academic_year": ay,
         "current_term":  settings.current_term if settings else "Term 1",
-        "total_pending": float(total_pending),
+        "total_pending": float(max(Decimal("0"), total_pending - Decimal(str(s.discount or 0)))),
+        "discount":      float(s.discount or 0),
+        "discount_reason": s.discount_reason or "",
         "breakdown":     breakdown,
     }
 

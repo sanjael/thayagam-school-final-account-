@@ -69,6 +69,8 @@ class StudentCreate(BaseModel):
     address: Optional[str] = None
     old_fee: Optional[float] = 0.0
     van_fee: Optional[float] = 0.0
+    discount: Optional[float] = 0.0
+    discount_reason: Optional[str] = None
 
 class StudentUpdate(BaseModel):
     name: Optional[str] = None
@@ -79,6 +81,8 @@ class StudentUpdate(BaseModel):
     is_active: Optional[bool] = None
     old_fee: Optional[float] = None
     van_fee: Optional[float] = None
+    discount: Optional[float] = None
+    discount_reason: Optional[str] = None
 
 class StudentOut(BaseModel):
     id: int
@@ -92,6 +96,8 @@ class StudentOut(BaseModel):
     is_active: bool
     old_fee: Optional[float] = 0.0
     van_fee: Optional[float] = 0.0
+    discount: Optional[float] = 0.0
+    discount_reason: Optional[str] = None
     created_at: Optional[datetime] = None
     total_fees: Optional[float] = 0.0
     pending_fees: Optional[float] = 0.0

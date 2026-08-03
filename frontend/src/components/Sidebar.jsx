@@ -81,9 +81,15 @@ export default function Sidebar({ onClose }) {
   useEffect(() => {
     async function fetchLogo() {
       try {
+        // Check cache first - avoid repeated settings calls
+        const cached = sessionStorage.getItem('cache_logo_url');
+        if (cached) { setLogoUrl(cached); return; }
+
         const s = await api.getSettings();
         if (s?.logo_path) {
-          setLogoUrl(s.logo_path.startsWith('data:image') ? s.logo_path : `${BASE_URL}/${s.logo_path}`);
+          const url = s.logo_path.startsWith('data:image') ? s.logo_path : `${BASE_URL}/${s.logo_path}`;
+          setLogoUrl(url);
+          try { sessionStorage.setItem('cache_logo_url', url); } catch(e) {}
         }
       } catch {}
     }

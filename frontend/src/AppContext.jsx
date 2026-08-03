@@ -236,13 +236,15 @@ export function AppProvider({ children }) {
     }
   }, [darkMode]);
 
-  // Keep Render server warm
+  // Keep Render server warm — ping every 60s when tab is visible
   useEffect(() => {
     const ping = () => {
-      fetch('https://thayagam-school-final-account.onrender.com/docs', { mode: 'no-cors' }).catch(() => {});
+      if (document.visibilityState === 'visible') {
+        fetch('https://thayagam-school-final-account.onrender.com/health', { mode: 'no-cors' }).catch(() => {});
+      }
     };
-    ping();
-    const interval = setInterval(ping, 180000); // Every 3 minutes
+    ping(); // immediate ping on load
+    const interval = setInterval(ping, 60000); // every 60 seconds
     return () => clearInterval(interval);
   }, []);
 

@@ -26,6 +26,7 @@ class Term(str, enum.Enum):
     term1 = "Term 1"
     term2 = "Term 2"
     term3 = "Term 3"
+    oldfee = "Old Fee"
 
 
 class User(Base):
@@ -76,6 +77,8 @@ class Student(Base):
     is_active    = Column(Boolean, default=True)
     old_fee      = Column(DECIMAL(10, 2), default=0.0)
     van_fee      = Column(DECIMAL(10, 2), default=0.0)
+    discount     = Column(DECIMAL(10, 2), default=0.0)
+    discount_reason = Column(String(255), nullable=True)
     created_at   = Column(DateTime, server_default=func.now())
 
     class_    = relationship("Class",       back_populates="students")
