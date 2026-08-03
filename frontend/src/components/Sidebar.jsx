@@ -21,6 +21,7 @@ const NAV_BY_ROLE = {
     { to: '/settings',    label: 'Settings',        icon: <Settings size={20} strokeWidth={2.5} /> },
   ],
   accountant: [
+    { to: '/dashboard',   label: 'Dashboard',      icon: <LayoutDashboard size={20} strokeWidth={2.5} /> },
     { to: '/payments',    label: 'Payments',        icon: <Receipt size={20} strokeWidth={2.5} /> },
     { to: '/students',    label: 'Students',        icon: <Users size={20} strokeWidth={2.5} /> },
     { to: '/reports',     label: 'Reports',         icon: <FileBarChart size={20} strokeWidth={2.5} /> },
