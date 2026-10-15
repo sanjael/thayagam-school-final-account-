@@ -2,6 +2,8 @@ node_modules/
 .venv/
 __pycache__/
 *.pyc
+*.log
+*.db
 .env
 .env.*
 backend/thayagam-school-backend/

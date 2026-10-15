@@ -181,6 +181,8 @@ def get_pending(academic_year: Optional[str] = Query(None), class_id: Optional[i
                         "amount_paid":  float(total_paid),
                         "balance":      float(balance),
                         "phone":        s.phone or "",
+                        "discount":     float(s.discount or 0),
+                        "discount_reason": s.discount_reason or "",
                     })
         if s.old_fee and s.old_fee > 0:
             total_paid = paid_map.get((s.id, "Old Fee"), Decimal("0"))
@@ -201,6 +203,8 @@ def get_pending(academic_year: Optional[str] = Query(None), class_id: Optional[i
                         "amount_paid":  float(total_paid),
                         "balance":      float(balance),
                         "phone":        s.phone or "",
+                        "discount":     float(s.discount or 0),
+                        "discount_reason": s.discount_reason or "",
                     })
     return results
 

@@ -105,15 +105,15 @@ export default function Layout({ children }) {
       });
   }, []);
 
-  // Load Notifications
+  // Load Notifications (on mount, page navigation, and tab focus — avoids keeping DB awake when idle)
   useEffect(() => {
     function loadNotifications() {
       api.getNotifications().then(setNotifications).catch(() => {});
     }
     loadNotifications();
-    const interval = setInterval(loadNotifications, 60000);
-    return () => clearInterval(interval);
-  }, []);
+    window.addEventListener('focus', loadNotifications);
+    return () => window.removeEventListener('focus', loadNotifications);
+  }, [location.pathname]);
 
   const unreadCount = notifications.items?.filter(n => !notifReadIds.includes(n.id)).length || 0;
 

@@ -5,6 +5,11 @@ import Layout from '../components/Layout';
 import { api } from '../api';
 import { useApp } from '../AppContext';
 import { useAuth } from '../AuthContext';
+import {
+  IndianRupee, AlertTriangle, GraduationCap, Calendar,
+  Receipt, CreditCard, UserPlus, FileBarChart,
+  ShieldCheck, Clock, TrendingUp, Building2
+} from 'lucide-react';
 
 function StatCard({ title, value, color, icon, sub }) {
   return (
@@ -106,7 +111,7 @@ export default function DashboardPage() {
         {/* Welcome Header */}
         <header className="flex flex-col gap-3 rounded-2xl bg-gradient-to-r from-amber-500/10 to-transparent dark:from-amber-900/20 border border-amber-100 dark:border-amber-900/30 p-4 sm:p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white">👋 {t('welcomeTitle')}</h1>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white">{t('welcomeTitle')}</h1>
             <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
               {t('welcomeSubtitle')}
             </p>
@@ -140,35 +145,35 @@ export default function DashboardPage() {
             value={fmt(summary?.today_collected)}   
             color="bg-gradient-to-br from-emerald-400 to-emerald-600" 
             sub="Collected today"
-            icon={<span className="text-xl">💵</span>}
+            icon={<IndianRupee size={18} strokeWidth={2.5} />}
           />
           <StatCard 
             title={t('pendingFees')} 
             value={fmt(summary?.total_balance)}    
             color="bg-gradient-to-br from-rose-400 to-rose-600" 
             sub="Outstanding dues"
-            icon={<span className="text-xl">⚠️</span>}
+            icon={<AlertTriangle size={18} strokeWidth={2.5} />}
           />
           <StatCard 
             title={t('totalStudents')}   
             value={summary?.total_students ?? '0'}      
             color="bg-gradient-to-br from-sky-400 to-sky-600" 
             sub="Active students"
-            icon={<span className="text-xl">🎓</span>}
+            icon={<GraduationCap size={18} strokeWidth={2.5} />}
           />
           <StatCard 
             title={t('thisMonth')}        
             value={fmt(summary?.month_collected)}   
             color="bg-gradient-to-br from-indigo-400 to-indigo-600" 
             sub="Month collections"
-            icon={<span className="text-xl">📅</span>}
+            icon={<Calendar size={18} strokeWidth={2.5} />}
           />
           <StatCard 
             title={t('receipts')}        
             value={summary?.total_receipts ?? '0'}   
             color="bg-gradient-to-br from-slate-600 to-slate-800" 
             sub="Total receipts"
-            icon={<span className="text-xl">🧾</span>}
+            icon={<Receipt size={18} strokeWidth={2.5} />}
           />
         </section>
 
@@ -179,7 +184,7 @@ export default function DashboardPage() {
               id: 'qa-new-payment',
               label: 'New Payment',
               sub: 'Record a fee collection',
-              icon: '💸',
+              icon: <CreditCard size={18} strokeWidth={2} />,
               color: 'from-amber-400 to-orange-500',
               onClick: handleCollectNow,
               show: user?.role !== 'principal',
@@ -188,7 +193,7 @@ export default function DashboardPage() {
               id: 'qa-add-student',
               label: 'Add Student',
               sub: 'Register new student',
-              icon: '🎒',
+              icon: <UserPlus size={18} strokeWidth={2} />,
               color: 'from-sky-400 to-indigo-500',
               onClick: handleNewStudent,
               show: user?.role === 'admin',
@@ -197,7 +202,7 @@ export default function DashboardPage() {
               id: 'qa-view-reports',
               label: 'View Reports',
               sub: 'Pending dues & daybook',
-              icon: '📈',
+              icon: <FileBarChart size={18} strokeWidth={2} />,
               color: 'from-emerald-400 to-teal-500',
               to: '/reports',
               show: true,
@@ -206,7 +211,7 @@ export default function DashboardPage() {
               id: 'qa-audit-logs',
               label: 'Audit Logs',
               sub: 'System activity trail',
-              icon: '🛡️',
+              icon: <ShieldCheck size={18} strokeWidth={2} />,
               color: 'from-purple-400 to-fuchsia-500',
               to: '/audit-logs',
               show: user?.role === 'admin',
@@ -252,7 +257,7 @@ export default function DashboardPage() {
           {/* Peak Hours Chart */}
           <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow">
             <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2">
-              <span className="text-lg">🕒</span>
+              <Clock size={16} className="text-amber-500" />
                Busiest Hours for Fee Collection
             </h3>
             
@@ -281,7 +286,7 @@ export default function DashboardPage() {
           <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-5">
               <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <span className="text-lg">📊</span>
+                <TrendingUp size={16} className="text-amber-500" />
                  Collection Trend
               </h3>
               {/* Period Filter Pills */}
@@ -357,7 +362,10 @@ export default function DashboardPage() {
           <div className="lg:col-span-1 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
               <div>
-                <h2 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">⚡ {t('recentActivity')}</h2>
+                <h2 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <Receipt size={16} className="text-amber-500" />
+                  {t('recentActivity')}
+                </h2>
                 <p className="text-[10px] text-slate-400 mt-0.5">Last 6 transactions</p>
               </div>
               <Link to="/payments" className="text-[10px] text-amber-500 font-bold hover:underline bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded-lg">
@@ -396,7 +404,10 @@ export default function DashboardPage() {
           <div className="lg:col-span-2 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
               <div>
-                <h2 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">🏫 School Classes</h2>
+                <h2 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <Building2 size={16} className="text-amber-500" />
+                  School Classes
+                </h2>
                 <p className="text-xs text-slate-400 mt-0.5">Select a class to view details.</p>
               </div>
               <Link to="/classes" className="text-[10px] text-amber-500 font-bold hover:underline bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded-lg">

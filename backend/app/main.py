@@ -91,10 +91,19 @@ async def validation_exception_handler(request, exc):
     except Exception:
         pass
     print("VALIDATION ERROR:", err, "BODY:", body)
-    with open("validation_errors.log", "a") as f:
-        f.write(json.dumps(err) + "\n")
-        f.write("BODY: " + body.decode('utf-8', 'ignore') + "\n")
-    return JSONResponse(status_code=422, content={"detail": err})
+    try:
+        with open("validation_errors.log", "a") as f:
+            f.write(json.dumps(str(err)) + "\n")
+            f.write("BODY: " + body.decode('utf-8', 'ignore') + "\n")
+    except Exception:
+        pass
+    safe_err = []
+    for e in err:
+        safe_e = dict(e)
+        if isinstance(safe_e.get("input"), bytes):
+            safe_e["input"] = safe_e["input"].decode("utf-8", "ignore")
+        safe_err.append(safe_e)
+    return JSONResponse(status_code=422, content={"detail": safe_err})
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):

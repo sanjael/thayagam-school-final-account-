@@ -584,6 +584,8 @@ export default function ReportsPage() {
               <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Total Fee</th>
               <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Paid</th>
               <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Balance</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Less Amount</th>
+              <th style="border: 1px solid #cbd5e1; padding: 9px 12px; background-color: #f8fafc; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 11px;">Less Reason</th>
             </tr>
           </thead>
           <tbody>
@@ -597,6 +599,8 @@ export default function ReportsPage() {
                 <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">₹${Number(p.total_fee || 0).toLocaleString('en-IN')}</td>
                 <td style="color: #16a34a; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">₹${Number(p.amount_paid || 0).toLocaleString('en-IN')}</td>
                 <td style="color: #dc2626; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">₹${Number(p.balance || 0).toLocaleString('en-IN')}</td>
+                <td style="color: #2563eb; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">${Number(p.discount || 0) > 0 ? '₹' + Number(p.discount).toLocaleString('en-IN') : '—'}</td>
+                <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; color: #64748b;">${p.discount_reason || '—'}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -606,6 +610,8 @@ export default function ReportsPage() {
               <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredPending.reduce((sum, p) => sum + (p.total_fee || 0), 0).toLocaleString('en-IN')}</td>
               <td style="color: #16a34a; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredPending.reduce((sum, p) => sum + (p.amount_paid || 0), 0).toLocaleString('en-IN')}</td>
               <td style="color: #dc2626; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; font-weight: bold; text-align: right;">₹${filteredPending.reduce((sum, p) => sum + (p.balance || 0), 0).toLocaleString('en-IN')}</td>
+              <td style="color: #2563eb; font-weight: bold; border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px; text-align: right;">₹${filteredPending.reduce((sum, p) => sum + (p.discount || 0), 0).toLocaleString('en-IN')}</td>
+              <td style="border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12px;"></td>
             </tr>
           </tfoot>
         </table>
@@ -986,6 +992,8 @@ export default function ReportsPage() {
                         <th className="px-6 py-4 text-right">Total Fee</th>
                         <th className="px-6 py-4 text-right">Paid</th>
                         <th className="px-6 py-4 text-right">Balance</th>
+                        <th className="px-6 py-4 text-right">Less Amount</th>
+                        <th className="px-6 py-4">Less Reason</th>
                         <th className="px-6 py-4 text-center print:hidden">Action</th>
                       </tr>
                     </thead>
@@ -993,7 +1001,7 @@ export default function ReportsPage() {
                     {filteredPending.some(p => p.term === 'Old Fee') && (
                       <tbody className="divide-y divide-amber-100 dark:divide-amber-900/30"  >
                         <tr>
-                          <td colSpan={7} className="px-6 pt-4 pb-1">
+                          <td colSpan={9} className="px-6 pt-4 pb-1">
                             <div className="flex items-center gap-2">
                               <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700 px-3 py-1 rounded-full">⏳ Previous Year Old Fees</span>
                               <span className="text-[10px] text-slate-400 font-semibold">— Balance from previous academic year</span>
@@ -1010,6 +1018,8 @@ export default function ReportsPage() {
                             <td className="px-6 py-3.5 text-right text-amber-700 dark:text-amber-400 font-bold">{fmt(p.total_fee)}</td>
                             <td className="px-6 py-3.5 text-right text-emerald-600">{fmt(p.amount_paid)}</td>
                             <td className="px-6 py-3.5 text-right font-black text-amber-600 dark:text-amber-400">{fmt(p.balance)}</td>
+                            <td className="px-6 py-3.5 text-right font-bold text-blue-600 dark:text-blue-400">{p.discount > 0 ? fmt(p.discount) : '—'}</td>
+                            <td className="px-6 py-3.5 text-xs text-slate-500 dark:text-slate-400">{p.discount_reason || '—'}</td>
                             <td className="px-6 py-3.5 text-center print:hidden">
                               <div className="flex justify-center gap-2">
                                 <button onClick={() => handleSendReminder(p.phone, p.student_name, p.balance)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition border border-emerald-200" title="Send WhatsApp Reminder">
@@ -1028,7 +1038,7 @@ export default function ReportsPage() {
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                         {filteredPending.some(p => p.term === 'Old Fee') && (
                           <tr>
-                            <td colSpan={7} className="px-6 pt-4 pb-1">
+                            <td colSpan={9} className="px-6 pt-4 pb-1">
                               <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full"> Current Year Term Fees</span>
                             </td>
                           </tr>
@@ -1043,6 +1053,8 @@ export default function ReportsPage() {
                             <td className="px-6 py-4 text-right">{fmt(p.total_fee)}</td>
                             <td className="px-6 py-4 text-right text-emerald-600">{fmt(p.amount_paid)}</td>
                             <td className="px-6 py-4 text-right font-bold text-rose-600">{fmt(p.balance)}</td>
+                            <td className="px-6 py-4 text-right font-bold text-blue-600 dark:text-blue-400">{p.discount > 0 ? fmt(p.discount) : '—'}</td>
+                            <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">{p.discount_reason || '—'}</td>
                             <td className="px-6 py-4 text-center print:hidden">
                               <div className="flex justify-center gap-2">
                                 <button onClick={() => handleSendReminder(p.phone, p.student_name, p.balance)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition border border-emerald-200" title="Send WhatsApp Reminder">
@@ -1062,6 +1074,8 @@ export default function ReportsPage() {
                         <td className="px-6 py-4 text-right font-black">{fmt(filteredPending.reduce((sum, p) => sum + (p.total_fee || 0), 0))}</td>
                         <td className="px-6 py-4 text-right font-black text-emerald-600">{fmt(filteredPending.reduce((sum, p) => sum + (p.amount_paid || 0), 0))}</td>
                         <td className="px-6 py-4 text-right font-black text-rose-600">{fmt(filteredPending.reduce((sum, p) => sum + (p.balance || 0), 0))}</td>
+                        <td className="px-6 py-4 text-right font-black text-blue-600">{fmt(filteredPending.reduce((sum, p) => sum + (p.discount || 0), 0))}</td>
+                        <td className="px-6 py-4"></td>
                         <td className="px-6 py-4 print:hidden"></td>
                       </tr>
                     </tfoot>
