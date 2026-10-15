@@ -39,29 +39,11 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12 sm:px-6 lg:px-8 relative overflow-hidden font-sans">
-      {/* Background styling for a professional look */}
-      <div className="absolute top-0 w-full h-1/2 bg-blue-900 shadow-xl rounded-b-[4rem] sm:rounded-b-[8rem]"></div>
-      
-      {/* Top right language switch */}
-      <div className="absolute top-6 right-6 z-20 flex gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full p-1 shadow-md">
-        <button
-          onClick={() => setLanguage('en')}
-          className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-            language === 'en' ? 'bg-amber-500 text-blue-950 shadow-sm' : 'text-blue-100 hover:text-white'
-          }`}
-        >
-          EN
-        </button>
-        <button
-          onClick={() => setLanguage('ta')}
-          className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-            language === 'ta' ? 'bg-amber-500 text-blue-950 shadow-sm' : 'text-blue-100 hover:text-white'
-          }`}
-        >
-          தமிழ்
-        </button>
-      </div>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 px-4 py-12 sm:px-6 lg:px-8 relative overflow-hidden font-sans">
+      {/* Ambient background glows */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="w-full max-w-md space-y-8 relative z-10 mt-8">
         
