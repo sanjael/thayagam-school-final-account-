@@ -226,7 +226,7 @@ export default function Layout({ children }) {
       <div className="flex flex-1 flex-col overflow-hidden print:overflow-visible min-w-0">
 
         {/* ── Sticky Header ── */}
-        <header className="flex h-14 md:h-16 items-center justify-between border-b border-slate-200 dark:border-slate-800/50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 sm:px-6 z-20 print:hidden flex-shrink-0 gap-2">
+        <header className="flex h-14 md:h-16 items-center justify-between border-b border-amber-500/20 bg-gradient-to-r from-slate-100/90 via-amber-50/30 to-slate-100/90 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 backdrop-blur-md px-3 sm:px-6 z-20 print:hidden flex-shrink-0 gap-2 shadow-xs">
 
           {/* Left: Hamburger + Logo */}
           <div className="flex items-center gap-2 flex-shrink-0">
@@ -270,7 +270,7 @@ export default function Layout({ children }) {
                 onChange={(e) => { setSearchQuery(e.target.value); setShowSearchResults(true); }}
                 onFocus={() => setShowSearchResults(true)}
                 placeholder={t('studentSearchPlaceholder')}
-                className="w-full rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-1.5 pl-9 text-xs outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 text-slate-900 dark:text-slate-100 placeholder-slate-500 transition shadow-inner"
+                className="w-full rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-1.5 pl-9 text-xs outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 text-slate-900 dark:text-slate-100 placeholder-slate-400 transition shadow-sm"
               />
               <span className="absolute left-3 top-2 text-slate-500">
                 <Search size={14} />

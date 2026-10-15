@@ -251,100 +251,74 @@ export default function DashboardPage() {
           })}
         </section>
 
-        {/* Charts Row */}
+        {/* Row 4: Analytics Row (Collection Trend & Recent Activity side-by-side) */}
         <section className="grid gap-4 sm:gap-6 md:grid-cols-2">
-          
-          {/* Peak Hours Chart */}
-          <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow">
-            <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2">
-              <Clock size={16} className="text-amber-500" />
-               Busiest Hours for Fee Collection
-            </h3>
-            
-            <div className="h-44 sm:h-56 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={timeData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <RechartsTooltip 
-                    formatter={(value) => [`${value} Payments`, "Volume"]}
-                    cursor={{ fill: 'transparent' }} 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '12px', fontWeight: 'bold' }} 
-                  />
-                  <Bar dataKey="payments" radius={[6, 6, 0, 0]} maxBarSize={60}>
-                    <LabelList dataKey="payments" position="top" style={{ fontSize: '10px', fill: '#64748b', fontWeight: 'bold' }} />
-                    {timeData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.payments > Math.max(...timeData.map(d=>d.payments))/1.5 ? '#f59e0b' : '#4f46e5'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
 
           {/* Collection Trend Chart with Period Filter */}
-          <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between mb-5">
-              <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <TrendingUp size={16} className="text-amber-500" />
-                 Collection Trend
-              </h3>
-              {/* Period Filter Pills */}
-              <div className="flex bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-0.5 gap-0.5">
-                {['today', 'week', 'month', 'year'].map(p => (
-                  <button
-                    key={p}
-                    id={`trend-filter-${p}`}
-                    onClick={() => setTrendPeriod(p)}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
-                      trendPeriod === p
-                        ? 'bg-amber-500 text-slate-950 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    {p.charAt(0).toUpperCase() + p.slice(1)}
-                  </button>
-                ))}
+          <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+            <div>
+              <div className="flex items-start justify-between mb-5">
+                <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                  <TrendingUp size={16} className="text-amber-500" />
+                  Collection Trend
+                </h3>
+                {/* Period Filter Pills */}
+                <div className="flex bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-0.5 gap-0.5">
+                  {['today', 'week', 'month', 'year'].map(p => (
+                    <button
+                      key={p}
+                      id={`trend-filter-${p}`}
+                      onClick={() => setTrendPeriod(p)}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                        trendPeriod === p
+                          ? 'bg-amber-500 text-slate-950 shadow-sm'
+                          : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      {p.charAt(0).toUpperCase() + p.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-56 sm:h-64 w-full">
+                {loadingTrend ? (
+                  <div className="h-full flex items-center justify-center text-xs text-slate-400 animate-pulse">
+                    Loading chart data...
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={trendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="label" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                      <YAxis tickFormatter={(val) => `₹${val >= 1000 ? (val/1000).toFixed(0) + 'k' : val}`} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                      <RechartsTooltip 
+                        formatter={(value) => [fmt(value), "Collected"]}
+                        cursor={{ stroke: '#f59e0b', strokeWidth: 1, strokeDasharray: '4 4' }}
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '12px', fontWeight: 'bold' }} 
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="amount" 
+                        stroke="#f59e0b" 
+                        strokeWidth={2.5} 
+                        fill="url(#trendGradient)"
+                        dot={{ fill: '#f59e0b', strokeWidth: 2, r: 3 }}
+                        activeDot={{ r: 5, fill: '#f59e0b' }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </div>
 
-            <div className="h-44 sm:h-56 w-full">
-              {loadingTrend ? (
-                <div className="h-full flex items-center justify-center text-xs text-slate-400 animate-pulse">
-                  Loading chart data...
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={trendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="label" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
-                    <YAxis tickFormatter={(val) => `₹${val >= 1000 ? (val/1000).toFixed(0) + 'k' : val}`} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                    <RechartsTooltip 
-                      formatter={(value) => [fmt(value), "Collected"]}
-                      cursor={{ stroke: '#f59e0b', strokeWidth: 1, strokeDasharray: '4 4' }}
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '12px', fontWeight: 'bold' }} 
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="amount" 
-                      stroke="#f59e0b" 
-                      strokeWidth={2.5} 
-                      fill="url(#trendGradient)"
-                      dot={{ fill: '#f59e0b', strokeWidth: 2, r: 3 }}
-                      activeDot={{ r: 5, fill: '#f59e0b' }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-
             {/* Period summary */}
-            <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
               <p className="text-[10px] text-slate-400 font-medium">
                 Total for <span className="font-bold text-slate-600 dark:text-slate-300">{PERIOD_LABELS[trendPeriod]}</span>:{' '}
                 <span className="font-black text-amber-600">
@@ -353,106 +327,113 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
+
+          {/* Recent Payments Widget (Now placed beside Collection Trend) */}
+          <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div>
+                  <h2 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <Receipt size={16} className="text-amber-500" />
+                    {t('recentActivity')}
+                  </h2>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Last 6 recorded transactions</p>
+                </div>
+                <Link to="/payments" className="text-[10px] text-amber-500 font-bold hover:underline bg-amber-50 dark:bg-amber-900/30 px-2.5 py-1 rounded-lg">
+                  {t('viewAll')} →
+                </Link>
+              </div>
+
+              <div className="mt-3.5 space-y-3">
+                {recentPayments.length === 0 && (
+                  <div className="py-12 text-center">
+                    <Receipt size={32} className="mx-auto text-slate-300 dark:text-slate-700 mb-2" />
+                    <p className="text-xs text-slate-400 font-medium">No payments recorded yet.</p>
+                  </div>
+                )}
+                {recentPayments.map((p) => (
+                  <div key={p.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+                    <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs font-black flex-shrink-0 border border-amber-200/50 dark:border-amber-800/50">
+                      ₹
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-amber-500 transition-colors">{p.student_name}</p>
+                      <p className="text-[10px] text-slate-400 font-medium truncate">{p.class_name} · {p.term}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-xs font-black text-emerald-600 dark:text-emerald-500">{fmt(p.amount)}</p>
+                      <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded-full mt-0.5 ${modeBg(p.payment_mode)}`}>
+                        {p.payment_mode}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-right">
+              <Link to="/payments" className="text-[10px] font-bold text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                View Full Daybook & Receipts →
+              </Link>
+            </div>
+          </div>
         </section>
 
-        {/* Bottom Row: Recent Payments + Classes Grid */}
-        <section className="grid gap-4 sm:gap-6 lg:grid-cols-3">
-
-          {/* Recent Payments Widget */}
-          <div className="lg:col-span-1 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-              <div>
-                <h2 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                  <Receipt size={16} className="text-amber-500" />
-                  {t('recentActivity')}
-                </h2>
-                <p className="text-[10px] text-slate-400 mt-0.5">Last 6 transactions</p>
-              </div>
-              <Link to="/payments" className="text-[10px] text-amber-500 font-bold hover:underline bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded-lg">
-                {t('viewAll')} →
-              </Link>
+        {/* Row 5: School Classes Full-Width Hub */}
+        <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-5">
+            <div>
+              <h2 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <Building2 size={16} className="text-amber-500" />
+                School Classes Overview
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">Click any class to inspect enrolled students, sections, and fee dues.</p>
             </div>
+            <Link to="/classes" className="text-[10px] text-amber-500 font-bold hover:underline bg-amber-50 dark:bg-amber-900/30 px-3 py-1.5 rounded-xl border border-amber-200 dark:border-amber-800/40">
+              Manage All Classes →
+            </Link>
+          </div>
 
-            <div className="mt-3 space-y-3">
-              {recentPayments.length === 0 && (
-                <div className="py-8 text-center">
-                  <span className="text-3xl"></span>
-                  <p className="mt-2 text-xs text-slate-400">No payments recorded yet.</p>
-                </div>
-              )}
-              {recentPayments.map((p) => (
-                <div key={p.id} className="flex items-center gap-3 group">
-                  <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-base flex-shrink-0">
-                    {modeIcon(p.payment_mode)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">{p.student_name}</p>
-                    <p className="text-[10px] text-slate-400 font-medium truncate">{p.class_name} · {p.term}</p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-xs font-black text-emerald-600 dark:text-emerald-500">{fmt(p.amount)}</p>
-                    <span className={`inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-full mt-0.5 ${modeBg(p.payment_mode)}`}>
-                      {p.payment_mode}
+          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-3 sm:gap-4">
+            {Array.from(new Set(classes.map(c => c.name)))
+              .sort((a, b) => {
+                const order = { "LKG": -2, "UKG": -1 };
+                const getRank = (n) => {
+                  const upper = n.toUpperCase();
+                  if (order[upper] !== undefined) return order[upper];
+                  const m = upper.match(/\d+/);
+                  return m ? parseInt(m[0], 10) : 999;
+                };
+                return getRank(a) - getRank(b);
+              })
+              .map((className) => {
+                const classObj = classes.find(c => c.name === className);
+                return (
+                  <Link 
+                    key={className} 
+                    to={`/classes?exact_class=${encodeURIComponent(className)}`}
+                    className="group flex flex-col items-center justify-center p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 hover:border-amber-500 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md"
+                  >
+                    <div className="w-11 h-11 rounded-2xl bg-amber-100/60 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-2.5 group-hover:scale-110 transition-transform shadow-inner">
+                      <GraduationCap size={22} strokeWidth={2} />
+                    </div>
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 text-center group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                      {className}
                     </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                    <span className="text-[10px] text-slate-400 mt-1 font-semibold">
+                      {classes.filter(c => c.name === className).length} Sec · {classObj?.student_count || 0} Students
+                    </span>
+                  </Link>
+                );
+            })}
           </div>
-
-          {/* Classes Grid */}
-          <div className="lg:col-span-2 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-              <div>
-                <h2 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                  <Building2 size={16} className="text-amber-500" />
-                  School Classes
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">Select a class to view details.</p>
-              </div>
-              <Link to="/classes" className="text-[10px] text-amber-500 font-bold hover:underline bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded-lg">
-                Manage Classes →
-              </Link>
+          
+          {classes.length === 0 && (
+            <div className="py-10 text-center">
+              <Building2 size={32} className="mx-auto text-slate-300 dark:text-slate-700 mb-2" />
+              <p className="mt-2 text-sm text-slate-400">No classes configured yet.</p>
             </div>
-
-            <div className="mt-4 grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 sm:gap-3">
-              {Array.from(new Set(classes.map(c => c.name)))
-                .sort((a, b) => {
-                  const order = { "LKG": -2, "UKG": -1 };
-                  const getRank = (n) => {
-                    const upper = n.toUpperCase();
-                    if (order[upper] !== undefined) return order[upper];
-                    const m = upper.match(/\d+/);
-                    return m ? parseInt(m[0], 10) : 999;
-                  };
-                  return getRank(a) - getRank(b);
-                })
-                .map((className) => (
-                <Link 
-                  key={className} 
-                  to={`/classes?exact_class=${encodeURIComponent(className)}`}
-                  className="group flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-md"
-                >
-                  <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-2 group-hover:scale-110 transition-transform">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-4-9 4 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
-                    </svg>
-                  </div>
-                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 text-center">
-                    {className}
-                  </span>
-
-                </Link>
-              ))}
-            </div>
-            
-            {classes.length === 0 && (
-              <div className="py-10 text-center">
-                <span className="text-3xl"></span>
-                <p className="mt-2 text-sm text-slate-400">No classes configured yet.</p>
-              </div>
-            )}
-          </div>
+          )}
         </section>
       </div>
     </Layout>
